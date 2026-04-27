@@ -1,0 +1,585 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import '../core/firebase/analytics_service.dart';
+import '../core/freemium/freemium_service.dart';
+import '../core/freemium/paywall_service.dart';
+import '../core/theme/app_theme.dart';
+import '../main.dart';
+import '../models/expense_model.dart';
+import '../models/property_model.dart';
+import '../services/property_database_service.dart';
+import '../widgets/banner_ad_widget.dart';
+import '../widgets/paywall_hard.dart';
+import '../widgets/paywall_soft.dart';
+
+class ComparePropertiesScreen extends StatefulWidget {
+  const ComparePropertiesScreen({super.key});
+
+  @override
+  State<ComparePropertiesScreen> createState() => _ComparePropertiesScreenState();
+}
+
+class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
+  final _fmt = NumberFormat('#,##0.00', 'en_US');
+
+  DateTime _selectedMonth = DateTime(DateTime.now().year, DateTime.now().month);
+  List<Property> _allProperties = [];
+  final Set<String> _selectedIds = {};
+  Map<String, MonthlyExpense?> _expenseMap = {};
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProperties();
+  }
+
+  Future<void> _loadProperties() async {
+    setState(() => _loading = true);
+    final props = await PropertyDatabaseService.instance.getAllProperties();
+    if (mounted) {
+      setState(() {
+        _allProperties = props;
+        _loading = false;
+      });
+    }
+    await _loadExpenses();
+  }
+
+  Future<void> _loadExpenses() async {
+    final Map<String, MonthlyExpense?> map = {};
+    for (final id in _selectedIds) {
+      map[id] = await PropertyDatabaseService.instance
+          .getExpenseForMonth(id, _selectedMonth.year, _selectedMonth.month);
+    }
+    if (mounted) setState(() => _expenseMap = map);
+  }
+
+  Future<void> _pickMonth(bool isSpanish) async {
+    int pickedYear  = _selectedMonth.year;
+    int pickedMonth = _selectedMonth.month;
+
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setLocal) {
+            final monthsEn = ['Jan','Feb','Mar','Apr','May','Jun',
+                              'Jul','Aug','Sep','Oct','Nov','Dec'];
+            final monthsEs = ['Ene','Feb','Mar','Abr','May','Jun',
+                              'Jul','Ago','Sep','Oct','Nov','Dic'];
+            final months = isSpanish ? monthsEs : monthsEn;
+            return AlertDialog(
+              title: Text(isSpanish ? 'Seleccionar Mes' : 'Select Month'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.chevron_left),
+                        onPressed: () => setLocal(() => pickedYear--),
+                      ),
+                      Text('$pickedYear',
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      IconButton(
+                        icon: const Icon(Icons.chevron_right),
+                        onPressed: () => setLocal(() => pickedYear++),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: List.generate(12, (i) {
+                      final sel = (i + 1) == pickedMonth;
+                      return GestureDetector(
+                        onTap: () => setLocal(() => pickedMonth = i + 1),
+                        child: Container(
+                          width: 62,
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          decoration: BoxDecoration(
+                            color: sel ? AppTheme.primary : AppTheme.background,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: sel ? AppTheme.primary : AppTheme.divider),
+                          ),
+                          child: Text(
+                            months[i],
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: sel ? Colors.white : null,
+                              fontWeight: sel ? FontWeight.bold : FontWeight.normal,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text(isSpanish ? 'Cancelar' : 'Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() => _selectedMonth = DateTime(pickedYear, pickedMonth));
+                    Navigator.pop(ctx);
+                    _loadExpenses();
+                  },
+                  style: ElevatedButton.styleFrom(minimumSize: const Size(80, 40)),
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _toggleProperty(String id) {
+    setState(() {
+      if (_selectedIds.contains(id)) {
+        _selectedIds.remove(id);
+        _expenseMap.remove(id);
+      } else {
+        if (_selectedIds.length >= 3) return; // max 3
+        _selectedIds.add(id);
+      }
+    });
+    _loadExpenses();
+    if (_selectedIds.length >= 2) {
+      AnalyticsService.instance.logPropertiesCompared();
+      final trigger = paywallService.recordAction();
+      if (trigger != PaywallTrigger.none && mounted && !freemiumService.isPremium) {
+        if (trigger == PaywallTrigger.soft) {
+          PaywallSoft.show(context);
+        } else {
+          PaywallHard.show(context);
+        }
+      }
+    }
+  }
+
+  List<Property> get _selectedProperties =>
+      _allProperties.where((p) => _selectedIds.contains(p.id)).toList();
+
+  double _cf(Property p) {
+    final e = _expenseMap[p.id];
+    return p.monthlyRent - (e?.totalExpenses ?? 0);
+  }
+
+  double _ratio(Property p) {
+    final e = _expenseMap[p.id];
+    if (p.monthlyRent <= 0 || e == null) return 0;
+    return e.totalExpenses / p.monthlyRent * 100;
+  }
+
+  double _noi(Property p) {
+    final e = _expenseMap[p.id];
+    final mort = e?.mortgage ?? 0;
+    final exp  = e?.totalExpenses ?? 0;
+    return (p.monthlyRent - (exp - mort)) * 12;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: isSpanishNotifier,
+      builder: (_, isSpanish, __) {
+        final isPremium = freemiumService.isPremium;
+
+        if (!isPremium) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(isSpanish ? 'Comparar Propiedades' : 'Compare Properties'),
+            ),
+            body: Column(
+              children: [
+                Expanded(
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(40),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: AppTheme.primary.withValues(alpha: 0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.lock_rounded,
+                                size: 48, color: AppTheme.primary),
+                          ),
+                          const SizedBox(height: 20),
+                          Text(
+                            isSpanish
+                                ? 'Función Premium'
+                                : 'Premium Feature',
+                            style: const TextStyle(
+                                fontSize: 22, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            isSpanish
+                                ? 'La comparación de propiedades está disponible para usuarios Premium. Desbloquea para ver análisis lado a lado.'
+                                : 'Property comparison is available for Premium users. Unlock to see side-by-side analysis.',
+                            style: const TextStyle(color: AppTheme.labelGray),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 28),
+                          ElevatedButton.icon(
+                            onPressed: () => PaywallHard.show(context),
+                            icon: const Icon(Icons.star_rounded),
+                            label: Text(isSpanish ? 'Obtener Premium' : 'Get Premium'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const BannerAdWidget(),
+              ],
+            ),
+          );
+        }
+
+        final dateFmt = DateFormat('MMMM yyyy', isSpanish ? 'es' : 'en');
+        final selected = _selectedProperties;
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(isSpanish ? 'Comparar Propiedades' : 'Compare Properties'),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.calendar_month_rounded),
+                onPressed: () => _pickMonth(isSpanish),
+              ),
+            ],
+          ),
+          body: Column(
+            children: [
+              Expanded(
+                child: _loading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _allProperties.isEmpty
+                        ? Center(
+                            child: Text(
+                              isSpanish
+                                  ? 'Sin propiedades para comparar.'
+                                  : 'No properties to compare.',
+                              style: const TextStyle(color: AppTheme.labelGray),
+                            ),
+                          )
+                        : ListView(
+                            padding: const EdgeInsets.all(16),
+                            children: [
+                              // Month badge
+                              GestureDetector(
+                                onTap: () => _pickMonth(isSpanish),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 10, horizontal: 16),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.primary.withValues(alpha: 0.08),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                        color: AppTheme.primary.withValues(alpha: 0.25)),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.calendar_month_rounded,
+                                          color: AppTheme.primary, size: 18),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        dateFmt.format(_selectedMonth),
+                                        style: const TextStyle(
+                                            color: AppTheme.primary,
+                                            fontWeight: FontWeight.w600),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+
+                              // Property chips
+                              _SectionLabel(isSpanish
+                                  ? 'SELECCIONAR PROPIEDADES (máx. 3)'
+                                  : 'SELECT PROPERTIES (max 3)'),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: _allProperties.map((p) {
+                                  final sel = _selectedIds.contains(p.id);
+                                  return FilterChip(
+                                    label: Text(p.name),
+                                    selected: sel,
+                                    onSelected: (_) => _toggleProperty(p.id),
+                                    selectedColor: AppTheme.primary.withValues(alpha: 0.15),
+                                    checkmarkColor: AppTheme.primary,
+                                    side: BorderSide(
+                                      color: sel ? AppTheme.primary : AppTheme.divider,
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                              const SizedBox(height: 20),
+
+                              // Comparison table
+                              if (selected.length >= 2) ...[
+                                _SectionLabel(isSpanish ? 'COMPARACIÓN' : 'COMPARISON'),
+                                Card(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: _ComparisonTable(
+                                      properties: selected,
+                                      expenseMap: _expenseMap,
+                                      fmt: _fmt,
+                                      isSpanish: isSpanish,
+                                      cfFn: _cf,
+                                      ratioFn: _ratio,
+                                      noiFn: _noi,
+                                    ),
+                                  ),
+                                ),
+                              ] else
+                                Container(
+                                  padding: const EdgeInsets.all(20),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.background,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: AppTheme.divider),
+                                  ),
+                                  child: Text(
+                                    isSpanish
+                                        ? 'Selecciona al menos 2 propiedades para comparar.'
+                                        : 'Select at least 2 properties to compare.',
+                                    style: const TextStyle(color: AppTheme.labelGray),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                            ],
+                          ),
+              ),
+              const BannerAdWidget(),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+// ── Comparison table ──────────────────────────────────────────────────────────
+
+class _ComparisonTable extends StatelessWidget {
+  final List<Property> properties;
+  final Map<String, MonthlyExpense?> expenseMap;
+  final NumberFormat fmt;
+  final bool isSpanish;
+  final double Function(Property) cfFn;
+  final double Function(Property) ratioFn;
+  final double Function(Property) noiFn;
+
+  const _ComparisonTable({
+    required this.properties,
+    required this.expenseMap,
+    required this.fmt,
+    required this.isSpanish,
+    required this.cfFn,
+    required this.ratioFn,
+    required this.noiFn,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final rows = [
+      _RowData(
+        label: isSpanish ? 'Alquiler mensual' : 'Monthly Rent',
+        values: properties.map((p) => '\$${fmt.format(p.monthlyRent)}').toList(),
+        colors: properties.map((_) => AppTheme.labelGray).toList(),
+        higherIsBetter: true,
+        rawValues: properties.map((p) => p.monthlyRent).toList(),
+      ),
+      _RowData(
+        label: isSpanish ? 'Total gastos' : 'Total Expenses',
+        values: properties.map((p) {
+          final e = expenseMap[p.id];
+          return '\$${fmt.format(e?.totalExpenses ?? 0)}';
+        }).toList(),
+        colors: properties.map((_) => AppTheme.labelGray).toList(),
+        higherIsBetter: false,
+        rawValues: properties.map((p) => expenseMap[p.id]?.totalExpenses ?? 0).toList(),
+      ),
+      _RowData(
+        label: isSpanish ? 'Flujo mensual' : 'Monthly CF',
+        values: properties.map((p) {
+          final cf = cfFn(p);
+          return '${cf < 0 ? '-' : '+'}\$${fmt.format(cf.abs())}';
+        }).toList(),
+        colors: properties.map((p) {
+          final cf = cfFn(p);
+          return cf >= 0 ? AppTheme.success : Colors.red;
+        }).toList(),
+        higherIsBetter: true,
+        rawValues: properties.map(cfFn).toList(),
+      ),
+      _RowData(
+        label: isSpanish ? 'Flujo anual' : 'Annual CF',
+        values: properties.map((p) {
+          final cf = cfFn(p) * 12;
+          return '${cf < 0 ? '-' : '+'}\$${fmt.format(cf.abs())}';
+        }).toList(),
+        colors: properties.map((p) {
+          final cf = cfFn(p);
+          return cf >= 0 ? AppTheme.success : Colors.red;
+        }).toList(),
+        higherIsBetter: true,
+        rawValues: properties.map((p) => cfFn(p) * 12).toList(),
+      ),
+      _RowData(
+        label: isSpanish ? 'Ratio gastos' : 'Expense Ratio',
+        values: properties.map((p) => '${ratioFn(p).toStringAsFixed(1)}%').toList(),
+        colors: properties.map((p) {
+          final r = ratioFn(p);
+          return r < 80 ? AppTheme.success : Colors.orange;
+        }).toList(),
+        higherIsBetter: false,
+        rawValues: properties.map(ratioFn).toList(),
+      ),
+      _RowData(
+        label: 'NOI (${isSpanish ? 'anual' : 'annual'})',
+        values: properties.map((p) {
+          final n = noiFn(p);
+          return '${n < 0 ? '-' : ''}\$${fmt.format(n.abs())}';
+        }).toList(),
+        colors: properties.map((p) {
+          final n = noiFn(p);
+          return n >= 0 ? AppTheme.success : Colors.red;
+        }).toList(),
+        higherIsBetter: true,
+        rawValues: properties.map(noiFn).toList(),
+      ),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header row
+        Row(
+          children: [
+            const SizedBox(width: 110),
+            ...properties.map((p) => Expanded(
+                  child: Text(
+                    p.name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                )),
+          ],
+        ),
+        const Divider(height: 16, color: AppTheme.divider),
+
+        // Data rows
+        ...rows.map((row) {
+          // Find best value index
+          int bestIdx = 0;
+          for (int i = 1; i < row.rawValues.length; i++) {
+            if (row.higherIsBetter) {
+              if (row.rawValues[i] > row.rawValues[bestIdx]) bestIdx = i;
+            } else {
+              if (row.rawValues[i] < row.rawValues[bestIdx]) bestIdx = i;
+            }
+          }
+
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 110,
+                  child: Text(
+                    row.label,
+                    style: const TextStyle(fontSize: 12, color: AppTheme.labelGray),
+                  ),
+                ),
+                ...List.generate(properties.length, (i) {
+                  final isBest = i == bestIdx &&
+                      row.rawValues.any((v) => v != row.rawValues[0]);
+                  return Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                      decoration: isBest
+                          ? BoxDecoration(
+                              color: AppTheme.success.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            )
+                          : null,
+                      child: Text(
+                        row.values[i],
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: row.colors[i],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  );
+                }),
+              ],
+            ),
+          );
+        }),
+      ],
+    );
+  }
+}
+
+class _RowData {
+  final String label;
+  final List<String> values;
+  final List<Color> colors;
+  final bool higherIsBetter;
+  final List<double> rawValues;
+
+  _RowData({
+    required this.label,
+    required this.values,
+    required this.colors,
+    required this.higherIsBetter,
+    required this.rawValues,
+  });
+}
+
+// ── Section label ─────────────────────────────────────────────────────────────
+
+class _SectionLabel extends StatelessWidget {
+  final String label;
+  const _SectionLabel(this.label);
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Text(label,
+            style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.labelGray,
+                letterSpacing: 0.8)),
+      );
+}
