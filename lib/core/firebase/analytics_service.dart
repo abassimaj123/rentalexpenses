@@ -5,58 +5,50 @@ class AnalyticsService {
   AnalyticsService._();
   static final instance = AnalyticsService._();
 
-  final _a = FirebaseAnalytics.instance;
+  final _fa = FirebaseAnalytics.instance;
 
-  Future<void> logPropertyAdded() async {
+  Future<void> logAppOpen() => _log('app_open');
+
+  Future<void> logPropertyAdded() => _log('property_added');
+
+  Future<void> logExpenseTracked(String category) =>
+      _log('expense_tracked', {'category': category});
+
+  Future<void> logReportViewed() => _log('report_viewed');
+
+  Future<void> logPropertiesCompared() => _log('properties_compared');
+
+  Future<void> logPdfExported() => _log('pdf_exported');
+
+  Future<void> logRewardedAdWatched() => _log('rewarded_ad_watched');
+
+  Future<void> logPurchased() => _log('premium_purchased');
+
+  Future<void> logRestored() => _log('premium_restored');
+
+  Future<void> logPaywallShown({required String type}) =>
+      _log('paywall_shown', {'type': type});
+
+  Future<void> logPaywallDismissed() => _log('paywall_dismissed');
+
+  // ── Tax & Schedule E ────────────────────────────────────────────────────
+  Future<void> logTaxSummaryViewed() => _log('tax_summary_viewed');
+  Future<void> logScheduleEExported() => _log('schedule_e_exported');
+  Future<void> logTenantAdded() => _log('tenant_added');
+  Future<void> logRecurringExpenseCreated() => _log('recurring_expense_created');
+
+  // ── Error & limit tracking ──────────────────────────────────────────────
+  Future<void> logRewardedAdFailed() => _log('rewarded_ad_failed');
+  Future<void> logRewardedDailyLimit() => _log('rewarded_daily_limit_reached');
+  Future<void> logPurchaseFailed() => _log('purchase_failed');
+  Future<void> logBannerFailed() => _log('banner_ad_failed');
+
+  // ── Internals ────────────────────────────────────────────────────────────
+
+  Future<void> _log(String name, [Map<String, Object>? params]) async {
     if (kDebugMode) return;
-    await _a.logEvent(name: 'property_added');
+    final merged = {'app_name': 'RentalExpenses', ...?params};
+    try { await _fa.logEvent(name: name, parameters: merged); } catch (_) {}
   }
 
-  Future<void> logExpenseTracked(String category) async {
-    if (kDebugMode) return;
-    await _a.logEvent(
-      name: 'expense_tracked',
-      parameters: {'category': category},
-    );
-  }
-
-  Future<void> logReportViewed() async {
-    if (kDebugMode) return;
-    await _a.logEvent(name: 'report_viewed');
-  }
-
-  Future<void> logPropertiesCompared() async {
-    if (kDebugMode) return;
-    await _a.logEvent(name: 'properties_compared');
-  }
-
-  Future<void> logPdfExported() async {
-    if (kDebugMode) return;
-    await _a.logEvent(name: 'pdf_exported');
-  }
-
-  Future<void> logRewardedAdWatched() async {
-    if (kDebugMode) return;
-    await _a.logEvent(name: 'rewarded_ad_watched');
-  }
-
-  Future<void> logPurchased() async {
-    if (kDebugMode) return;
-    await _a.logEvent(name: 'premium_purchased');
-  }
-
-  Future<void> logRestored() async {
-    if (kDebugMode) return;
-    await _a.logEvent(name: 'premium_restored');
-  }
-
-  Future<void> logPaywallShown({required String type}) async {
-    if (kDebugMode) return;
-    await _a.logEvent(name: 'paywall_shown', parameters: {'type': type});
-  }
-
-  Future<void> logPaywallDismissed() async {
-    if (kDebugMode) return;
-    await _a.logEvent(name: 'paywall_dismissed');
-  }
 }

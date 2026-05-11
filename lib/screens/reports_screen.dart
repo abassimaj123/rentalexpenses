@@ -1,4 +1,8 @@
+import '../core/ads/ad_footer.dart';
+import 'dart:math' as math;
+
 import 'package:fl_chart/fl_chart.dart';
+import 'package:calcwise_core/calcwise_core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
@@ -6,23 +10,25 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import '../core/firebase/analytics_service.dart';
 import '../core/freemium/freemium_service.dart';
+import '../core/freemium/iap_service.dart';
 import '../core/theme/app_theme.dart';
 import '../main.dart';
 import '../models/expense_model.dart';
 import '../models/property_model.dart';
 import '../services/property_database_service.dart';
-import '../widgets/banner_ad_widget.dart';
 import '../widgets/paywall_hard.dart';
+import '../widgets/paywall_soft.dart';
 import '../widgets/premium_cta_widget.dart';
+import 'tax_summary_screen.dart';
 
 // ── Palette cycling for bar chart ─────────────────────────────────────────────
 const _chartColors = [
   AppTheme.primary,
   AppTheme.success,
-  Color(0xFFFFA500),
+  AppTheme.warning,
   Colors.red,
-  Color(0xFF9C27B0),
-  Color(0xFF009688),
+  AppTheme.chartPurple,
+  AppTheme.chartTeal,
 ];
 
 // ── Category labels ────────────────────────────────────────────────────────────
@@ -36,6 +42,22 @@ const _catKeysEs = [
   'Adm. Prop.', 'Mantenimiento', 'Vacancia', 'Servicios',
   'Jardinería', 'Otro',
 ];
+
+// ── Trend data point ──────────────────────────────────────────────────────────
+class _TrendPoint {
+  final int year;
+  final int month;
+  final double income;   // sum of all properties' current monthlyRent
+  final double expenses; // sum of recorded expenses that month (0 if untracked)
+  double get cashFlow => income - expenses;
+
+  const _TrendPoint({
+    required this.year,
+    required this.month,
+    required this.income,
+    required this.expenses,
+  });
+}
 
 List<double> _catValues(MonthlyExpense? e) {
   if (e == null) return List.filled(10, 0);
@@ -59,6 +81,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
   DateTime _selectedMonth = DateTime(DateTime.now().year, DateTime.now().month);
   List<Property> _properties = [];
   Map<String, MonthlyExpense?> _expenseMap = {};
+  List<_TrendPoint> _trendData = [];
   bool _loading = true;
 
   @override
@@ -70,17 +93,44 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
   Future<void> _load() async {
     setState(() => _loading = true);
+
     final props = await PropertyDatabaseService.instance.getAllProperties();
+
+    // Current-month expenses (existing logic)
     final Map<String, MonthlyExpense?> map = {};
     for (final p in props) {
       map[p.id] = await PropertyDatabaseService.instance
           .getExpenseForMonth(p.id, _selectedMonth.year, _selectedMonth.month);
     }
+
+    // ── 12-month cash-flow trend ────────────────────────────────────────────
+    final now       = DateTime.now();
+    final fromDate  = DateTime(now.year, now.month - 11); // Dart normalises overflow
+    final totalRent = props.fold<double>(0, (s, p) => s + p.monthlyRent);
+
+    final expTotals = await PropertyDatabaseService.instance.getMonthlyExpenseTotals(
+      fromYear:  fromDate.year,  fromMonth:  fromDate.month,
+      toYear:    now.year,       toMonth:    now.month,
+    );
+
+    final trend = <_TrendPoint>[];
+    for (int i = 0; i < 12; i++) {
+      final d   = DateTime(now.year, now.month - 11 + i);
+      final key = d.year * 12 + d.month;
+      trend.add(_TrendPoint(
+        year:     d.year,
+        month:    d.month,
+        income:   totalRent,
+        expenses: expTotals[key] ?? 0,
+      ));
+    }
+
     if (mounted) {
       setState(() {
         _properties = props;
         _expenseMap = map;
-        _loading = false;
+        _trendData  = trend;
+        _loading    = false;
       });
     }
   }
@@ -138,9 +188,12 @@ class _ReportsScreenState extends State<ReportsScreen> {
                           width: 62,
                           padding: const EdgeInsets.symmetric(vertical: 8),
                           decoration: BoxDecoration(
-                            color: sel ? AppTheme.primary : AppTheme.background,
+                            color: sel
+                                ? AppTheme.primary
+                                : Theme.of(ctx).colorScheme.surfaceContainerLow,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: sel ? AppTheme.primary : AppTheme.divider),
+                            border: Border.all(
+                                color: sel ? AppTheme.primary : CalcwiseTheme.of(context).cardBorder),
                           ),
                           child: Text(
                             months[i],
@@ -317,6 +370,35 @@ class _ReportsScreenState extends State<ReportsScreen> {
           appBar: AppBar(
             title: Text(isSpanish ? 'Reportes' : 'Reports'),
             actions: [
+              // Premium badge
+              ValueListenableBuilder<bool>(
+                valueListenable: freemiumService.isPremiumNotifier,
+                builder: (_, isPremium, __) {
+                  if (isPremium) {
+                    return const Padding(
+                      padding: EdgeInsets.only(right: 4),
+                      child: Icon(Icons.verified_rounded,
+                          color: Colors.amber, size: 22),
+                    );
+                  }
+                  return IconButton(
+                    icon: const Icon(Icons.star_outline, color: Colors.amber),
+                    tooltip: isSpanish ? 'Obtener Premium' : 'Go Premium',
+                    onPressed: () => IAPService.instance.buy(),
+                  );
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.account_balance_rounded),
+                tooltip: isSpanish ? 'Schedule E / Taxes' : 'Schedule E / Taxes',
+                onPressed: () => Navigator.of(context).push(PageRouteBuilder(
+                    pageBuilder: (_, __, ___) => const TaxSummaryScreen(),
+                    transitionsBuilder: (_, anim, __, child) =>
+                        FadeTransition(opacity: anim, child: child),
+                    transitionDuration: const Duration(milliseconds: 250),
+                  ),
+                ),
+              ),
               IconButton(
                 icon: const Icon(Icons.picture_as_pdf_outlined),
                 tooltip: isSpanish ? 'Exportar PDF' : 'Export PDF',
@@ -400,12 +482,12 @@ class _ReportsScreenState extends State<ReportsScreen> {
                                               icon: Icons.attach_money_rounded,
                                               label: isSpanish ? 'Ingresos totales' : 'Total Rent',
                                               value: '\$${_fmt.format(totalRent)}',
-                                              color: AppTheme.labelGray,
+                                              color: CalcwiseTheme.of(context).textSecondary,
                                             ),
                                           ),
                                         ],
                                       ),
-                                      const Divider(height: 24, color: AppTheme.divider),
+                                      Divider(height: 24, color: CalcwiseTheme.of(context).cardBorder),
                                       Row(
                                         children: [
                                           Expanded(
@@ -416,7 +498,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                                                   : 'Monthly Cash Flow',
                                               value:
                                                   '${totalCF < 0 ? '-' : '+'}\$${_fmt.format(totalCF.abs())}',
-                                              color: totalCF >= 0 ? AppTheme.success : Colors.red,
+                                              color: totalCF >= 0 ? AppTheme.success : AppTheme.dangerRed,
                                             ),
                                           ),
                                           Expanded(
@@ -428,7 +510,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                                               value:
                                                   '${totalAnnualCF < 0 ? '-' : '+'}\$${_fmt.format(totalAnnualCF.abs())}',
                                               color:
-                                                  totalAnnualCF >= 0 ? AppTheme.success : Colors.red,
+                                                  totalAnnualCF >= 0 ? AppTheme.success : AppTheme.dangerRed,
                                             ),
                                           ),
                                         ],
@@ -438,6 +520,20 @@ class _ReportsScreenState extends State<ReportsScreen> {
                                 ),
                               ),
                               const SizedBox(height: 20),
+
+                              // ── 12-Month Cash-Flow Trend ───────────────────
+                              if (_trendData.isNotEmpty) ...[
+                                _SectionLabel(isSpanish
+                                    ? 'TENDENCIA 12 MESES'
+                                    : '12-MONTH TREND'),
+                                _CashFlowTrendChart(
+                                  points:    _trendData,
+                                  isPremium: isPremium,
+                                  isSpanish: isSpanish,
+                                  fmt:       _fmt,
+                                ),
+                                const SizedBox(height: 20),
+                              ],
 
                               // ── Expense Category Chart ─────────────────────
                               _SectionLabel(
@@ -489,7 +585,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                             ],
                           ),
               ),
-              const BannerAdWidget(),
+              const AdFooter(),
             ],
           ),
         );
@@ -537,7 +633,7 @@ class _ExpenseCategoryChart extends StatelessWidget {
           child: Center(
             child: Text(
               isSpanish ? 'Sin gastos registrados' : 'No expenses recorded',
-              style: const TextStyle(color: AppTheme.labelGray),
+              style: TextStyle(color: CalcwiseTheme.of(context).textSecondary),
             ),
           ),
         ),
@@ -572,9 +668,14 @@ class _ExpenseCategoryChart extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              height: 200,
-              child: BarChart(
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final chartHeight = (constraints.maxWidth < 400)
+                  ? 200.0
+                  : 240.0;
+                return SizedBox(
+                  height: chartHeight,
+                  child: BarChart(
                 BarChartData(
                   maxY: maxVal * 1.2,
                   barGroups: barGroups,
@@ -589,7 +690,7 @@ class _ExpenseCategoryChart extends StatelessWidget {
                           if (val == 0) return const SizedBox.shrink();
                           return Text(
                             '\$${val >= 1000 ? '${(val / 1000).toStringAsFixed(1)}k' : val.toStringAsFixed(0)}',
-                            style: const TextStyle(fontSize: 10, color: AppTheme.labelGray),
+                            style: TextStyle(fontSize: 10, color: CalcwiseTheme.of(context).textSecondary),
                           );
                         },
                       ),
@@ -608,7 +709,7 @@ class _ExpenseCategoryChart extends StatelessWidget {
                             padding: const EdgeInsets.only(top: 4),
                             child: Text(
                               labels[catIdx],
-                              style: const TextStyle(fontSize: 9, color: AppTheme.labelGray),
+                              style: TextStyle(fontSize: 9, color: CalcwiseTheme.of(context).textSecondary),
                               textAlign: TextAlign.center,
                             ),
                           );
@@ -633,6 +734,9 @@ class _ExpenseCategoryChart extends StatelessWidget {
                   ),
                 ),
               ),
+                  );
+                },
+              ),
             ),
             const SizedBox(height: 8),
             // Legend
@@ -653,7 +757,7 @@ class _ExpenseCategoryChart extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(labels[catIdx],
-                        style: const TextStyle(fontSize: 10, color: AppTheme.labelGray)),
+                        style: TextStyle(fontSize: 10, color: CalcwiseTheme.of(context).textSecondary)),
                   ],
                 );
               }).toList(),
@@ -676,10 +780,10 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.only(bottom: 8),
         child: Text(label,
-            style: const TextStyle(
+            style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.bold,
-                color: AppTheme.labelGray,
+                color: CalcwiseTheme.of(context).textSecondary,
                 letterSpacing: 0.8)),
       );
 }
@@ -703,7 +807,7 @@ class _SummaryTile extends StatelessWidget {
         Icon(icon, color: color, size: 22),
         const SizedBox(height: 6),
         Text(label,
-            style: const TextStyle(fontSize: 11, color: AppTheme.labelGray),
+            style: TextStyle(fontSize: 11, color: CalcwiseTheme.of(context).textSecondary),
             textAlign: TextAlign.center),
         const SizedBox(height: 4),
         Text(value,
@@ -731,17 +835,19 @@ class _PropertyRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cf = property.monthlyRent - (expense?.totalExpenses ?? 0);
-    final cfColor = cf >= 0 ? AppTheme.success : Colors.red;
+    final cfColor = cf >= 0 ? AppTheme.success : AppTheme.dangerRed;
     final ratio = property.monthlyRent > 0
         ? ((expense?.totalExpenses ?? 0) / property.monthlyRent * 100) : 0.0;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
-      color: isUnderperformer ? Colors.red.shade50 : null,
+      color: isUnderperformer
+          ? AppTheme.dangerRed.withValues(alpha: 0.08)
+          : null,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: isUnderperformer
-            ? BorderSide(color: Colors.red.shade200)
+            ? BorderSide(color: AppTheme.dangerRed.withValues(alpha: 0.30))
             : BorderSide.none,
       ),
       child: Padding(
@@ -770,7 +876,7 @@ class _PropertyRow extends StatelessWidget {
                       style: const TextStyle(fontWeight: FontWeight.w600)),
                   Text(
                     '${isSpanish ? 'Alquiler' : 'Rent'}: \$${fmt.format(property.monthlyRent)}  •  ${ratio.toStringAsFixed(1)}%',
-                    style: const TextStyle(fontSize: 12, color: AppTheme.labelGray),
+                    style: TextStyle(fontSize: 12, color: CalcwiseTheme.of(context).textSecondary),
                   ),
                 ],
               ),
@@ -788,7 +894,7 @@ class _PropertyRow extends StatelessWidget {
                 ),
                 Text(
                   isSpanish ? '/mes' : '/mo',
-                  style: const TextStyle(fontSize: 11, color: AppTheme.labelGray),
+                  style: TextStyle(fontSize: 11, color: CalcwiseTheme.of(context).textSecondary),
                 ),
               ],
             ),
@@ -798,6 +904,304 @@ class _PropertyRow extends StatelessWidget {
     );
   }
 }
+
+// ── 12-Month Cash-Flow Trend Chart ────────────────────────────────────────────
+
+class _CashFlowTrendChart extends StatelessWidget {
+  final List<_TrendPoint> points;
+  final bool isPremium;
+  final bool isSpanish;
+  final NumberFormat fmt;
+
+  const _CashFlowTrendChart({
+    required this.points,
+    required this.isPremium,
+    required this.isSpanish,
+    required this.fmt,
+  });
+
+  static const _freeMonths = 3;
+
+  static const _monthsEn = [
+    'Jan','Feb','Mar','Apr','May','Jun',
+    'Jul','Aug','Sep','Oct','Nov','Dec',
+  ];
+  static const _monthsEs = [
+    'Ene','Feb','Mar','Abr','May','Jun',
+    'Jul','Ago','Sep','Oct','Nov','Dic',
+  ];
+
+  @override
+  Widget build(BuildContext outerCtx) {
+    final theme = CalcwiseTheme.of(outerCtx);
+    final displayPoints = isPremium
+        ? points
+        : points.sublist(points.length > _freeMonths
+            ? points.length - _freeMonths
+            : 0);
+    final isLimited = !isPremium && points.length > _freeMonths;
+
+    final labels = isSpanish ? _monthsEs : _monthsEn;
+
+    // Handle empty / all-zero state
+    final hasData = displayPoints.any((p) => p.income > 0 || p.expenses > 0);
+    if (!hasData) {
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          child: Center(
+            child: Text(
+              isSpanish
+                  ? 'Sin datos registrados aún'
+                  : 'No data recorded yet',
+              style: TextStyle(color: theme.textSecondary),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final maxY = displayPoints
+            .map((p) => math.max(p.income, p.expenses))
+            .reduce((a, b) => a > b ? a : b) *
+        1.25;
+
+    final barWidth = isPremium ? 18.0 : 28.0;
+
+    final barGroups = displayPoints.asMap().entries.map((entry) {
+      final i   = entry.key;
+      final pt  = entry.value;
+      final cf  = pt.cashFlow;
+      final top = math.max(pt.income, pt.expenses);
+
+      final stack = <BarChartRodStackItem>[];
+
+      if (pt.expenses > 0 && pt.income > 0) {
+        // Red portion = expenses
+        stack.add(BarChartRodStackItem(
+            0, pt.expenses, Colors.red.shade400));
+        if (cf > 0) {
+          // Green portion = cash flow above expenses
+          stack.add(BarChartRodStackItem(
+              pt.expenses, pt.income, AppTheme.success));
+        }
+      } else if (pt.income > 0) {
+        // Only rent, no expenses tracked → subtle green
+        stack.add(BarChartRodStackItem(
+            0, pt.income, AppTheme.success.withValues(alpha: 0.45)));
+      } else if (pt.expenses > 0) {
+        stack.add(BarChartRodStackItem(
+            0, pt.expenses, Colors.red.shade400));
+      }
+
+      if (stack.isEmpty) {
+        stack.add(BarChartRodStackItem(0, 1, theme.cardBorder));
+      }
+
+      return BarChartGroupData(
+        x: i,
+        barRods: [
+          BarChartRodData(
+            toY: top < 1 ? 1 : top,
+            rodStackItems: stack,
+            width: barWidth,
+            borderRadius: const BorderRadius.only(
+              topLeft:  Radius.circular(4),
+              topRight: Radius.circular(4),
+            ),
+          ),
+        ],
+      );
+    }).toList();
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 16, 16, 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Legend row
+            Padding(
+              padding: const EdgeInsets.only(left: 8, bottom: 12),
+              child: Row(children: [
+                _LegendDot(color: AppTheme.success),
+                const SizedBox(width: 4),
+                Text(
+                  isSpanish ? 'Flujo de caja' : 'Cash Flow',
+                  style: TextStyle(
+                      fontSize: 11, color: theme.textSecondary),
+                ),
+                const SizedBox(width: 14),
+                _LegendDot(color: Colors.red.shade400),
+                const SizedBox(width: 4),
+                Text(
+                  isSpanish ? 'Gastos' : 'Expenses',
+                  style: TextStyle(
+                      fontSize: 11, color: theme.textSecondary),
+                ),
+              ]),
+            ),
+
+            // Chart
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final chartHeight = (constraints.maxWidth < 400)
+                  ? 185.0
+                  : 220.0;
+                return SizedBox(
+                  height: chartHeight,
+                  child: BarChart(
+                BarChartData(
+                  maxY: maxY,
+                  barGroups: barGroups,
+                  gridData: const FlGridData(
+                      show: true, drawVerticalLine: false),
+                  borderData: FlBorderData(show: false),
+                  titlesData: FlTitlesData(
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 54,
+                        getTitlesWidget: (val, meta) {
+                          if (val == 0 || val == maxY) {
+                            return const SizedBox.shrink();
+                          }
+                          final s = val >= 1000
+                              ? '\$${(val / 1000).toStringAsFixed(1)}k'
+                              : '\$${val.toStringAsFixed(0)}';
+                          return Text(s,
+                              style: TextStyle(
+                                  fontSize: 10,
+                                  color: theme.textSecondary));
+                        },
+                      ),
+                    ),
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 36,
+                        getTitlesWidget: (val, meta) {
+                          final i = val.toInt();
+                          if (i < 0 || i >= displayPoints.length) {
+                            return const SizedBox.shrink();
+                          }
+                          final pt  = displayPoints[i];
+                          final lbl = labels[pt.month - 1];
+                          // Mark January with year suffix to avoid
+                          // ambiguity when the chart spans two years.
+                          final suffix = pt.month == 1
+                              ? "\n'${pt.year % 100}"
+                              : '';
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              '$lbl$suffix',
+                              style: TextStyle(
+                                  fontSize: 10,
+                                  color: theme.textSecondary),
+                              textAlign: TextAlign.center,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    rightTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false)),
+                    topTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false)),
+                  ),
+                  barTouchData: BarTouchData(
+                    touchTooltipData: BarTouchTooltipData(
+                      getTooltipItem: (group, _, rod, __) {
+                        final pt  = displayPoints[group.x];
+                        final cf  = pt.cashFlow;
+                        final sign = cf >= 0 ? '+' : '-';
+                        return BarTooltipItem(
+                          '${labels[pt.month - 1]} ${pt.year}\n'
+                          '${isSpanish ? "Alquiler" : "Rent"}: \$${fmt.format(pt.income)}\n'
+                          '${isSpanish ? "Gastos" : "Expenses"}: \$${fmt.format(pt.expenses)}\n'
+                          '${isSpanish ? "Flujo" : "Cash Flow"}: $sign\$${fmt.format(cf.abs())}',
+                          const TextStyle(
+                              color: Colors.white, fontSize: 11),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+                  );
+                },
+              ),
+            ),
+
+            // Free-tier upsell banner
+            if (isLimited) ...[
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: AppTheme.surfaceTint,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                      color:
+                          AppTheme.primary.withValues(alpha: 0.20)),
+                ),
+                child: Row(children: [
+                  Icon(Icons.lock_outline,
+                      size: 15, color: theme.textSecondary),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      isSpanish
+                          ? 'Mostrando 3 meses. Premium desbloquea 12 meses.'
+                          : 'Showing 3 months. Premium unlocks 12-month history.',
+                      style: TextStyle(
+                          fontSize: 11, color: theme.textSecondary),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => PaywallSoft.show(outerCtx),
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      tapTargetSize:
+                          MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text(
+                      isSpanish ? 'Desbloquear' : 'Unlock',
+                      style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.primary),
+                    ),
+                  ),
+                ]),
+              ),
+            ],
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LegendDot extends StatelessWidget {
+  final Color color;
+  const _LegendDot({required this.color});
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: 10,
+        height: 10,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(3),
+        ),
+      );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 class _EmptyState extends StatelessWidget {
   final bool isSpanish;
@@ -812,7 +1216,7 @@ class _EmptyState extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.bar_chart_rounded, size: 72,
-                color: AppTheme.labelGray.withValues(alpha: 0.35)),
+                color: CalcwiseTheme.of(context).textSecondary.withValues(alpha: 0.35)),
             const SizedBox(height: 16),
             Text(
               isSpanish
@@ -826,7 +1230,7 @@ class _EmptyState extends StatelessWidget {
               isSpanish
                   ? 'Agrega propiedades en la pestaña Propiedades para ver reportes.'
                   : 'Add properties in the Properties tab to see reports here.',
-              style: const TextStyle(color: AppTheme.labelGray),
+              style: TextStyle(color: CalcwiseTheme.of(context).textSecondary),
               textAlign: TextAlign.center,
             ),
           ],

@@ -1,0 +1,25 @@
+App: Rental Expenses Tracker & Calculator
+
+Descripción corta:
+Rastrea cada gasto de alquiler. Conoce tu ganancia real.
+
+Descripción completa:
+Deja de adivinar si tu propiedad de alquiler realmente es rentable. RentalExpenses da a los propietarios un panorama completo y preciso de cada dólar que entra y sale — cada mes.
+
+HERRAMIENTAS PRINCIPALES:
+• Categorías de gastos — hipoteca, impuestos, seguro, HOA, mantenimiento, vacante, servicios, jardinería y más
+• Estimador de deducciones fiscales — ve qué gastos reducen tu ingreso gravable
+• Ingreso operativo neto (NOI) — el número que usan los inversores para valorar propiedades
+• Pérdidas y ganancias — flujo de caja mensual y anual de un vistazo
+• Resumen Schedule E — organizado para la temporada de impuestos
+• Ratio de gastos — sabe si tu propiedad está sobreapalancada
+
+FUNCIONES PREMIUM:
+• Propiedades guardadas ilimitadas
+• Desglose completo de gastos con gráficos visuales
+• Historial ilimitado
+• Sin anuncios — nunca
+
+Más de 40,000 propietarios confían en RentalExpenses.
+
+Pago único — sin suscripción.

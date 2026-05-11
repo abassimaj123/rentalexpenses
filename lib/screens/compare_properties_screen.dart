@@ -1,14 +1,14 @@
+import '../core/ads/ad_footer.dart';
+import 'package:calcwise_core/calcwise_core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../core/firebase/analytics_service.dart';
 import '../core/freemium/freemium_service.dart';
-import '../core/freemium/paywall_service.dart';
 import '../core/theme/app_theme.dart';
 import '../main.dart';
 import '../models/expense_model.dart';
 import '../models/property_model.dart';
 import '../services/property_database_service.dart';
-import '../widgets/banner_ad_widget.dart';
 import '../widgets/paywall_hard.dart';
 import '../widgets/paywall_soft.dart';
 
@@ -101,9 +101,9 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                           width: 62,
                           padding: const EdgeInsets.symmetric(vertical: 8),
                           decoration: BoxDecoration(
-                            color: sel ? AppTheme.primary : AppTheme.background,
+                            color: sel ? AppTheme.primary : CalcwiseTheme.of(context).surfaceHigh,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: sel ? AppTheme.primary : AppTheme.divider),
+                            border: Border.all(color: sel ? AppTheme.primary : CalcwiseTheme.of(context).cardBorder),
                           ),
                           child: Text(
                             months[i],
@@ -142,7 +142,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
     );
   }
 
-  void _toggleProperty(String id) {
+  Future<void> _toggleProperty(String id) async {
     setState(() {
       if (_selectedIds.contains(id)) {
         _selectedIds.remove(id);
@@ -155,7 +155,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
     _loadExpenses();
     if (_selectedIds.length >= 2) {
       AnalyticsService.instance.logPropertiesCompared();
-      final trigger = paywallService.recordAction();
+      final trigger = await paywallSession.recordAction();
       if (trigger != PaywallTrigger.none && mounted && !freemiumService.isPremium) {
         if (trigger == PaywallTrigger.soft) {
           PaywallSoft.show(context);
@@ -230,7 +230,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                             isSpanish
                                 ? 'La comparación de propiedades está disponible para usuarios Premium. Desbloquea para ver análisis lado a lado.'
                                 : 'Property comparison is available for Premium users. Unlock to see side-by-side analysis.',
-                            style: const TextStyle(color: AppTheme.labelGray),
+                            style: TextStyle(color: CalcwiseTheme.of(context).textSecondary),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 28),
@@ -244,7 +244,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                     ),
                   ),
                 ),
-                const BannerAdWidget(),
+                const AdFooter(),
               ],
             ),
           );
@@ -274,7 +274,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                               isSpanish
                                   ? 'Sin propiedades para comparar.'
                                   : 'No properties to compare.',
-                              style: const TextStyle(color: AppTheme.labelGray),
+                              style: TextStyle(color: CalcwiseTheme.of(context).textSecondary),
                             ),
                           )
                         : ListView(
@@ -322,11 +322,11 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                                   return FilterChip(
                                     label: Text(p.name),
                                     selected: sel,
-                                    onSelected: (_) => _toggleProperty(p.id),
+                                    onSelected: (_) async { await _toggleProperty(p.id); },
                                     selectedColor: AppTheme.primary.withValues(alpha: 0.15),
                                     checkmarkColor: AppTheme.primary,
                                     side: BorderSide(
-                                      color: sel ? AppTheme.primary : AppTheme.divider,
+                                      color: sel ? AppTheme.primary : CalcwiseTheme.of(context).cardBorder,
                                     ),
                                   );
                                 }).toList(),
@@ -354,22 +354,22 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                                 Container(
                                   padding: const EdgeInsets.all(20),
                                   decoration: BoxDecoration(
-                                    color: AppTheme.background,
+                                    color: CalcwiseTheme.of(context).surfaceHigh,
                                     borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: AppTheme.divider),
+                                    border: Border.all(color: CalcwiseTheme.of(context).cardBorder),
                                   ),
                                   child: Text(
                                     isSpanish
                                         ? 'Selecciona al menos 2 propiedades para comparar.'
                                         : 'Select at least 2 properties to compare.',
-                                    style: const TextStyle(color: AppTheme.labelGray),
+                                    style: TextStyle(color: CalcwiseTheme.of(context).textSecondary),
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
                             ],
                           ),
               ),
-              const BannerAdWidget(),
+              const AdFooter(),
             ],
           ),
         );
@@ -405,7 +405,7 @@ class _ComparisonTable extends StatelessWidget {
       _RowData(
         label: isSpanish ? 'Alquiler mensual' : 'Monthly Rent',
         values: properties.map((p) => '\$${fmt.format(p.monthlyRent)}').toList(),
-        colors: properties.map((_) => AppTheme.labelGray).toList(),
+        colors: properties.map((_) => CalcwiseTheme.of(context).textSecondary).toList(),
         higherIsBetter: true,
         rawValues: properties.map((p) => p.monthlyRent).toList(),
       ),
@@ -415,7 +415,7 @@ class _ComparisonTable extends StatelessWidget {
           final e = expenseMap[p.id];
           return '\$${fmt.format(e?.totalExpenses ?? 0)}';
         }).toList(),
-        colors: properties.map((_) => AppTheme.labelGray).toList(),
+        colors: properties.map((_) => CalcwiseTheme.of(context).textSecondary).toList(),
         higherIsBetter: false,
         rawValues: properties.map((p) => expenseMap[p.id]?.totalExpenses ?? 0).toList(),
       ),
@@ -491,7 +491,7 @@ class _ComparisonTable extends StatelessWidget {
                 )),
           ],
         ),
-        const Divider(height: 16, color: AppTheme.divider),
+        Divider(height: 16, color: CalcwiseTheme.of(context).cardBorder),
 
         // Data rows
         ...rows.map((row) {
@@ -514,7 +514,7 @@ class _ComparisonTable extends StatelessWidget {
                   width: 110,
                   child: Text(
                     row.label,
-                    style: const TextStyle(fontSize: 12, color: AppTheme.labelGray),
+                    style: TextStyle(fontSize: 12, color: CalcwiseTheme.of(context).textSecondary),
                   ),
                 ),
                 ...List.generate(properties.length, (i) {
@@ -576,10 +576,10 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.only(bottom: 8),
         child: Text(label,
-            style: const TextStyle(
+            style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.bold,
-                color: AppTheme.labelGray,
+                color: CalcwiseTheme.of(context).textSecondary,
                 letterSpacing: 0.8)),
       );
 }

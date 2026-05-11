@@ -1,15 +1,20 @@
+import '../core/ads/ad_footer.dart';
 import 'dart:convert';
+import 'package:calcwise_core/calcwise_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/ads/ad_service.dart';
 import '../core/freemium/freemium_service.dart';
-import '../core/freemium/paywall_service.dart';
+import '../core/freemium/iap_service.dart';
+import '../core/services/review_service.dart';
 import '../core/theme/app_theme.dart';
 import '../main.dart';
-import '../widgets/banner_ad_widget.dart';
+import '../widgets/insight_card.dart';
 import '../widgets/paywall_hard.dart';
+import '../core/insight_engine.dart';
 
 // ── Data model ────────────────────────────────────────────────────────────────
 
@@ -27,6 +32,9 @@ class ExpenseCalc {
   final double landscaping;
   final double otherExpenses;
   final DateTime savedAt;
+  // ── Investor metrics (optional) ─────────────────────────────────────────
+  final double propertyValue;  // purchase price / current market value
+  final double cashInvested;   // down payment + closing costs + rehab
 
   ExpenseCalc({
     required this.propertyName,
@@ -42,6 +50,8 @@ class ExpenseCalc {
     required this.landscaping,
     required this.otherExpenses,
     required this.savedAt,
+    this.propertyValue = 0,
+    this.cashInvested = 0,
   });
 
   double get totalExpenses =>
@@ -56,6 +66,18 @@ class ExpenseCalc {
   /// NOI = Annual (Rent - expenses EXCLUDING mortgage)
   double get noi =>
       (rentIncome - (totalExpenses - mortgage)) * 12;
+
+  /// Cap Rate = Annual NOI / Property Value × 100
+  double? get capRate =>
+      propertyValue > 0 ? (noi / propertyValue * 100) : null;
+
+  /// Gross Yield = Annual Rent / Property Value × 100
+  double? get grossYield =>
+      propertyValue > 0 ? (rentIncome * 12 / propertyValue * 100) : null;
+
+  /// Cash-on-Cash ROI = Annual Cash Flow / Cash Invested × 100
+  double? get cocRoi =>
+      cashInvested > 0 ? (annualCashFlow / cashInvested * 100) : null;
 
   Map<String, double> get breakdown => {
     'Mortgage':            mortgage,
@@ -97,6 +119,8 @@ class ExpenseCalc {
     'landscaping':   landscaping,
     'otherExpenses': otherExpenses,
     'savedAt':       savedAt.toIso8601String(),
+    'propertyValue': propertyValue,
+    'cashInvested':  cashInvested,
   };
 
   factory ExpenseCalc.fromJson(Map<String, dynamic> j) => ExpenseCalc(
@@ -113,6 +137,8 @@ class ExpenseCalc {
     landscaping:   (j['landscaping']   as num).toDouble(),
     otherExpenses: (j['otherExpenses'] as num).toDouble(),
     savedAt:       DateTime.parse(j['savedAt'] as String),
+    propertyValue: (j['propertyValue'] as num?)?.toDouble() ?? 0,
+    cashInvested:  (j['cashInvested']  as num?)?.toDouble() ?? 0,
   );
 }
 
@@ -160,10 +186,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   // Controllers
   final _nameCtrl  = TextEditingController();
-  final _rentCtrl  = TextEditingController();
-  final _mortCtrl  = TextEditingController();
-  final _taxCtrl   = TextEditingController();
-  final _insCtrl   = TextEditingController();
+  final _rentCtrl  = TextEditingController(text: '2000');
+  final _mortCtrl  = TextEditingController(text: '1200');
+  final _taxCtrl   = TextEditingController(text: '200');
+  final _insCtrl   = TextEditingController(text: '150');
   final _hoaCtrl   = TextEditingController();
   final _mgmtCtrl  = TextEditingController();
   final _maintCtrl = TextEditingController();
@@ -171,6 +197,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   final _utilCtrl  = TextEditingController();
   final _landCtrl  = TextEditingController();
   final _otherCtrl = TextEditingController();
+
+  final _valueCtrl  = TextEditingController(); // property value
+  final _investCtrl = TextEditingController(); // cash invested
 
   // Toggles
   bool _mgmtIsPercent = true;   // true = % of rent, false = $
@@ -192,6 +221,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   List<TextEditingController> get _allControllers => [
     _nameCtrl, _rentCtrl, _mortCtrl, _taxCtrl, _insCtrl, _hoaCtrl,
     _mgmtCtrl, _maintCtrl, _vacCtrl, _utilCtrl, _landCtrl, _otherCtrl,
+    _valueCtrl, _investCtrl,
   ];
 
   void _clearSaved() => setState(() => _saved = false);
@@ -214,6 +244,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     _vacCtrl.text  = c.vacancyLoss  > 0 ? c.vacancyLoss.toStringAsFixed(2) : '';
   }
 
+  bool get _canCalculate => _parseD(_rentCtrl) > 0;
+
   double _parseD(TextEditingController c) {
     final v = c.text;
     if (v.isEmpty) return 0.0;
@@ -223,7 +255,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     return double.tryParse(s) ?? 0.0;
   }
 
-  void _calculate(bool isSpanish) {
+  Future<void> _calculate(bool isSpanish) async {
     final rent     = _parseD(_rentCtrl);
     final mortgage = _parseD(_mortCtrl);
     final taxes    = _parseD(_taxCtrl);
@@ -256,6 +288,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       landscaping:   landscaping,
       otherExpenses: other,
       savedAt:       DateTime.now(),
+      propertyValue: _parseD(_valueCtrl),
+      cashInvested:  _parseD(_investCtrl),
     );
 
     setState(() {
@@ -264,7 +298,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     });
 
     AdService.instance.onCalculation();
-    final trigger = paywallService.recordAction();
+    final trigger = await paywallSession.recordAction();
     if (trigger != PaywallTrigger.none && mounted) PaywallHard.show(context);
   }
 
@@ -272,11 +306,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     if (_result == null) return;
     final isPremium = freemiumService.isPremium;
     final history   = await loadHistory();
-    if (!isPremium && history.length >= FreemiumService.freeHistoryLimit) {
+    if (!isPremium && history.length >= MonetizationConfig.freeCalculationLimit) {
       if (mounted) PaywallHard.show(context);
       return;
     }
+    HapticFeedback.mediumImpact();
     await saveToHistory(_result!);
+    ReviewService.instance.requestAfterSave();
     if (mounted) setState(() => _saved = true);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -284,6 +320,46 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         duration: const Duration(seconds: 2),
       ));
     }
+  }
+
+  void _share(bool isSpanish) {
+    if (_result == null) return;
+    final c = _result!;
+    final cf = c.monthlyCashFlow;
+    final lines = <String>[
+      isSpanish
+          ? '🏠 ${c.propertyName} — Gastos de Alquiler'
+          : '🏠 ${c.propertyName} — Rental Expense Summary',
+      '',
+      isSpanish
+          ? '• Alquiler mensual: \$${_fmt.format(c.rentIncome)}'
+          : '• Monthly Rent: \$${_fmt.format(c.rentIncome)}',
+      isSpanish
+          ? '• Total gastos: \$${_fmt.format(c.totalExpenses)}'
+          : '• Total Expenses: \$${_fmt.format(c.totalExpenses)}',
+      isSpanish
+          ? '• Flujo de caja mensual: ${cf < 0 ? '-' : '+'}\$${_fmt.format(cf.abs())}'
+          : '• Monthly Cash Flow: ${cf < 0 ? '-' : '+'}\$${_fmt.format(cf.abs())}',
+      isSpanish
+          ? '• Flujo de caja anual: ${c.annualCashFlow < 0 ? '-' : '+'}\$${_fmt.format(c.annualCashFlow.abs())}'
+          : '• Annual Cash Flow: ${c.annualCashFlow < 0 ? '-' : '+'}\$${_fmt.format(c.annualCashFlow.abs())}',
+      isSpanish
+          ? '• NOI anual: \$${_fmt.format(c.noi)}'
+          : '• Annual NOI: \$${_fmt.format(c.noi)}',
+      if (c.capRate != null)
+        isSpanish
+            ? '• Cap Rate: ${c.capRate!.toStringAsFixed(2)}%'
+            : '• Cap Rate: ${c.capRate!.toStringAsFixed(2)}%',
+      if (c.cocRoi != null)
+        isSpanish
+            ? '• ROI (Cash-on-Cash): ${c.cocRoi!.toStringAsFixed(2)}%'
+            : '• Cash-on-Cash ROI: ${c.cocRoi!.toStringAsFixed(2)}%',
+      '',
+      isSpanish
+          ? 'Calculado con Rental Expenses Tracker'
+          : 'Calculated with Rental Expenses Tracker',
+    ];
+    Share.share(lines.join('\n'));
   }
 
   void _reset() {
@@ -308,6 +384,24 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 ? 'Gastos de Alquiler'
                 : 'Rental Expenses'),
             actions: [
+              // Premium badge
+              ValueListenableBuilder<bool>(
+                valueListenable: freemiumService.isPremiumNotifier,
+                builder: (_, isPremium, __) {
+                  if (isPremium) {
+                    return const Padding(
+                      padding: EdgeInsets.only(right: 4),
+                      child: Icon(Icons.verified_rounded,
+                          color: Colors.amber, size: 22),
+                    );
+                  }
+                  return IconButton(
+                    icon: const Icon(Icons.star_outline, color: Colors.amber),
+                    tooltip: isSpanish ? 'Obtener Premium' : 'Go Premium',
+                    onPressed: () => IAPService.instance.buy(),
+                  );
+                },
+              ),
               IconButton(
                 icon: const Icon(Icons.refresh_rounded),
                 tooltip: isSpanish ? 'Reiniciar' : 'Reset',
@@ -318,9 +412,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           body: Column(
             children: [
               Expanded(
-                child: ListView(
+                child: SingleChildScrollView(
                   padding: const EdgeInsets.all(16),
-                  children: [
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 600),
+                      child: CalcwisePageEntrance(child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
                     // ── Property Setup ──────────────────────────────────
                     _SectionLabel(isSpanish ? 'Información de la Propiedad' : 'Property Setup'),
                     _buildCard([
@@ -336,6 +435,44 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                         ctrl: _rentCtrl,
                         label: isSpanish ? 'Ingreso mensual de alquiler' : 'Monthly Rent Income',
                         hint: '0.00',
+                        isNumeric: true,
+                        prefix: '\$',
+                      ),
+                      const SizedBox(height: 12),
+                      Divider(height: 1, color: CalcwiseTheme.of(context).cardBorder),
+                      const SizedBox(height: 12),
+                      // ── Investor Metrics inputs (optional) ──────────
+                      Row(children: [
+                        const Icon(Icons.analytics_outlined,
+                            size: 14, color: AppTheme.primary),
+                        const SizedBox(width: 6),
+                        Text(
+                          isSpanish
+                              ? 'Métricas de inversión (opcional)'
+                              : 'Investment Metrics (optional)',
+                          style: const TextStyle(
+                              fontSize: 12,
+                              color: AppTheme.primary,
+                              fontWeight: FontWeight.w600),
+                        ),
+                      ]),
+                      const SizedBox(height: 10),
+                      _TextField(
+                        ctrl: _valueCtrl,
+                        label: isSpanish
+                            ? 'Valor de la propiedad (\$)'
+                            : 'Property Value (\$)',
+                        hint: isSpanish ? 'Precio de compra o mercado' : 'Purchase price or market value',
+                        isNumeric: true,
+                        prefix: '\$',
+                      ),
+                      const SizedBox(height: 12),
+                      _TextField(
+                        ctrl: _investCtrl,
+                        label: isSpanish
+                            ? 'Capital invertido (\$)'
+                            : 'Cash Invested (\$)',
+                        hint: isSpanish ? 'Entrada + costos + reformas' : 'Down payment + closing costs + rehab',
                         isNumeric: true,
                         prefix: '\$',
                       ),
@@ -390,8 +527,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                               isSpanish
                                   ? 'Adm. de propiedad'
                                   : 'Property Management',
-                              style: const TextStyle(
-                                  fontSize: 13, color: AppTheme.labelGray),
+                              style: TextStyle(
+                                  fontSize: 13, color: CalcwiseTheme.of(context).textSecondary),
                             ),
                           ),
                           _ToggleChip(
@@ -432,8 +569,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                           Expanded(
                             child: Text(
                               isSpanish ? 'Pérdida por vacante' : 'Vacancy Loss',
-                              style: const TextStyle(
-                                  fontSize: 13, color: AppTheme.labelGray),
+                              style: TextStyle(
+                                  fontSize: 13, color: CalcwiseTheme.of(context).textSecondary),
                             ),
                           ),
                           _ToggleChip(
@@ -484,12 +621,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     const SizedBox(height: 20),
 
                     // ── Calculate button ────────────────────────────────
-                    ElevatedButton.icon(
-                      onPressed: () => _calculate(isSpanish),
-                      icon: const Icon(Icons.calculate_rounded),
-                      label: Text(
-                        isSpanish ? 'Calcular Gastos' : 'Calculate Expenses',
-                        style: const TextStyle(fontSize: 16),
+                    Opacity(
+                      opacity: _canCalculate ? 1.0 : 0.45,
+                      child: ElevatedButton.icon(
+                        onPressed: _canCalculate ? () async { await _calculate(isSpanish); } : null,
+                        icon: const Icon(Icons.calculate_rounded),
+                        label: Text(
+                          isSpanish ? 'Calcular Gastos' : 'Calculate Expenses',
+                          style: const TextStyle(fontSize: 16),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -499,6 +639,19 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                       _ResultsSection(
                         calc: _result!,
                         fmt: _fmt,
+                        isSpanish: isSpanish,
+                      ),
+                      const SizedBox(height: 12),
+                      InsightCard(
+                        insights: InsightEngine.generate(
+                          monthlyRent: _result!.rentIncome,
+                          totalMonthlyExpenses: _result!.totalExpenses,
+                          monthlyCashFlow: _result!.monthlyCashFlow,
+                          expenseRatioPct: _result!.expenseRatio,
+                          vacancyLoss: _result!.vacancyLoss,
+                          capRate: _result!.capRate,
+                          isSpanish: isSpanish,
+                        ),
                         isSpanish: isSpanish,
                       ),
                       const SizedBox(height: 16),
@@ -519,14 +672,23 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                               ),
                             ),
                           ),
+                          const SizedBox(width: 10),
+                          OutlinedButton.icon(
+                            onPressed: () => _share(isSpanish),
+                            icon: const Icon(Icons.share_outlined),
+                            label: Text(isSpanish ? 'Compartir' : 'Share'),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 24),
                     ],
                   ],
+                      )),  // CalcwisePageEntrance closes
+                    ),
+                  ),
                 ),
               ),
-              const BannerAdWidget(),
+              const AdFooter(),
             ],
           ),
         );
@@ -561,7 +723,7 @@ class _ResultsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cf = calc.monthlyCashFlow;
-    final cfColor = cf >= 0 ? AppTheme.success : Colors.red;
+    final cfColor = cf >= 0 ? AppTheme.success : AppTheme.dangerRed;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -581,7 +743,7 @@ class _ResultsSection extends StatelessWidget {
                   value: '\$${fmt.format(calc.totalExpenses)}',
                   bold: true,
                 ),
-                const Divider(height: 24, color: AppTheme.divider),
+                Divider(height: 24, color: CalcwiseTheme.of(context).cardBorder),
                 _ResultRow(
                   label: isSpanish
                       ? 'Flujo de caja mensual'
@@ -618,12 +780,77 @@ class _ResultsSection extends StatelessWidget {
                       ? 'Ingreso operativo neto (NOI anual)'
                       : 'Net Operating Income (Annual NOI)',
                   value: '\$${fmt.format(calc.noi)}',
-                  valueColor: calc.noi >= 0 ? AppTheme.success : Colors.red,
+                  valueColor: calc.noi >= 0 ? AppTheme.success : AppTheme.dangerRed,
                 ),
               ],
             ),
           ),
         ),
+        const SizedBox(height: 16),
+
+        // ── Investor Metrics card (Cap Rate, Yield, CoC ROI) ─────────
+        if (calc.capRate != null || calc.cocRoi != null) ...[
+          const SizedBox(height: 16),
+          _SectionLabel(isSpanish ? 'Métricas de Inversión' : 'Investment Metrics'),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(children: [
+                if (calc.capRate != null) ...[
+                  _InvestorMetricRow(
+                    label: 'Cap Rate',
+                    value: '${calc.capRate!.toStringAsFixed(2)}%',
+                    hint: isSpanish
+                        ? 'NOI anual ÷ valor de propiedad'
+                        : 'Annual NOI ÷ property value',
+                    color: calc.capRate! >= 6
+                        ? AppTheme.success
+                        : calc.capRate! >= 4
+                            ? AppTheme.warning
+                            : AppTheme.dangerRed,
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                if (calc.grossYield != null) ...[
+                  _InvestorMetricRow(
+                    label: isSpanish ? 'Rendimiento bruto' : 'Gross Yield',
+                    value: '${calc.grossYield!.toStringAsFixed(2)}%',
+                    hint: isSpanish
+                        ? 'Alquiler anual ÷ valor de propiedad'
+                        : 'Annual rent ÷ property value',
+                    color: calc.grossYield! >= 8
+                        ? AppTheme.success
+                        : AppTheme.warning,
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                if (calc.cocRoi != null) ...[
+                  _InvestorMetricRow(
+                    label: 'Cash-on-Cash ROI',
+                    value: '${calc.cocRoi!.toStringAsFixed(2)}%',
+                    hint: isSpanish
+                        ? 'Flujo anual ÷ capital invertido'
+                        : 'Annual cash flow ÷ cash invested',
+                    color: calc.cocRoi! >= 8
+                        ? AppTheme.success
+                        : calc.cocRoi! >= 4
+                            ? AppTheme.warning
+                            : AppTheme.dangerRed,
+                  ),
+                ],
+                const SizedBox(height: 8),
+                Divider(height: 12, color: CalcwiseTheme.of(context).cardBorder),
+                Text(
+                  isSpanish
+                      ? 'Cap Rate > 6% = bueno  •  CoC ROI > 8% = excelente'
+                      : 'Cap Rate > 6% = good  •  CoC ROI > 8% = excellent',
+                  style: TextStyle(fontSize: 10, color: CalcwiseTheme.of(context).textSecondary),
+                  textAlign: TextAlign.center,
+                ),
+              ]),
+            ),
+          ),
+        ],
         const SizedBox(height: 16),
 
         // Cash flow indicator banner
@@ -689,18 +916,7 @@ class _BreakdownList extends StatelessWidget {
     required this.isSpanish,
   });
 
-  static const List<Color> _palette = [
-    Color(0xFFC8102E),
-    Color(0xFF2563EB),
-    Color(0xFF16A34A),
-    Color(0xFFD97706),
-    Color(0xFF7C3AED),
-    Color(0xFF0891B2),
-    Color(0xFFDB2777),
-    Color(0xFF65A30D),
-    Color(0xFF9333EA),
-    Color(0xFF0D9488),
-  ];
+  static const List<Color> _palette = AppTheme.categoryPalette;
 
   @override
   Widget build(BuildContext context) {
@@ -713,7 +929,7 @@ class _BreakdownList extends StatelessWidget {
     if (entries.isEmpty) {
       return Text(
         isSpanish ? 'Sin gastos ingresados' : 'No expenses entered',
-        style: const TextStyle(color: AppTheme.labelGray),
+        style: TextStyle(color: CalcwiseTheme.of(context).textSecondary),
       );
     }
 
@@ -777,8 +993,8 @@ class _BreakdownRow extends StatelessWidget {
               child: Text(
                 '${pct.toStringAsFixed(1)}%',
                 textAlign: TextAlign.end,
-                style: const TextStyle(
-                    fontSize: 12, color: AppTheme.labelGray),
+                style: TextStyle(
+                    fontSize: 12, color: CalcwiseTheme.of(context).textSecondary),
               ),
             ),
           ],
@@ -809,10 +1025,10 @@ class _SectionLabel extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 8),
         child: Text(
           label.toUpperCase(),
-          style: const TextStyle(
+          style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
-              color: AppTheme.labelGray,
+              color: CalcwiseTheme.of(context).textSecondary,
               letterSpacing: 0.6),
         ),
       );
@@ -925,6 +1141,57 @@ class _ResultRow extends StatelessWidget {
             fontWeight: FontWeight.bold,
             color: valueColor,
           ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Investor metric row ───────────────────────────────────────────────────────
+
+class _InvestorMetricRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final String hint;
+  final Color color;
+
+  const _InvestorMetricRow({
+    required this.label,
+    required this.value,
+    required this.hint,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 4,
+          height: 36,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 14)),
+              Text(hint,
+                  style: TextStyle(
+                      fontSize: 11, color: CalcwiseTheme.of(context).textSecondary)),
+            ],
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+              fontSize: 18, fontWeight: FontWeight.bold, color: color),
         ),
       ],
     );

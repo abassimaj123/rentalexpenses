@@ -1,64 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:calcwise_core/calcwise_core.dart';
 
 class AppTheme {
-  static const primary    = Color(0xFFC8102E);
-  static const background = Color(0xFFF8FAFC);
-  static const cardWhite  = Colors.white;
-  static const success    = Color(0xFF34C759);
-  static const warning    = Color(0xFFFFA500);
-  static const labelGray  = Color(0xFF64748B);
-  static const divider    = Color(0xFFE2E8F0);
+  AppTheme._();
 
-  static ThemeData get theme => ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: primary),
-        scaffoldBackgroundColor: background,
-        cardTheme: CardThemeData(
-          elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          color: cardWhite,
-          surfaceTintColor: Colors.transparent,
-        ),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: primary,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          centerTitle: false,
-        ),
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: const Color(0xFFF1F5F9),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: primary, width: 2),
-          ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: primary,
-            foregroundColor: Colors.white,
-            minimumSize: const Size(double.infinity, 52),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-            elevation: 0,
-          ),
-        ),
-        textTheme: const TextTheme(
-          titleLarge:  TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-          titleMedium: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-          bodyLarge:   TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-          bodyMedium:  TextStyle(fontSize: 14, color: labelGray),
-        ),
-        navigationBarTheme: NavigationBarThemeData(
-          backgroundColor: cardWhite,
-          indicatorColor: primary.withValues(alpha: 0.12),
-          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        ),
-      );
+  static const Color primary      = Color(0xFF16A34A); // Green 600
+  static const Color accent       = Color(0xFFF59E0B); // Amber 500
+  static const Color background   = Color(0xFFF8FAFC);
+  static const Color cardWhite    = Colors.white;
+  static const Color success      = Color(0xFF34C759);
+  static const Color warning      = Color(0xFFFFA500);
+  static const Color labelGray    = Color(0xFF64748B);
+  static const Color divider      = Color(0xFFE2E8F0);
+  static const Color inputFill    = Color(0xFFF1F5F9);
+  static const Color chartPurple  = Color(0xFF9C27B0);
+  static const Color chartTeal    = Color(0xFF009688);
+  static const Color surfaceTint  = Color(0xFFECFDF5); // green-50
+  static const Color dangerRed    = Color(0xFFDC2626);
+
+  // Category palette — breakdown charts and expense lists
+  static const List<Color> categoryPalette = [
+    Color(0xFF16A34A), // green
+    Color(0xFF2563EB), // blue
+    Color(0xFFC8102E), // red
+    Color(0xFFD97706), // amber
+    Color(0xFF7C3AED), // violet
+    Color(0xFF0891B2), // cyan
+    Color(0xFFDB2777), // pink
+    Color(0xFF65A30D), // lime
+    Color(0xFF9333EA), // purple
+    Color(0xFF0D9488), // teal
+  ];
+
+  static ThemeData get theme => CalcwiseThemeFactory.buildLight(primary: primary, accent: accent);
+  static ThemeData get dark  => CalcwiseThemeFactory.buildDark(primary: primary, accent: accent);
 
   static LinearGradient get primaryGradient => LinearGradient(
     colors: [primary, Color.lerp(primary, Colors.black, 0.15)!],

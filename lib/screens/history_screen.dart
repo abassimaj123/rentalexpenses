@@ -1,3 +1,5 @@
+import '../core/ads/ad_footer.dart';
+import 'package:calcwise_core/calcwise_core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -5,7 +7,7 @@ import '../core/freemium/freemium_service.dart';
 import '../core/theme/app_theme.dart';
 import '../main.dart';
 import '../screens/calculator_screen.dart';
-import '../widgets/banner_ad_widget.dart';
+import '../screens/history_detail_screen.dart';
 import '../widgets/paywall_hard.dart';
 
 class HistoryScreen extends StatefulWidget {
@@ -49,11 +51,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   void _loadIntoCalculator(ExpenseCalc calc) {
     // Push a new calculator screen pre-loaded with this entry
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => Scaffold(
-        body: CalculatorScreen(preload: calc),
-      ),
-    ));
+    Navigator.of(context).push(PageRouteBuilder(
+                    pageBuilder: (_, __, ___) => Scaffold(
+        body: CalculatorScreen(preload: calc)),
+                    transitionsBuilder: (_, anim, __, child) =>
+                        FadeTransition(opacity: anim, child: child),
+                    transitionDuration: const Duration(milliseconds: 250),
+                  ),
+    );
   }
 
   @override
@@ -82,7 +87,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         ? _EmptyState(isSpanish: isSpanish)
                         : _buildList(isSpanish),
               ),
-              const BannerAdWidget(),
+              const AdFooter(),
             ],
           ),
         );
@@ -94,7 +99,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return ValueListenableBuilder<bool>(
       valueListenable: freemiumService.isPremiumNotifier,
       builder: (_, isPremium, __) {
-        final limit = FreemiumService.freeHistoryLimit;
+        final limit = MonetizationConfig.freeCalculationLimit;
         return ListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: _entries.length + (isPremium ? 0 : 1),
@@ -105,7 +110,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             }
             final e = _entries[i];
             final cf = e.monthlyCashFlow;
-            final cfColor = cf >= 0 ? AppTheme.success : Colors.red;
+            final cfColor = cf >= 0 ? AppTheme.success : AppTheme.dangerRed;
             return Dismissible(
               key: ValueKey('${e.savedAt.toIso8601String()}_$i'),
               direction: DismissDirection.endToStart,
@@ -113,10 +118,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 alignment: Alignment.centerRight,
                 padding: const EdgeInsets.only(right: 20),
                 decoration: BoxDecoration(
-                  color: Colors.red.shade100,
+                  color: AppTheme.dangerRed.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Icon(Icons.delete_rounded, color: Colors.red),
+                child: const Icon(Icons.delete_rounded,
+                    color: AppTheme.dangerRed),
               ),
               onDismissed: (_) => _delete(i, isSpanish),
               child: Card(
@@ -157,19 +163,27 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       ),
                       Text(
                         _dateFmt.format(e.savedAt),
-                        style: const TextStyle(
-                            fontSize: 12, color: AppTheme.labelGray),
+                        style: TextStyle(
+                            fontSize: 12, color: CalcwiseTheme.of(context).textSecondary),
                       ),
                     ],
                   ),
                   trailing: IconButton(
-                    icon: const Icon(Icons.open_in_new_rounded,
+                    icon: const Icon(Icons.replay_rounded,
                         color: AppTheme.primary, size: 20),
-                    tooltip:
-                        isSpanish ? 'Cargar en calculadora' : 'Load into calculator',
+                    tooltip: isSpanish
+                        ? 'Cargar en calculadora'
+                        : 'Load in calculator',
                     onPressed: () => _loadIntoCalculator(e),
                   ),
-                  onTap: () => _loadIntoCalculator(e),
+                  onTap: () => Navigator.of(context).push(
+                    PageRouteBuilder(
+                    pageBuilder: (_, __, ___) => HistoryDetailScreen(calc: e),
+                    transitionsBuilder: (_, anim, __, child) =>
+                        FadeTransition(opacity: anim, child: child),
+                    transitionDuration: const Duration(milliseconds: 250),
+                  ),
+                    ),
                 ),
               ),
             );
@@ -195,7 +209,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             child: Text(isSpanish ? 'Borrar' : 'Clear',
-                style: const TextStyle(color: Colors.red)),
+                style: const TextStyle(color: AppTheme.dangerRed)),
           ),
         ],
       ),
@@ -236,7 +250,7 @@ class _EmptyState extends StatelessWidget {
                   ? 'Calcula los gastos de una propiedad y guarda el resultado.'
                   : 'Calculate expenses for a property and save the result.',
               textAlign: TextAlign.center,
-              style: const TextStyle(color: AppTheme.labelGray),
+              style: TextStyle(color: CalcwiseTheme.of(context).textSecondary),
             ),
           ],
         ),
@@ -281,8 +295,8 @@ class _UpgradeCTA extends StatelessWidget {
                   ? 'Desbloquea Premium para historial ilimitado'
                   : 'Unlock Premium for unlimited history',
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                  color: AppTheme.labelGray, fontSize: 13),
+              style: TextStyle(
+                  color: CalcwiseTheme.of(context).textSecondary, fontSize: 13),
             ),
             const SizedBox(height: 12),
             SizedBox(

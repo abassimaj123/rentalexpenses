@@ -1,3 +1,5 @@
+import '../core/ads/ad_footer.dart';
+import 'package:calcwise_core/calcwise_core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../core/freemium/freemium_service.dart';
@@ -5,8 +7,8 @@ import '../core/theme/app_theme.dart';
 import '../main.dart';
 import '../models/expense_model.dart';
 import '../models/property_model.dart';
+import '../screens/receipt_viewer_screen.dart';
 import '../services/property_database_service.dart';
-import '../widgets/banner_ad_widget.dart';
 import '../widgets/paywall_hard.dart';
 import 'expense_entry_screen.dart';
 
@@ -49,13 +51,16 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
   }
 
   Future<void> _openEntry(MonthlyExpense e) async {
-    final result = await Navigator.of(context).push<bool>(MaterialPageRoute(
-      builder: (_) => ExpenseEntryScreen(
+    final result = await Navigator.of(context).push<bool>(PageRouteBuilder(
+                    pageBuilder: (_, __, ___) => ExpenseEntryScreen(
         property: widget.property,
         existing: e,
-        targetMonth: e.date,
-      ),
-    ));
+        targetMonth: e.date,),
+                    transitionsBuilder: (_, anim, __, child) =>
+                        FadeTransition(opacity: anim, child: child),
+                    transitionDuration: const Duration(milliseconds: 250),
+                  ),
+    );
     if (result == true) _load();
   }
 
@@ -65,7 +70,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
       valueListenable: isSpanishNotifier,
       builder: (_, isSpanish, __) {
         final isPremium = freemiumService.isPremium;
-        final freeLimit = FreemiumService.freeHistoryLimit;
+        final freeLimit = MonetizationConfig.freeCalculationLimit;
         final dateFmt = DateFormat('MMMM yyyy', isSpanish ? 'es' : 'en');
 
         return Scaffold(
@@ -95,7 +100,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                               final ratio = rent > 0
                                   ? (e.totalExpenses / rent * 100)
                                   : 0.0;
-                              final cfColor = cf >= 0 ? AppTheme.success : Colors.red;
+                              final cfColor = cf >= 0 ? AppTheme.success : AppTheme.dangerRed;
 
                               // Free users: blur entries beyond freeLimit
                               final isLocked = !isPremium && i >= freeLimit;
@@ -114,10 +119,11 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                   alignment: Alignment.centerRight,
                                   padding: const EdgeInsets.only(right: 20),
                                   decoration: BoxDecoration(
-                                    color: Colors.red.shade100,
+                                    color: AppTheme.dangerRed.withValues(alpha: 0.12),
                                     borderRadius: BorderRadius.circular(16),
                                   ),
-                                  child: const Icon(Icons.delete_rounded, color: Colors.red),
+                                  child: const Icon(Icons.delete_rounded,
+                                      color: AppTheme.dangerRed),
                                 ),
                                 confirmDismiss: (_) async {
                                   return await showDialog<bool>(
@@ -135,7 +141,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                         TextButton(
                                           onPressed: () => Navigator.pop(d, true),
                                           child: Text(isSpanish ? 'Eliminar' : 'Delete',
-                                              style: const TextStyle(color: Colors.red)),
+                                              style: const TextStyle(color: AppTheme.dangerRed)),
                                         ),
                                       ],
                                     ),
@@ -180,14 +186,47 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                                 const SizedBox(height: 4),
                                                 Text(
                                                   '${isSpanish ? 'Gastos' : 'Expenses'}: \$${_fmt.format(e.totalExpenses)}  •  ${ratio.toStringAsFixed(1)}%',
-                                                  style: const TextStyle(
+                                                  style: TextStyle(
                                                     fontSize: 13,
-                                                    color: AppTheme.labelGray,
+                                                    color: CalcwiseTheme.of(context).textSecondary,
                                                   ),
                                                 ),
                                               ],
                                             ),
                                           ),
+                                          // Receipt icon badge
+                                          if (e.receiptPath != null) ...[
+                                            const SizedBox(width: 8),
+                                            GestureDetector(
+                                              onTap: () {
+                                                Navigator.of(ctx).push(
+                                                  MaterialPageRoute(
+                                                    builder: (_) =>
+                                                        ReceiptViewerScreen(
+                                                      imagePath:
+                                                          e.receiptPath!,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                              child: Container(
+                                                width: 32,
+                                                height: 32,
+                                                decoration: BoxDecoration(
+                                                  color: AppTheme.success
+                                                      .withValues(alpha: 0.12),
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                                child: const Icon(
+                                                  Icons.check_circle_rounded,
+                                                  color: AppTheme.success,
+                                                  size: 18,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                          ],
                                           Column(
                                             crossAxisAlignment: CrossAxisAlignment.end,
                                             children: [
@@ -202,9 +241,9 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                               const SizedBox(height: 2),
                                               Text(
                                                 isSpanish ? 'flujo mensual' : 'monthly CF',
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   fontSize: 11,
-                                                  color: AppTheme.labelGray,
+                                                  color: CalcwiseTheme.of(context).textSecondary,
                                                 ),
                                               ),
                                             ],
@@ -218,7 +257,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                             },
                           ),
               ),
-              const BannerAdWidget(),
+              const AdFooter(),
             ],
           ),
         );
@@ -239,7 +278,7 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.receipt_long_rounded, size: 72, color: AppTheme.labelGray.withValues(alpha: 0.4)),
+            Icon(Icons.receipt_long_rounded, size: 72, color: CalcwiseTheme.of(context).textSecondary.withValues(alpha: 0.4)),
             const SizedBox(height: 16),
             Text(
               isSpanish ? 'Sin entradas de gastos' : 'No expense entries yet',
@@ -251,7 +290,7 @@ class _EmptyState extends StatelessWidget {
               isSpanish
                   ? 'Agrega gastos mensuales con el botón + en la pantalla anterior.'
                   : 'Add monthly expenses using the + button on the previous screen.',
-              style: const TextStyle(color: AppTheme.labelGray),
+              style: TextStyle(color: CalcwiseTheme.of(context).textSecondary),
               textAlign: TextAlign.center,
             ),
           ],
@@ -281,19 +320,19 @@ class _LockedRow extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: AppTheme.labelGray.withValues(alpha: 0.1),
+                  color: CalcwiseTheme.of(context).textSecondary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.lock_rounded, color: AppTheme.labelGray),
+                child: Icon(Icons.lock_rounded, color: CalcwiseTheme.of(context).textSecondary),
               ),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(height: 14, width: 120, color: AppTheme.divider),
+                    Container(height: 14, width: 120, color: CalcwiseTheme.of(context).cardBorder),
                     const SizedBox(height: 6),
-                    Container(height: 12, width: 180, color: AppTheme.divider),
+                    Container(height: 12, width: 180, color: CalcwiseTheme.of(context).cardBorder),
                   ],
                 ),
               ),

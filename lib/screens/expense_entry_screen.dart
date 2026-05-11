@@ -1,14 +1,21 @@
+import '../core/ads/ad_footer.dart';
+import 'dart:io';
+import 'package:calcwise_core/calcwise_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path_pkg;
 import '../core/firebase/analytics_service.dart';
-import '../core/freemium/paywall_service.dart';
+import '../core/freemium/freemium_service.dart';
 import '../core/theme/app_theme.dart';
 import '../main.dart';
 import '../models/expense_model.dart';
 import '../models/property_model.dart';
+import '../screens/receipt_viewer_screen.dart';
 import '../services/property_database_service.dart';
-import '../widgets/banner_ad_widget.dart';
+import '../widgets/paywall_hard.dart';
 
 class ExpenseEntryScreen extends StatefulWidget {
   final Property property;
@@ -46,6 +53,13 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
   bool _vacIsPercent  = false;
   bool _isSaving = false;
 
+  // Feature 2 — recurring
+  bool _isRecurring = false;
+  String _recurrenceType = 'monthly'; // 'monthly' | 'annual'
+
+  // Feature 3 — receipt photo
+  String? _receiptPath; // persisted file path (null = no photo)
+
   // Live results
   double _totalExpenses = 0;
   double _monthlyCF    = 0;
@@ -68,6 +82,9 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
       _utilCtrl.text  = e.utilities     > 0 ? e.utilities.toStringAsFixed(2) : '';
       _landCtrl.text  = e.landscaping   > 0 ? e.landscaping.toStringAsFixed(2) : '';
       _otherCtrl.text = e.otherExpenses > 0 ? e.otherExpenses.toStringAsFixed(2) : '';
+      _isRecurring    = e.isRecurring;
+      _recurrenceType = e.recurrenceType ?? 'monthly';
+      _receiptPath    = e.receiptPath;
     }
     for (final c in _allControllers) {
       c.addListener(_recalculate);
@@ -131,6 +148,75 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
     );
   }
 
+  Future<void> _pickReceipt(bool isSpanish) async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.camera_alt_rounded,
+                    color: AppTheme.primary),
+                title: Text(isSpanish ? 'Tomar foto' : 'Take photo'),
+                onTap: () => Navigator.pop(ctx, ImageSource.camera),
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library_rounded,
+                    color: AppTheme.primary),
+                title: Text(
+                    isSpanish ? 'Elegir de galería' : 'Choose from gallery'),
+                onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (source == null) return;
+
+    final picker = ImagePicker();
+    final XFile? picked =
+        await picker.pickImage(source: source, imageQuality: 85);
+    if (picked == null) return;
+
+    // Copy file to app documents directory so it persists independently
+    final docsDir = await getApplicationDocumentsDirectory();
+    final receiptsDir =
+        Directory(path_pkg.join(docsDir.path, 'receipts'));
+    if (!receiptsDir.existsSync()) receiptsDir.createSync(recursive: true);
+
+    final ext = path_pkg.extension(picked.path).isNotEmpty
+        ? path_pkg.extension(picked.path)
+        : '.jpg';
+    final fileName =
+        'receipt_${widget.property.id}_${_selectedMonth.year}_${_selectedMonth.month.toString().padLeft(2, '0')}_${DateTime.now().millisecondsSinceEpoch}$ext';
+    final destPath = path_pkg.join(receiptsDir.path, fileName);
+
+    await File(picked.path).copy(destPath);
+
+    // Delete old file if it was replaced
+    if (_receiptPath != null && _receiptPath != destPath) {
+      final old = File(_receiptPath!);
+      if (old.existsSync()) old.deleteSync();
+    }
+
+    setState(() => _receiptPath = destPath);
+  }
+
+  void _deleteReceipt() {
+    if (_receiptPath != null) {
+      final f = File(_receiptPath!);
+      if (f.existsSync()) f.deleteSync();
+    }
+    setState(() => _receiptPath = null);
+  }
+
   Future<void> _save(bool isSpanish) async {
     if (_isSaving) return;
     setState(() => _isSaving = true);
@@ -161,6 +247,9 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
         utilities: _parseD(_utilCtrl),
         landscaping: _parseD(_landCtrl),
         otherExpenses: _parseD(_otherCtrl),
+        isRecurring: _isRecurring,
+        recurrenceType: _isRecurring ? _recurrenceType : null,
+        receiptPath: _receiptPath,
       );
 
       if (existing != null) {
@@ -169,8 +258,11 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
         await PropertyDatabaseService.instance.insertExpense(expense);
       }
 
-      paywallService.recordAction();
+      await paywallSession.recordAction();
       await AnalyticsService.instance.logExpenseTracked('monthly_expenses');
+      if (_isRecurring) {
+        await AnalyticsService.instance.logRecurringExpenseCreated();
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -252,7 +344,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                           monthLabel,
                           style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
-                        trailing: const Icon(Icons.edit_rounded, size: 18, color: AppTheme.labelGray),
+                        trailing: Icon(Icons.edit_rounded, size: 18, color: CalcwiseTheme.of(context).textSecondary),
                         onTap: () => _pickMonth(isSpanish),
                       ),
                     ),
@@ -290,7 +382,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                                 Expanded(
                                   child: Text(
                                     isSpanish ? 'Adm. de propiedad' : 'Property Management',
-                                    style: const TextStyle(fontSize: 13, color: AppTheme.labelGray),
+                                    style: TextStyle(fontSize: 13, color: CalcwiseTheme.of(context).textSecondary),
                                   ),
                                 ),
                                 _ToggleChip(
@@ -334,7 +426,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                                 Expanded(
                                   child: Text(
                                     isSpanish ? 'Pérdida por vacante' : 'Vacancy Loss',
-                                    style: const TextStyle(fontSize: 13, color: AppTheme.labelGray),
+                                    style: TextStyle(fontSize: 13, color: CalcwiseTheme.of(context).textSecondary),
                                   ),
                                 ),
                                 _ToggleChip(
@@ -369,6 +461,95 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                     ),
                     const SizedBox(height: 20),
 
+                    // Feature 2 — Recurring expense toggle
+                    _SectionLabel(isSpanish ? 'RECURRENCIA' : 'RECURRENCE'),
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        child: Column(
+                          children: [
+                            SwitchListTile(
+                              contentPadding: EdgeInsets.zero,
+                              title: Text(
+                                isSpanish
+                                    ? 'Gasto recurrente'
+                                    : 'Recurring expense',
+                                style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500),
+                              ),
+                              subtitle: Text(
+                                isSpanish
+                                    ? 'Se repite automáticamente'
+                                    : 'Repeats automatically',
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    color: CalcwiseTheme.of(context).textSecondary),
+                              ),
+                              value: _isRecurring,
+                              activeThumbColor: AppTheme.primary,
+                              onChanged: (v) =>
+                                  setState(() => _isRecurring = v),
+                            ),
+                            if (_isRecurring) ...[
+                              Divider(height: 1, color: CalcwiseTheme.of(context).cardBorder),
+                              const SizedBox(height: 8),
+                              DropdownButtonFormField<String>(
+                                initialValue: _recurrenceType,
+                                decoration: InputDecoration(
+                                  labelText: isSpanish
+                                      ? 'Frecuencia'
+                                      : 'Frequency',
+                                ),
+                                items: [
+                                  DropdownMenuItem(
+                                    value: 'monthly',
+                                    child: Text(isSpanish
+                                        ? 'Mensual'
+                                        : 'Monthly'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'annual',
+                                    child: Text(isSpanish
+                                        ? 'Anual'
+                                        : 'Annual'),
+                                  ),
+                                ],
+                                onChanged: (v) => setState(
+                                    () => _recurrenceType = v ?? 'monthly'),
+                              ),
+                              const SizedBox(height: 8),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Feature 3 — Receipt photo attachment
+                    _SectionLabel(isSpanish ? 'RECIBO / FOTO' : 'RECEIPT / PHOTO'),
+                    _ReceiptSection(
+                      isSpanish: isSpanish,
+                      receiptPath: _receiptPath,
+                      isPremium: freemiumService.isPremium,
+                      onAdd: () => _pickReceipt(isSpanish),
+                      onDelete: _deleteReceipt,
+                      onView: () {
+                        if (_receiptPath == null) return;
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => ReceiptViewerScreen(
+                            imagePath: _receiptPath!,
+                            onDelete: () {
+                              _deleteReceipt();
+                            },
+                          ),
+                        ));
+                      },
+                      onPremiumTap: () => PaywallHard.show(context),
+                    ),
+                    const SizedBox(height: 20),
+
                     // Live results
                     _SectionLabel(isSpanish ? 'RESULTADOS EN VIVO' : 'LIVE RESULTS'),
                     Card(
@@ -381,7 +562,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                               value: '\$${_fmt.format(_totalExpenses)}',
                               bold: true,
                             ),
-                            const Divider(height: 20, color: AppTheme.divider),
+                            Divider(height: 20, color: CalcwiseTheme.of(context).cardBorder),
                             _ResultRow(
                               label: isSpanish ? 'Flujo de caja mensual' : 'Monthly Cash Flow',
                               value: '${_monthlyCF < 0 ? '-' : ''}\$${_fmt.format(_monthlyCF.abs())}',
@@ -418,7 +599,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                   ],
                 ),
               ),
-              const BannerAdWidget(),
+              const AdFooter(),
             ],
           ),
         );
@@ -500,10 +681,10 @@ class _MonthPickerDialogState extends State<_MonthPickerDialog> {
                   width: 72,
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   decoration: BoxDecoration(
-                    color: selected ? AppTheme.primary : AppTheme.background,
+                    color: selected ? AppTheme.primary : CalcwiseTheme.of(context).surfaceHigh,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: selected ? AppTheme.primary : AppTheme.divider,
+                      color: selected ? AppTheme.primary : CalcwiseTheme.of(context).cardBorder,
                     ),
                   ),
                   child: Text(
@@ -539,6 +720,188 @@ class _MonthPickerDialogState extends State<_MonthPickerDialog> {
   }
 }
 
+// ── Receipt section widget ────────────────────────────────────────────────────
+
+class _ReceiptSection extends StatelessWidget {
+  final bool isSpanish;
+  final String? receiptPath;
+  final bool isPremium;
+  final VoidCallback onAdd;
+  final VoidCallback onDelete;
+  final VoidCallback onView;
+  final VoidCallback onPremiumTap;
+
+  const _ReceiptSection({
+    required this.isSpanish,
+    required this.receiptPath,
+    required this.isPremium,
+    required this.onAdd,
+    required this.onDelete,
+    required this.onView,
+    required this.onPremiumTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Free user: show premium CTA button
+    if (!isPremium) {
+      return InkWell(
+        onTap: onPremiumTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: AppTheme.primary.withValues(alpha: 0.07),
+            borderRadius: BorderRadius.circular(12),
+            border:
+                Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.lock_outline_rounded,
+                  color: AppTheme.primary, size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  isSpanish
+                      ? 'Agregar Recibo (Premium)'
+                      : 'Add Receipt (Premium)',
+                  style: const TextStyle(
+                    color: AppTheme.primary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+              const Icon(Icons.chevron_right_rounded,
+                  color: AppTheme.primary, size: 20),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Premium user with no photo yet
+    if (receiptPath == null) {
+      return OutlinedButton.icon(
+        onPressed: onAdd,
+        icon: const Icon(Icons.add_a_photo_outlined),
+        label: Text(isSpanish ? 'Agregar Recibo' : 'Add Receipt'),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppTheme.primary,
+          side: const BorderSide(color: AppTheme.primary),
+          minimumSize: const Size(double.infinity, 52),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14)),
+        ),
+      );
+    }
+
+    // Premium user with photo attached
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            // Thumbnail
+            GestureDetector(
+              onTap: onView,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.file(
+                  File(receiptPath!),
+                  width: 72,
+                  height: 72,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    width: 72,
+                    height: 72,
+                    color: CalcwiseTheme.of(context).cardBorder,
+                    child: Icon(Icons.broken_image_outlined,
+                        color: CalcwiseTheme.of(context).textSecondary),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.check_circle_rounded,
+                          color: AppTheme.success, size: 16),
+                      const SizedBox(width: 6),
+                      Text(
+                        isSpanish ? 'Recibo adjunto' : 'Receipt attached',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      TextButton.icon(
+                        onPressed: onView,
+                        icon: const Icon(Icons.zoom_in_rounded, size: 16),
+                        label: Text(
+                          isSpanish ? 'Ver' : 'View',
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppTheme.primary,
+                          padding: EdgeInsets.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          minimumSize: Size.zero,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      TextButton.icon(
+                        onPressed: onAdd,
+                        icon: const Icon(Icons.swap_horiz_rounded, size: 16),
+                        label: Text(
+                          isSpanish ? 'Cambiar' : 'Change',
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                        style: TextButton.styleFrom(
+                          foregroundColor: CalcwiseTheme.of(context).textSecondary,
+                          padding: EdgeInsets.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          minimumSize: Size.zero,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      TextButton.icon(
+                        onPressed: onDelete,
+                        icon: const Icon(Icons.delete_outline_rounded,
+                            size: 16),
+                        label: Text(
+                          isSpanish ? 'Quitar' : 'Remove',
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppTheme.dangerRed,
+                          padding: EdgeInsets.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          minimumSize: Size.zero,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 // ── Shared small widgets ──────────────────────────────────────────────────────
 
 class _SectionLabel extends StatelessWidget {
@@ -550,10 +913,10 @@ class _SectionLabel extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 8),
         child: Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.bold,
-              color: AppTheme.labelGray,
+              color: CalcwiseTheme.of(context).textSecondary,
               letterSpacing: 0.8),
         ),
       );

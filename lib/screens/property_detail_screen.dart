@@ -1,3 +1,5 @@
+import '../core/ads/ad_footer.dart';
+import 'package:calcwise_core/calcwise_core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../core/freemium/freemium_service.dart';
@@ -6,9 +8,9 @@ import '../main.dart';
 import '../models/expense_model.dart';
 import '../models/property_model.dart';
 import '../services/property_database_service.dart';
-import '../widgets/banner_ad_widget.dart';
 import 'expense_entry_screen.dart';
 import 'expense_history_screen.dart';
+import 'tenants_screen.dart';
 
 class PropertyDetailScreen extends StatefulWidget {
   final Property property;
@@ -118,23 +120,29 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
 
   Future<void> _addExpenses(bool isSpanish) async {
     final now = DateTime.now();
-    final result = await Navigator.of(context).push<bool>(MaterialPageRoute(
-      builder: (_) => ExpenseEntryScreen(
+    final result = await Navigator.of(context).push<bool>(PageRouteBuilder(
+                    pageBuilder: (_, __, ___) => ExpenseEntryScreen(
         property: _property,
-        targetMonth: DateTime(now.year, now.month),
-      ),
-    ));
+        targetMonth: DateTime(now.year, now.month)),
+                    transitionsBuilder: (_, anim, __, child) =>
+                        FadeTransition(opacity: anim, child: child),
+                    transitionDuration: const Duration(milliseconds: 250),
+                  ),
+    );
     if (result == true) _load();
   }
 
   Future<void> _openEntry(MonthlyExpense e) async {
-    final result = await Navigator.of(context).push<bool>(MaterialPageRoute(
-      builder: (_) => ExpenseEntryScreen(
+    final result = await Navigator.of(context).push<bool>(PageRouteBuilder(
+                    pageBuilder: (_, __, ___) => ExpenseEntryScreen(
         property: _property,
         existing: e,
-        targetMonth: e.date,
-      ),
-    ));
+        targetMonth: e.date,),
+                    transitionsBuilder: (_, anim, __, child) =>
+                        FadeTransition(opacity: anim, child: child),
+                    transitionDuration: const Duration(milliseconds: 250),
+                  ),
+    );
     if (result == true) _load();
   }
 
@@ -175,9 +183,24 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
               IconButton(
                 icon: const Icon(Icons.history_rounded),
                 tooltip: isSpanish ? 'Historial completo' : 'Full history',
-                onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (_) => ExpenseHistoryScreen(property: _property),
-                )).then((_) => _load()),
+                onPressed: () => Navigator.of(context).push(PageRouteBuilder(
+                    pageBuilder: (_, __, ___) => ExpenseHistoryScreen(property: _property),
+                    transitionsBuilder: (_, anim, __, child) =>
+                        FadeTransition(opacity: anim, child: child),
+                    transitionDuration: const Duration(milliseconds: 250),
+                  ),
+                ).then((_) => _load()),
+              ),
+              IconButton(
+                icon: const Icon(Icons.people_rounded),
+                tooltip: isSpanish ? 'Locatarios' : 'Tenants',
+                onPressed: () => Navigator.of(context).push(PageRouteBuilder(
+                    pageBuilder: (_, __, ___) => TenantsScreen(property: _property),
+                    transitionsBuilder: (_, anim, __, child) =>
+                        FadeTransition(opacity: anim, child: child),
+                    transitionDuration: const Duration(milliseconds: 250),
+                  ),
+                ),
               ),
             ],
           ),
@@ -231,8 +254,8 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                             if (_property.address.isNotEmpty)
                                               Text(
                                                 _property.address,
-                                                style: const TextStyle(
-                                                  color: AppTheme.labelGray,
+                                                style: TextStyle(
+                                                  color: CalcwiseTheme.of(context).textSecondary,
                                                   fontSize: 13,
                                                 ),
                                               ),
@@ -241,7 +264,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                       ),
                                     ],
                                   ),
-                                  const Divider(height: 24, color: AppTheme.divider),
+                                  Divider(height: 24, color: CalcwiseTheme.of(context).cardBorder),
                                   Row(
                                     children: [
                                       Expanded(
@@ -277,7 +300,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                   isSpanish
                                       ? 'Sin gastos registrados para este mes. Usa el botón + para agregar.'
                                       : 'No expenses recorded for this month. Tap + to add.',
-                                  style: const TextStyle(color: AppTheme.labelGray),
+                                  style: TextStyle(color: CalcwiseTheme.of(context).textSecondary),
                                 ),
                               ),
                             )
@@ -336,7 +359,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                 padding: const EdgeInsets.all(16),
                                 child: Text(
                                   isSpanish ? 'Sin entradas aún.' : 'No entries yet.',
-                                  style: const TextStyle(color: AppTheme.labelGray),
+                                  style: TextStyle(color: CalcwiseTheme.of(context).textSecondary),
                                 ),
                               ),
                             )
@@ -355,8 +378,8 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                     padding: const EdgeInsets.all(14),
                                     child: Row(
                                       children: [
-                                        const Icon(Icons.receipt_long_rounded,
-                                            color: AppTheme.labelGray, size: 22),
+                                        Icon(Icons.receipt_long_rounded,
+                                            color: CalcwiseTheme.of(context).textSecondary, size: 22),
                                         const SizedBox(width: 12),
                                         Expanded(
                                           child: Column(
@@ -368,8 +391,8 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                               ),
                                               Text(
                                                 '\$${_fmt.format(e.totalExpenses)}  •  ${ratio.toStringAsFixed(1)}%',
-                                                style: const TextStyle(
-                                                  fontSize: 12, color: AppTheme.labelGray),
+                                                style: TextStyle(
+                                                  fontSize: 12, color: CalcwiseTheme.of(context).textSecondary),
                                               ),
                                             ],
                                           ),
@@ -382,8 +405,8 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                           ),
                                         ),
                                         const SizedBox(width: 4),
-                                        const Icon(Icons.chevron_right_rounded,
-                                            color: AppTheme.labelGray, size: 18),
+                                        Icon(Icons.chevron_right_rounded,
+                                            color: CalcwiseTheme.of(context).textSecondary, size: 18),
                                       ],
                                     ),
                                   ),
@@ -393,7 +416,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                         ],
                       ),
               ),
-              const BannerAdWidget(),
+              const AdFooter(),
             ],
           ),
         );
@@ -413,10 +436,10 @@ class _SectionLabel extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 8),
         child: Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.bold,
-              color: AppTheme.labelGray,
+              color: CalcwiseTheme.of(context).textSecondary,
               letterSpacing: 0.8),
         ),
       );
@@ -432,12 +455,12 @@ class _InfoTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: AppTheme.labelGray),
+        Icon(icon, size: 16, color: CalcwiseTheme.of(context).textSecondary),
         const SizedBox(width: 6),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: const TextStyle(fontSize: 11, color: AppTheme.labelGray)),
+            Text(label, style: TextStyle(fontSize: 11, color: CalcwiseTheme.of(context).textSecondary)),
             Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
           ],
         ),
@@ -472,7 +495,7 @@ class _StatCard extends StatelessWidget {
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(label,
-                      style: const TextStyle(fontSize: 12, color: AppTheme.labelGray)),
+                      style: TextStyle(fontSize: 12, color: CalcwiseTheme.of(context).textSecondary)),
                 ),
               ],
             ),

@@ -1,15 +1,18 @@
+import '../core/ads/ad_footer.dart';
+import 'package:calcwise_core/calcwise_core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../core/firebase/analytics_service.dart';
 import '../core/freemium/freemium_service.dart';
+import '../core/freemium/iap_service.dart';
 import '../core/theme/app_theme.dart';
 import '../main.dart';
 import '../models/expense_model.dart';
 import '../models/property_model.dart';
 import '../services/property_database_service.dart';
-import '../widgets/banner_ad_widget.dart';
 import '../widgets/paywall_hard.dart';
 import 'property_detail_screen.dart';
+import 'settings_screen.dart';
 
 enum _SortMode { profitability, name, newest }
 
@@ -206,7 +209,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
           TextButton(
             onPressed: () => Navigator.pop(d, true),
             child: Text(isSpanish ? 'Eliminar' : 'Delete',
-                style: const TextStyle(color: Colors.red)),
+                style: const TextStyle(color: AppTheme.dangerRed)),
           ),
         ],
       ),
@@ -226,6 +229,34 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
           appBar: AppBar(
             title: Text(isSpanish ? 'Mis Propiedades' : 'My Properties'),
             actions: [
+              // Premium badge — always visible in AppBar
+              ValueListenableBuilder<bool>(
+                valueListenable: freemiumService.isPremiumNotifier,
+                builder: (_, isPremium, __) {
+                  if (isPremium) {
+                    return const Padding(
+                      padding: EdgeInsets.only(right: 4),
+                      child: Icon(Icons.verified_rounded,
+                          color: Colors.amber, size: 22),
+                    );
+                  }
+                  return IconButton(
+                    icon: const Icon(Icons.star_outline, color: Colors.amber),
+                    tooltip: isSpanish ? 'Obtener Premium' : 'Go Premium',
+                    onPressed: () => IAPService.instance.buy(),
+                  );
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.settings_outlined),
+                tooltip: isSpanish ? 'Ajustes' : 'Settings',
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const SettingsScreen(),
+                  ),
+                ),
+              ),
               PopupMenuButton<_SortMode>(
                 icon: const Icon(Icons.sort_rounded),
                 tooltip: isSpanish ? 'Ordenar' : 'Sort',
@@ -289,20 +320,78 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                 final p = _sorted[i];
                                 final cf    = _cashFlow(p);
                                 final ratio = _expenseRatio(p);
-                                final cfColor = cf >= 0 ? AppTheme.success : Colors.red;
+                                final cfColor = cf >= 0 ? AppTheme.success : AppTheme.dangerRed;
                                 final hasData = _latestExpense[p.id] != null;
 
-                                return GestureDetector(
-                                  onLongPress: () => _deleteProperty(p, isSpanish),
+                                return Dismissible(
+                                  key: ValueKey(p.id),
+                                  direction: DismissDirection.endToStart,
+                                  confirmDismiss: (_) async {
+                                    return await showDialog<bool>(
+                                          context: ctx,
+                                          builder: (d) => AlertDialog(
+                                            title: Text(isSpanish
+                                                ? 'Eliminar propiedad'
+                                                : 'Delete property'),
+                                            content: Text(isSpanish
+                                                ? '¿Eliminar "${p.name}" y todos sus gastos?'
+                                                : 'Delete "${p.name}" and all its expense data?'),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () =>
+                                                    Navigator.pop(d, false),
+                                                child: Text(isSpanish
+                                                    ? 'Cancelar'
+                                                    : 'Cancel'),
+                                              ),
+                                              TextButton(
+                                                onPressed: () =>
+                                                    Navigator.pop(d, true),
+                                                child: Text(
+                                                  isSpanish
+                                                      ? 'Eliminar'
+                                                      : 'Delete',
+                                                  style: const TextStyle(
+                                                      color:
+                                                          AppTheme.dangerRed),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ) ??
+                                        false;
+                                  },
+                                  onDismissed: (_) async {
+                                    await PropertyDatabaseService.instance
+                                        .deleteProperty(p.id);
+                                    _load();
+                                  },
+                                  background: Container(
+                                    alignment: Alignment.centerRight,
+                                    padding: const EdgeInsets.only(right: 20),
+                                    margin:
+                                        const EdgeInsets.only(bottom: 12),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.dangerRed
+                                          .withValues(alpha: 0.12),
+                                      borderRadius:
+                                          BorderRadius.circular(16),
+                                    ),
+                                    child: const Icon(Icons.delete_rounded,
+                                        color: AppTheme.dangerRed),
+                                  ),
                                   child: Card(
                                     margin: const EdgeInsets.only(bottom: 12),
                                     child: InkWell(
                                       borderRadius: BorderRadius.circular(16),
                                       onTap: () => Navigator.of(ctx).push(
-                                        MaterialPageRoute(
-                                          builder: (_) => PropertyDetailScreen(property: p),
-                                        ),
-                                      ).then((_) => _load()),
+                                        PageRouteBuilder(
+                    pageBuilder: (_, __, ___) => PropertyDetailScreen(property: p),
+                    transitionsBuilder: (_, anim, __, child) =>
+                        FadeTransition(opacity: anim, child: child),
+                    transitionDuration: const Duration(milliseconds: 250),
+                  ),
+                                        ).then((_) => _load()),
                                       child: Padding(
                                         padding: const EdgeInsets.all(16),
                                         child: Column(
@@ -335,9 +424,9 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                                       if (p.address.isNotEmpty)
                                                         Text(
                                                           p.address,
-                                                          style: const TextStyle(
+                                                          style: TextStyle(
                                                             fontSize: 12,
-                                                            color: AppTheme.labelGray,
+                                                            color: CalcwiseTheme.of(context).textSecondary,
                                                           ),
                                                           maxLines: 1,
                                                           overflow: TextOverflow.ellipsis,
@@ -345,18 +434,18 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                                     ],
                                                   ),
                                                 ),
-                                                const Icon(Icons.chevron_right_rounded,
-                                                    color: AppTheme.labelGray),
+                                                Icon(Icons.chevron_right_rounded,
+                                                    color: CalcwiseTheme.of(context).textSecondary),
                                               ],
                                             ),
-                                            const Divider(height: 20, color: AppTheme.divider),
+                                            Divider(height: 20, color: CalcwiseTheme.of(context).cardBorder),
                                             Row(
                                               children: [
                                                 Expanded(
                                                   child: _MiniStat(
                                                     label: isSpanish ? 'Alquiler' : 'Rent',
                                                     value: '\$${_fmt.format(p.monthlyRent)}',
-                                                    color: AppTheme.labelGray,
+                                                    color: CalcwiseTheme.of(context).textSecondary,
                                                   ),
                                                 ),
                                                 if (hasData) ...[
@@ -381,8 +470,8 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                                       isSpanish
                                                           ? 'Sin datos de gastos aún'
                                                           : 'No expense data yet',
-                                                      style: const TextStyle(
-                                                          fontSize: 12, color: AppTheme.labelGray),
+                                                      style: TextStyle(
+                                                          fontSize: 12, color: CalcwiseTheme.of(context).textSecondary),
                                                       textAlign: TextAlign.center,
                                                     ),
                                                   ),
@@ -398,7 +487,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                             ),
                           ),
               ),
-              const BannerAdWidget(),
+              const AdFooter(),
             ],
           ),
         );
@@ -422,7 +511,7 @@ class _EmptyState extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.home_work_rounded, size: 80,
-                color: AppTheme.labelGray.withValues(alpha: 0.35)),
+                color: CalcwiseTheme.of(context).textSecondary.withValues(alpha: 0.35)),
             const SizedBox(height: 20),
             Text(
               isSpanish ? 'Agrega tu primera propiedad' : 'Add your first property',
@@ -434,7 +523,7 @@ class _EmptyState extends StatelessWidget {
               isSpanish
                   ? 'Registra tus propiedades y lleva el seguimiento de sus gastos e ingresos mes a mes.'
                   : 'Track your rental properties and monitor income vs. expenses month by month.',
-              style: const TextStyle(color: AppTheme.labelGray, fontSize: 14),
+              style: TextStyle(color: CalcwiseTheme.of(context).textSecondary, fontSize: 14),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 28),
@@ -456,7 +545,7 @@ class _MiniStat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(label, style: const TextStyle(fontSize: 11, color: AppTheme.labelGray)),
+        Text(label, style: TextStyle(fontSize: 11, color: CalcwiseTheme.of(context).textSecondary)),
         const SizedBox(height: 2),
         Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: color)),
       ],

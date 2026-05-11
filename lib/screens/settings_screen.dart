@@ -1,12 +1,14 @@
+import '../core/ads/ad_footer.dart';
+import 'package:calcwise_core/calcwise_core.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../core/ads/ad_service.dart';
 import '../core/freemium/freemium_service.dart';
 import '../core/freemium/iap_service.dart';
+import '../core/services/review_service.dart';
 import '../core/theme/app_theme.dart';
 import '../main.dart';
-import '../widgets/banner_ad_widget.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -32,6 +34,25 @@ class SettingsScreen extends StatelessWidget {
         return Scaffold(
           appBar: AppBar(
             title: Text(isSpanish ? 'Configuración' : 'Settings'),
+            actions: [
+              ValueListenableBuilder<bool>(
+                valueListenable: freemiumService.isPremiumNotifier,
+                builder: (_, isPremium, __) {
+                  if (isPremium) {
+                    return const Padding(
+                      padding: EdgeInsets.only(right: 12),
+                      child: Icon(Icons.verified_rounded,
+                          color: Colors.amber, size: 22),
+                    );
+                  }
+                  return IconButton(
+                    icon: const Icon(Icons.star_outline, color: Colors.amber),
+                    tooltip: isSpanish ? 'Obtener Premium' : 'Go Premium',
+                    onPressed: () => IAPService.instance.buy(),
+                  );
+                },
+              ),
+            ],
           ),
           body: Column(
             children: [
@@ -86,6 +107,19 @@ class SettingsScreen extends StatelessWidget {
                         ),
                       ),
                     ),
+                    // ── Theme ────────────────────────────────────────
+                    _SectionHeader(label: isSpanish ? 'Tema' : 'Theme'),
+                    Card(
+                      child: ValueListenableBuilder<ThemeMode>(
+                        valueListenable: themeModeService.notifier,
+                        builder: (_, mode, __) => ListTile(
+                          leading: Icon(themeModeService.icon, color: AppTheme.primary),
+                          title: Text(themeModeService.label(isSpanish: isSpanish)),
+                          trailing: Icon(Icons.chevron_right_rounded, size: 18, color: CalcwiseTheme.of(context).textSecondary),
+                          onTap: () => themeModeService.toggle(),
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 20),
 
                     // ── Premium ───────────────────────────────────────
@@ -129,16 +163,16 @@ class SettingsScreen extends StatelessWidget {
                                   child: Text(isSpanish ? 'Comprar' : 'Buy'),
                                 ),
                               ),
-                              const Divider(height: 1, color: AppTheme.divider),
+                              Divider(height: 1, color: CalcwiseTheme.of(context).cardBorder),
                               ListTile(
-                                leading: const Icon(Icons.restore_rounded,
-                                    color: AppTheme.labelGray),
+                                leading: Icon(Icons.restore_rounded,
+                                    color: CalcwiseTheme.of(context).textSecondary),
                                 title: Text(isSpanish
                                     ? 'Restaurar compra'
                                     : 'Restore purchase'),
                                 onTap: () => IAPService.instance.restore(),
                               ),
-                              const Divider(height: 1, color: AppTheme.divider),
+                              Divider(height: 1, color: CalcwiseTheme.of(context).cardBorder),
                               ListTile(
                                 leading: const Icon(Icons.play_circle_outline, color: AppTheme.primary),
                                 title: Text(isSpanish ? 'Sin anuncios 60 min' : 'Ad-free for 60 min'),
@@ -166,6 +200,38 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
 
+                    // ── Support ───────────────────────────────────────
+                    _SectionHeader(label: isSpanish ? 'Soporte' : 'Support'),
+                    Card(
+                      child: Column(
+                        children: [
+                          ListTile(
+                            leading: const Icon(Icons.star_rate_outlined,
+                                color: AppTheme.primary),
+                            title: Text(isSpanish
+                                ? 'Calificar la app'
+                                : 'Rate the App'),
+                            trailing: Icon(Icons.chevron_right_rounded,
+                                size: 18, color: CalcwiseTheme.of(context).textSecondary),
+                            onTap: () => ReviewService.instance.requestReview(),
+                          ),
+                          Divider(height: 1, color: CalcwiseTheme.of(context).cardBorder),
+                          ListTile(
+                            leading: const Icon(Icons.email_outlined,
+                                color: AppTheme.primary),
+                            title: Text(isSpanish
+                                ? 'Contactar soporte'
+                                : 'Contact Support'),
+                            trailing: Icon(Icons.open_in_new_rounded,
+                                size: 18, color: CalcwiseTheme.of(context).textSecondary),
+                            onTap: () => _launchUrl(
+                                'mailto:support@calqwise.com'),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
                     // ── Legal ─────────────────────────────────────────
                     _SectionHeader(label: isSpanish ? 'Legal' : 'Legal'),
                     Card(
@@ -174,8 +240,8 @@ class SettingsScreen extends StatelessWidget {
                             color: AppTheme.primary),
                         title: Text(
                             isSpanish ? 'Política de privacidad' : 'Privacy Policy'),
-                        trailing: const Icon(Icons.open_in_new_rounded,
-                            size: 18, color: AppTheme.labelGray),
+                        trailing: Icon(Icons.open_in_new_rounded,
+                            size: 18, color: CalcwiseTheme.of(context).textSecondary),
                         onTap: () =>
                             _launchUrl('https://calqwise.com/privacy'),
                       ),
@@ -216,7 +282,7 @@ class SettingsScreen extends StatelessWidget {
                             onTap: () => _launchUrl(
                                 'https://play.google.com/store/apps/details?id=com.affordabilityca.calculator'),
                           ),
-                          const Divider(height: 1, color: AppTheme.divider),
+                          Divider(height: 1, color: CalcwiseTheme.of(context).cardBorder),
                           _AppTile(
                             icon: Icons.attach_money_rounded,
                             title: isSpanish
@@ -225,7 +291,7 @@ class SettingsScreen extends StatelessWidget {
                             onTap: () => _launchUrl(
                                 'https://play.google.com/store/apps/details?id=com.affordabilityus.calculator'),
                           ),
-                          const Divider(height: 1, color: AppTheme.divider),
+                          Divider(height: 1, color: CalcwiseTheme.of(context).cardBorder),
                           _AppTile(
                             icon: Icons.trending_up_rounded,
                             title: isSpanish
@@ -234,7 +300,7 @@ class SettingsScreen extends StatelessWidget {
                             onTap: () => _launchUrl(
                                 'https://play.google.com/store/apps/details?id=com.rentalroi.us.calculator'),
                           ),
-                          const Divider(height: 1, color: AppTheme.divider),
+                          Divider(height: 1, color: CalcwiseTheme.of(context).cardBorder),
                           _AppTile(
                             icon: Icons.school_outlined,
                             title: isSpanish
@@ -243,7 +309,7 @@ class SettingsScreen extends StatelessWidget {
                             onTap: () => _launchUrl(
                                 'https://play.google.com/store/apps/details?id=com.studentloan.calculator'),
                           ),
-                          const Divider(height: 1, color: AppTheme.divider),
+                          Divider(height: 1, color: CalcwiseTheme.of(context).cardBorder),
                           _AppTile(
                             icon: Icons.grid_view_outlined,
                             title: isSpanish
@@ -257,20 +323,37 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
 
+                    // ── Disclaimer ─────────────────────────────────────
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(4, 0, 4, 0),
+                      child: Text(
+                        isSpanish
+                            ? 'Solo con fines informativos. No es asesoramiento financiero. Consulte a un profesional antes de tomar decisiones financieras.'
+                            : 'For informational purposes only. Not financial advice. Consult a qualified advisor before making financial decisions.',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontStyle: FontStyle.italic,
+                          color: CalcwiseTheme.of(context).textSecondary,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
                     // ── App version ────────────────────────────────────
-                    const Center(
+                    Center(
                       child: Text(
                         'Rental Expenses Tracker v1.0.0\n© 2026 CalqWise',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                            fontSize: 12, color: AppTheme.labelGray),
+                            fontSize: 12, color: CalcwiseTheme.of(context).textSecondary),
                       ),
                     ),
                     const SizedBox(height: 16),
                   ],
                 ),
               ),
-              const BannerAdWidget(),
+              const AdFooter(),
             ],
           ),
         );
@@ -288,10 +371,10 @@ class _SectionHeader extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Text(label,
-          style: const TextStyle(
+          style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.bold,
-              color: AppTheme.labelGray,
+              color: CalcwiseTheme.of(context).textSecondary,
               letterSpacing: 0.5)),
     );
   }
@@ -313,8 +396,8 @@ class _AppTile extends StatelessWidget {
     return ListTile(
       leading: Icon(icon, color: AppTheme.primary),
       title: Text(title, style: const TextStyle(fontSize: 14)),
-      trailing: const Icon(Icons.chevron_right_rounded,
-          color: AppTheme.labelGray),
+      trailing: Icon(Icons.chevron_right_rounded,
+          color: CalcwiseTheme.of(context).textSecondary),
       onTap: onTap,
     );
   }
