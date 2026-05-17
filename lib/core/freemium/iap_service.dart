@@ -21,6 +21,7 @@ class IAPService {
       onPurchaseCompleted: () => ReviewService.instance.requestReview(),
     );
     await _iap.initialize();
+    PaywallHard.registerPrice(_iap.localizedPrice);
   }
 
   Future<void> buy() => _iap.buy();
