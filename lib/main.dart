@@ -1,5 +1,5 @@
-﻿import 'dart:async';
-import 'package:calcwise_core/calcwise_core.dart' hide CrashlyticsService, iapErrorNotifier;
+import 'package:calcwise_core/calcwise_core.dart'
+    hide CrashlyticsService, iapErrorNotifier;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'core/ads/ad_service.dart';
+import 'config/ad_config.dart';
 import 'core/firebase/analytics_service.dart';
 import 'core/firebase/firebase_options.dart';
 import 'core/freemium/freemium_service.dart';
@@ -18,6 +18,7 @@ import 'screens/calculator_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/property_list_screen.dart';
 import 'screens/reports_screen.dart';
+import 'screens/tools_screen.dart';
 import 'screens/history_screen.dart';
 import 'widgets/paywall_hard.dart';
 import 'widgets/paywall_soft.dart';
@@ -26,6 +27,19 @@ final ValueNotifier<bool> isSpanishNotifier = ValueNotifier<bool>(false);
 
 /// Centralized paywall session service
 final paywallSession = PaywallSessionService(appKey: 'rentalexpenses');
+
+/// Global AdService (calcwise_core)
+final adService = CalcwiseAdService(
+  config: CalcwiseAdConfig(
+    bannerAndroid: AdConfig.bannerAndroid,
+    interstitialAndroid: AdConfig.interstitialAndroid,
+    rewardedAndroid: AdConfig.rewardedAndroid,
+    calcThreshold: AdConfig.calcThreshold,
+    cooldownMinutes: AdConfig.cooldownMinutes,
+  ),
+  freemium: freemiumService,
+  analytics: AnalyticsService.instance,
+);
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,9 +62,9 @@ Future<void> main() async {
   await paywallSession.initialize();
 
   try {
-    await _requestConsent();
+    await requestCalcwiseConsent();
     await MobileAds.instance.initialize();
-    await AdService.instance.initialize();
+    if (AdConfig.adsEnabled) await adService.initialize();
   } catch (e) {
     debugPrint('AdMob init error: $e');
   }
@@ -63,6 +77,17 @@ Future<void> main() async {
     systemNavigationBarIconBrightness: Brightness.light,
   ));
 
+  CalcwiseAdFooter.configure(
+    adService: adService,
+    freemium: freemiumService,
+    isSpanishNotifier: isSpanishNotifier,
+    onGetPremium: () => IAPService.instance.buy(),
+  );
+  CalcwiseRewardAdSheet.configure(
+    adService: adService,
+    freemium: freemiumService,
+    isSpanishNotifier: isSpanishNotifier,
+  );
   runApp(const _IapErrorWrapper());
 }
 
@@ -91,8 +116,7 @@ class _IapErrorWrapperState extends State<_IapErrorWrapper> {
     if (msg == null) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(msg)));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
       iapErrorNotifier.value = null;
     });
   }
@@ -143,13 +167,15 @@ class _MainShellState extends State<MainShell> {
     PropertyListScreen(),
     CalculatorScreen(),
     ReportsScreen(),
+    ToolsScreen(),
     HistoryScreen(),
   ];
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async => await paywallSession.recordSession());
+    WidgetsBinding.instance.addPostFrameCallback(
+        (_) async => await paywallSession.recordSession());
   }
 
   Future<void> _onTabChanged(int i) async {
@@ -158,8 +184,10 @@ class _MainShellState extends State<MainShell> {
     final trigger = await paywallSession.recordAction();
     if (trigger == PaywallTrigger.none || !mounted) return;
     if (trigger == PaywallTrigger.hard) {
+      AnalyticsService.instance.logPaywallShown('hard');
       PaywallHard.show(context);
     } else {
+      AnalyticsService.instance.logPaywallShown('soft');
       PaywallSoft.show(context);
     }
   }
@@ -182,22 +210,27 @@ class _MainShellState extends State<MainShell> {
             onDestinationSelected: _onTabChanged,
             destinations: [
               NavigationDestination(
-                icon: const Icon(Icons.home_work_outlined),
+                icon: const Icon(Icons.home_work_rounded),
                 selectedIcon: const Icon(Icons.home_work_rounded),
                 label: isSpanish ? 'Propiedades' : 'Properties',
               ),
               NavigationDestination(
-                icon: const Icon(Icons.calculate_outlined),
+                icon: const Icon(Icons.calculate_rounded),
                 selectedIcon: const Icon(Icons.calculate),
                 label: isSpanish ? 'Calculadora' : 'Calculator',
               ),
               NavigationDestination(
-                icon: const Icon(Icons.bar_chart_outlined),
+                icon: const Icon(Icons.bar_chart_rounded),
                 selectedIcon: const Icon(Icons.bar_chart_rounded),
                 label: isSpanish ? 'Reportes' : 'Reports',
               ),
               NavigationDestination(
-                icon: const Icon(Icons.history_outlined),
+                icon: const Icon(Icons.build_rounded),
+                selectedIcon: const Icon(Icons.build),
+                label: isSpanish ? 'Herramientas' : 'Tools',
+              ),
+              NavigationDestination(
+                icon: const Icon(Icons.history_rounded),
                 selectedIcon: const Icon(Icons.history_rounded),
                 label: isSpanish ? 'Historial' : 'History',
               ),
@@ -207,27 +240,4 @@ class _MainShellState extends State<MainShell> {
       },
     );
   }
-}
-
-
-/// Request GDPR/PIPEDA consent via Google UMP SDK.
-/// Resolves on success, timeout, or error so the app always launches.
-/// On non-EEA/UK devices the UMP SDK completes immediately without showing a form.
-Future<void> _requestConsent() async {
-  final completer = Completer<void>();
-  ConsentInformation.instance.requestConsentInfoUpdate(
-    ConsentRequestParameters(),
-    () async {
-      // Consent info updated — show form only if required
-      if (await ConsentInformation.instance.isConsentFormAvailable()) {
-        ConsentForm.loadAndShowConsentFormIfRequired(
-          (_) { if (!completer.isCompleted) completer.complete(); },
-        );
-      } else {
-        if (!completer.isCompleted) completer.complete();
-      }
-    },
-    (_) { if (!completer.isCompleted) completer.complete(); },
-  );
-  return completer.future;
 }

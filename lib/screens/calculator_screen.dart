@@ -1,4 +1,4 @@
-import '../core/ads/ad_footer.dart';
+import 'dart:async';
 import 'dart:convert';
 import 'package:calcwise_core/calcwise_core.dart';
 import 'package:flutter/material.dart';
@@ -6,14 +6,14 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../core/ads/ad_service.dart';
 import '../core/freemium/freemium_service.dart';
 import '../core/freemium/iap_service.dart';
-import '../core/services/review_service.dart';
 import '../core/theme/app_theme.dart';
 import '../main.dart';
 import '../widgets/insight_card.dart';
 import '../widgets/paywall_hard.dart';
+import '../widgets/paywall_soft.dart';
+import 'settings_screen.dart';
 import '../core/insight_engine.dart';
 
 // ── Data model ────────────────────────────────────────────────────────────────
@@ -27,14 +27,14 @@ class ExpenseCalc {
   final double hoaFees;
   final double propertyMgmt; // stored as $
   final double maintenance;
-  final double vacancyLoss;  // stored as $
+  final double vacancyLoss; // stored as $
   final double utilities;
   final double landscaping;
   final double otherExpenses;
   final DateTime savedAt;
   // ── Investor metrics (optional) ─────────────────────────────────────────
-  final double propertyValue;  // purchase price / current market value
-  final double cashInvested;   // down payment + closing costs + rehab
+  final double propertyValue; // purchase price / current market value
+  final double cashInvested; // down payment + closing costs + rehab
 
   ExpenseCalc({
     required this.propertyName,
@@ -55,21 +55,28 @@ class ExpenseCalc {
   });
 
   double get totalExpenses =>
-      mortgage + propertyTaxes + insurance + hoaFees + propertyMgmt +
-      maintenance + vacancyLoss + utilities + landscaping + otherExpenses;
+      mortgage +
+      propertyTaxes +
+      insurance +
+      hoaFees +
+      propertyMgmt +
+      maintenance +
+      vacancyLoss +
+      utilities +
+      landscaping +
+      otherExpenses;
 
   double get monthlyCashFlow => rentIncome - totalExpenses;
-  double get annualCashFlow  => monthlyCashFlow * 12;
-  double get expenseRatio    => rentIncome > 0 ? (totalExpenses / rentIncome * 100) : 0;
-  double get breakEvenRent   => totalExpenses;
+  double get annualCashFlow => monthlyCashFlow * 12;
+  double get expenseRatio =>
+      rentIncome > 0 ? (totalExpenses / rentIncome * 100) : 0;
+  double get breakEvenRent => totalExpenses;
 
   /// NOI = Annual (Rent - expenses EXCLUDING mortgage)
-  double get noi =>
-      (rentIncome - (totalExpenses - mortgage)) * 12;
+  double get noi => (rentIncome - (totalExpenses - mortgage)) * 12;
 
   /// Cap Rate = Annual NOI / Property Value × 100
-  double? get capRate =>
-      propertyValue > 0 ? (noi / propertyValue * 100) : null;
+  double? get capRate => propertyValue > 0 ? (noi / propertyValue * 100) : null;
 
   /// Gross Yield = Annual Rent / Property Value × 100
   double? get grossYield =>
@@ -80,66 +87,66 @@ class ExpenseCalc {
       cashInvested > 0 ? (annualCashFlow / cashInvested * 100) : null;
 
   Map<String, double> get breakdown => {
-    'Mortgage':            mortgage,
-    'Property Taxes':      propertyTaxes,
-    'Insurance':           insurance,
-    'HOA Fees':            hoaFees,
-    'Property Mgmt':       propertyMgmt,
-    'Maintenance':         maintenance,
-    'Vacancy Loss':        vacancyLoss,
-    'Utilities':           utilities,
-    'Landscaping':         landscaping,
-    'Other':               otherExpenses,
-  };
+        'Mortgage': mortgage,
+        'Property Taxes': propertyTaxes,
+        'Insurance': insurance,
+        'HOA Fees': hoaFees,
+        'Property Mgmt': propertyMgmt,
+        'Maintenance': maintenance,
+        'Vacancy Loss': vacancyLoss,
+        'Utilities': utilities,
+        'Landscaping': landscaping,
+        'Other': otherExpenses,
+      };
 
   Map<String, double> get breakdownES => {
-    'Hipoteca':            mortgage,
-    'Impuestos':           propertyTaxes,
-    'Seguro':              insurance,
-    'HOA':                 hoaFees,
-    'Adm. propiedad':      propertyMgmt,
-    'Mantenimiento':       maintenance,
-    'Vacante':             vacancyLoss,
-    'Servicios':           utilities,
-    'Jardinería':          landscaping,
-    'Otros':               otherExpenses,
-  };
+        'Hipoteca': mortgage,
+        'Impuestos': propertyTaxes,
+        'Seguro': insurance,
+        'HOA': hoaFees,
+        'Adm. propiedad': propertyMgmt,
+        'Mantenimiento': maintenance,
+        'Vacante': vacancyLoss,
+        'Servicios': utilities,
+        'Jardinería': landscaping,
+        'Otros': otherExpenses,
+      };
 
   Map<String, dynamic> toJson() => {
-    'propertyName':  propertyName,
-    'rentIncome':    rentIncome,
-    'mortgage':      mortgage,
-    'propertyTaxes': propertyTaxes,
-    'insurance':     insurance,
-    'hoaFees':       hoaFees,
-    'propertyMgmt':  propertyMgmt,
-    'maintenance':   maintenance,
-    'vacancyLoss':   vacancyLoss,
-    'utilities':     utilities,
-    'landscaping':   landscaping,
-    'otherExpenses': otherExpenses,
-    'savedAt':       savedAt.toIso8601String(),
-    'propertyValue': propertyValue,
-    'cashInvested':  cashInvested,
-  };
+        'propertyName': propertyName,
+        'rentIncome': rentIncome,
+        'mortgage': mortgage,
+        'propertyTaxes': propertyTaxes,
+        'insurance': insurance,
+        'hoaFees': hoaFees,
+        'propertyMgmt': propertyMgmt,
+        'maintenance': maintenance,
+        'vacancyLoss': vacancyLoss,
+        'utilities': utilities,
+        'landscaping': landscaping,
+        'otherExpenses': otherExpenses,
+        'savedAt': savedAt.toIso8601String(),
+        'propertyValue': propertyValue,
+        'cashInvested': cashInvested,
+      };
 
   factory ExpenseCalc.fromJson(Map<String, dynamic> j) => ExpenseCalc(
-    propertyName:  j['propertyName']  as String,
-    rentIncome:    (j['rentIncome']    as num).toDouble(),
-    mortgage:      (j['mortgage']      as num).toDouble(),
-    propertyTaxes: (j['propertyTaxes'] as num).toDouble(),
-    insurance:     (j['insurance']     as num).toDouble(),
-    hoaFees:       (j['hoaFees']       as num).toDouble(),
-    propertyMgmt:  (j['propertyMgmt']  as num).toDouble(),
-    maintenance:   (j['maintenance']   as num).toDouble(),
-    vacancyLoss:   (j['vacancyLoss']   as num).toDouble(),
-    utilities:     (j['utilities']     as num).toDouble(),
-    landscaping:   (j['landscaping']   as num).toDouble(),
-    otherExpenses: (j['otherExpenses'] as num).toDouble(),
-    savedAt:       DateTime.parse(j['savedAt'] as String),
-    propertyValue: (j['propertyValue'] as num?)?.toDouble() ?? 0,
-    cashInvested:  (j['cashInvested']  as num?)?.toDouble() ?? 0,
-  );
+        propertyName: j['propertyName'] as String,
+        rentIncome: (j['rentIncome'] as num).toDouble(),
+        mortgage: (j['mortgage'] as num).toDouble(),
+        propertyTaxes: (j['propertyTaxes'] as num).toDouble(),
+        insurance: (j['insurance'] as num).toDouble(),
+        hoaFees: (j['hoaFees'] as num).toDouble(),
+        propertyMgmt: (j['propertyMgmt'] as num).toDouble(),
+        maintenance: (j['maintenance'] as num).toDouble(),
+        vacancyLoss: (j['vacancyLoss'] as num).toDouble(),
+        utilities: (j['utilities'] as num).toDouble(),
+        landscaping: (j['landscaping'] as num).toDouble(),
+        otherExpenses: (j['otherExpenses'] as num).toDouble(),
+        savedAt: DateTime.parse(j['savedAt'] as String),
+        propertyValue: (j['propertyValue'] as num?)?.toDouble() ?? 0,
+        cashInvested: (j['cashInvested'] as num?)?.toDouble() ?? 0,
+      );
 }
 
 // ── History helpers ───────────────────────────────────────────────────────────
@@ -149,20 +156,32 @@ const _prefKey = 'expense_history_v1';
 Future<List<ExpenseCalc>> loadHistory() async {
   final prefs = await SharedPreferences.getInstance();
   final raw = prefs.getStringList(_prefKey) ?? [];
-  return raw.map((s) {
-    try { return ExpenseCalc.fromJson(jsonDecode(s) as Map<String, dynamic>); }
-    catch (_) { return null; }
-  }).whereType<ExpenseCalc>().toList();
+  return raw
+      .map((s) {
+        try {
+          return ExpenseCalc.fromJson(jsonDecode(s) as Map<String, dynamic>);
+        } catch (_) {
+          return null;
+        }
+      })
+      .whereType<ExpenseCalc>()
+      .toList();
 }
 
 Future<void> saveToHistory(ExpenseCalc calc) async {
-  final prefs  = await SharedPreferences.getInstance();
-  final limit  = freemiumService.historyLimit;
-  final raw    = prefs.getStringList(_prefKey) ?? [];
-  final list   = raw.map((s) {
-    try { return ExpenseCalc.fromJson(jsonDecode(s) as Map<String, dynamic>); }
-    catch (_) { return null; }
-  }).whereType<ExpenseCalc>().toList();
+  final prefs = await SharedPreferences.getInstance();
+  final limit = freemiumService.historyLimit;
+  final raw = prefs.getStringList(_prefKey) ?? [];
+  final list = raw
+      .map((s) {
+        try {
+          return ExpenseCalc.fromJson(jsonDecode(s) as Map<String, dynamic>);
+        } catch (_) {
+          return null;
+        }
+      })
+      .whereType<ExpenseCalc>()
+      .toList();
 
   list.insert(0, calc);
   if (list.length > limit) list.removeRange(limit, list.length);
@@ -185,29 +204,32 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   final _fmt = NumberFormat('#,##0.00', 'en_US');
 
   // Controllers
-  final _nameCtrl  = TextEditingController();
-  final _rentCtrl  = TextEditingController(text: '2000');
-  final _mortCtrl  = TextEditingController(text: '1200');
-  final _taxCtrl   = TextEditingController(text: '200');
-  final _insCtrl   = TextEditingController(text: '150');
-  final _hoaCtrl   = TextEditingController();
-  final _mgmtCtrl  = TextEditingController();
+  final _nameCtrl = TextEditingController();
+  final _rentCtrl = TextEditingController(text: '2000');
+  final _mortCtrl = TextEditingController(text: '1200');
+  final _taxCtrl = TextEditingController(text: '200');
+  final _insCtrl = TextEditingController(text: '150');
+  final _hoaCtrl = TextEditingController();
+  final _mgmtCtrl = TextEditingController();
   final _maintCtrl = TextEditingController();
-  final _vacCtrl   = TextEditingController();
-  final _utilCtrl  = TextEditingController();
-  final _landCtrl  = TextEditingController();
+  final _vacCtrl = TextEditingController();
+  final _utilCtrl = TextEditingController();
+  final _landCtrl = TextEditingController();
   final _otherCtrl = TextEditingController();
 
-  final _valueCtrl  = TextEditingController(); // property value
+  final _valueCtrl = TextEditingController(); // property value
   final _investCtrl = TextEditingController(); // cash invested
 
   // Toggles
-  bool _mgmtIsPercent = true;   // true = % of rent, false = $
-  bool _vacIsPercent  = true;   // vacancy loss % of rent
+  bool _mgmtIsPercent = true; // true = % of rent, false = $
+  bool _vacIsPercent = true; // vacancy loss % of rent
 
   // Computed result
   ExpenseCalc? _result;
   bool _saved = false;
+
+  Timer? _debounce;
+  Timer? _saveDebounce;
 
   @override
   void initState() {
@@ -215,33 +237,62 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     if (widget.preload != null) _populateFrom(widget.preload!);
     for (final c in _allControllers) {
       c.addListener(_clearSaved);
+      c.addListener(_debouncedCalculate);
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) => _debouncedCalculate());
   }
 
   List<TextEditingController> get _allControllers => [
-    _nameCtrl, _rentCtrl, _mortCtrl, _taxCtrl, _insCtrl, _hoaCtrl,
-    _mgmtCtrl, _maintCtrl, _vacCtrl, _utilCtrl, _landCtrl, _otherCtrl,
-    _valueCtrl, _investCtrl,
-  ];
+        _nameCtrl,
+        _rentCtrl,
+        _mortCtrl,
+        _taxCtrl,
+        _insCtrl,
+        _hoaCtrl,
+        _mgmtCtrl,
+        _maintCtrl,
+        _vacCtrl,
+        _utilCtrl,
+        _landCtrl,
+        _otherCtrl,
+        _valueCtrl,
+        _investCtrl,
+      ];
+
+  void _debouncedCalculate() {
+    _debounce?.cancel();
+    _debounce = Timer(AppDuration.page, () {
+      if (!mounted) return;
+      _calculate(isSpanishNotifier.value);
+      _saveDebounce?.cancel();
+      _saveDebounce = Timer(const Duration(milliseconds: 2000), () {
+        if (mounted && _result != null && !_saved)
+          _save(isSpanishNotifier.value);
+      });
+    });
+  }
 
   void _clearSaved() => setState(() => _saved = false);
 
   void _populateFrom(ExpenseCalc c) {
-    _nameCtrl.text  = c.propertyName;
-    _rentCtrl.text  = c.rentIncome    > 0 ? c.rentIncome.toStringAsFixed(2) : '';
-    _mortCtrl.text  = c.mortgage      > 0 ? c.mortgage.toStringAsFixed(2) : '';
-    _taxCtrl.text   = c.propertyTaxes > 0 ? c.propertyTaxes.toStringAsFixed(2) : '';
-    _insCtrl.text   = c.insurance     > 0 ? c.insurance.toStringAsFixed(2) : '';
-    _hoaCtrl.text   = c.hoaFees       > 0 ? c.hoaFees.toStringAsFixed(2) : '';
-    _maintCtrl.text = c.maintenance   > 0 ? c.maintenance.toStringAsFixed(2) : '';
-    _utilCtrl.text  = c.utilities     > 0 ? c.utilities.toStringAsFixed(2) : '';
-    _landCtrl.text  = c.landscaping   > 0 ? c.landscaping.toStringAsFixed(2) : '';
-    _otherCtrl.text = c.otherExpenses > 0 ? c.otherExpenses.toStringAsFixed(2) : '';
+    _nameCtrl.text = c.propertyName;
+    _rentCtrl.text = c.rentIncome > 0 ? c.rentIncome.toStringAsFixed(2) : '';
+    _mortCtrl.text = c.mortgage > 0 ? c.mortgage.toStringAsFixed(2) : '';
+    _taxCtrl.text =
+        c.propertyTaxes > 0 ? c.propertyTaxes.toStringAsFixed(2) : '';
+    _insCtrl.text = c.insurance > 0 ? c.insurance.toStringAsFixed(2) : '';
+    _hoaCtrl.text = c.hoaFees > 0 ? c.hoaFees.toStringAsFixed(2) : '';
+    _maintCtrl.text = c.maintenance > 0 ? c.maintenance.toStringAsFixed(2) : '';
+    _utilCtrl.text = c.utilities > 0 ? c.utilities.toStringAsFixed(2) : '';
+    _landCtrl.text = c.landscaping > 0 ? c.landscaping.toStringAsFixed(2) : '';
+    _otherCtrl.text =
+        c.otherExpenses > 0 ? c.otherExpenses.toStringAsFixed(2) : '';
     // For loaded entries, always show raw $ values for mgmt & vacancy
     _mgmtIsPercent = false;
-    _vacIsPercent  = false;
-    _mgmtCtrl.text = c.propertyMgmt > 0 ? c.propertyMgmt.toStringAsFixed(2) : '';
-    _vacCtrl.text  = c.vacancyLoss  > 0 ? c.vacancyLoss.toStringAsFixed(2) : '';
+    _vacIsPercent = false;
+    _mgmtCtrl.text =
+        c.propertyMgmt > 0 ? c.propertyMgmt.toStringAsFixed(2) : '';
+    _vacCtrl.text = c.vacancyLoss > 0 ? c.vacancyLoss.toStringAsFixed(2) : '';
   }
 
   bool get _canCalculate => _parseD(_rentCtrl) > 0;
@@ -256,15 +307,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Future<void> _calculate(bool isSpanish) async {
-    final rent     = _parseD(_rentCtrl);
+    final rent = _parseD(_rentCtrl);
     final mortgage = _parseD(_mortCtrl);
-    final taxes    = _parseD(_taxCtrl);
-    final ins      = _parseD(_insCtrl);
-    final hoa      = _parseD(_hoaCtrl);
+    final taxes = _parseD(_taxCtrl);
+    final ins = _parseD(_insCtrl);
+    final hoa = _parseD(_hoaCtrl);
     final maintenance = _parseD(_maintCtrl);
-    final utilities   = _parseD(_utilCtrl);
+    final utilities = _parseD(_utilCtrl);
     final landscaping = _parseD(_landCtrl);
-    final other       = _parseD(_otherCtrl);
+    final other = _parseD(_otherCtrl);
 
     final mgmtRaw = _parseD(_mgmtCtrl);
     final mgmtDollar = _mgmtIsPercent ? (rent * mgmtRaw / 100) : mgmtRaw;
@@ -273,46 +324,47 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     final vacDollar = _vacIsPercent ? (rent * vacRaw / 100) : vacRaw;
 
     final calc = ExpenseCalc(
-      propertyName:  _nameCtrl.text.trim().isEmpty
+      propertyName: _nameCtrl.text.trim().isEmpty
           ? (isSpanish ? 'Mi Propiedad' : 'My Property')
           : _nameCtrl.text.trim(),
-      rentIncome:    rent,
-      mortgage:      mortgage,
+      rentIncome: rent,
+      mortgage: mortgage,
       propertyTaxes: taxes,
-      insurance:     ins,
-      hoaFees:       hoa,
-      propertyMgmt:  mgmtDollar,
-      maintenance:   maintenance,
-      vacancyLoss:   vacDollar,
-      utilities:     utilities,
-      landscaping:   landscaping,
+      insurance: ins,
+      hoaFees: hoa,
+      propertyMgmt: mgmtDollar,
+      maintenance: maintenance,
+      vacancyLoss: vacDollar,
+      utilities: utilities,
+      landscaping: landscaping,
       otherExpenses: other,
-      savedAt:       DateTime.now(),
+      savedAt: DateTime.now(),
       propertyValue: _parseD(_valueCtrl),
-      cashInvested:  _parseD(_investCtrl),
+      cashInvested: _parseD(_investCtrl),
     );
 
     setState(() {
       _result = calc;
-      _saved  = false;
+      _saved = false;
     });
 
-    AdService.instance.onCalculation();
+    adService.onAction();
     final trigger = await paywallSession.recordAction();
     if (trigger != PaywallTrigger.none && mounted) PaywallHard.show(context);
   }
 
   Future<void> _save(bool isSpanish) async {
     if (_result == null) return;
-    final isPremium = freemiumService.isPremium;
-    final history   = await loadHistory();
-    if (!isPremium && history.length >= MonetizationConfig.freeCalculationLimit) {
+    final isPremium = freemiumService.hasFullAccess;
+    final history = await loadHistory();
+    if (!isPremium &&
+        history.length >= MonetizationConfig.freeCalculationLimit) {
       if (mounted) PaywallHard.show(context);
       return;
     }
     HapticFeedback.mediumImpact();
     await saveToHistory(_result!);
-    ReviewService.instance.requestAfterSave();
+    adService.onSave();
     if (mounted) setState(() => _saved = true);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -322,8 +374,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     }
   }
 
-  void _share(bool isSpanish) {
+  Future<void> _share(bool isSpanish) async {
     if (_result == null) return;
+    HapticFeedback.lightImpact();
     final c = _result!;
     final cf = c.monthlyCashFlow;
     final lines = <String>[
@@ -359,16 +412,42 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           ? 'Calculado con Rental Expenses Tracker'
           : 'Calculated with Rental Expenses Tracker',
     ];
-    Share.share(lines.join('\n'));
+    try {
+      await Share.share(lines.join('\n'));
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                isSpanish ? 'Compartido con éxito' : 'Shared successfully'),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(isSpanish ? 'Error al compartir' : 'Share failed'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 
   void _reset() {
     for (final c in _allControllers) c.clear();
-    setState(() { _result = null; _saved = false; });
+    setState(() {
+      _result = null;
+      _saved = false;
+    });
   }
 
   @override
   void dispose() {
+    _debounce?.cancel();
+    _saveDebounce?.cancel();
     for (final c in _allControllers) c.dispose();
     super.dispose();
   }
@@ -380,316 +459,452 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       builder: (_, isSpanish, __) {
         return Scaffold(
           appBar: AppBar(
-            title: Text(isSpanish
-                ? 'Gastos de Alquiler'
-                : 'Rental Expenses'),
+            title: Text(isSpanish ? 'Gastos de Alquiler' : 'Rental Expenses'),
             actions: [
-              // Premium badge
-              ValueListenableBuilder<bool>(
-                valueListenable: freemiumService.isPremiumNotifier,
-                builder: (_, isPremium, __) {
-                  if (isPremium) {
-                    return const Padding(
-                      padding: EdgeInsets.only(right: 4),
-                      child: Icon(Icons.verified_rounded,
-                          color: Colors.amber, size: 22),
-                    );
-                  }
-                  return IconButton(
-                    icon: const Icon(Icons.star_outline, color: Colors.amber),
-                    tooltip: isSpanish ? 'Obtener Premium' : 'Go Premium',
-                    onPressed: () => IAPService.instance.buy(),
-                  );
-                },
-              ),
               IconButton(
                 icon: const Icon(Icons.refresh_rounded),
                 tooltip: isSpanish ? 'Reiniciar' : 'Reset',
                 onPressed: _reset,
               ),
+              CalcwiseAppBarActions(
+                freemium: freemiumService,
+                session: paywallSession,
+                onSettings: () => Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (_, __, ___) => const SettingsScreen(),
+                    transitionsBuilder: (_, anim, __, child) =>
+                        FadeTransition(opacity: anim, child: child),
+                    transitionDuration: AppDuration.base,
+                  ),
+                ),
+                onRewardAd: () => CalcwiseRewardAdSheet.show(context),
+              ),
             ],
           ),
-          body: Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 600),
-                      child: CalcwisePageEntrance(child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                    // ── Property Setup ──────────────────────────────────
-                    _SectionLabel(isSpanish ? 'Información de la Propiedad' : 'Property Setup'),
-                    _buildCard([
-                      _TextField(
-                        ctrl: _nameCtrl,
-                        label: isSpanish ? 'Nombre de la propiedad' : 'Property Name',
-                        hint: isSpanish ? 'Ej: Casa Principal' : 'e.g. Main St Duplex',
-                        isNumeric: false,
-                        prefix: null,
-                      ),
-                      const SizedBox(height: 12),
-                      _TextField(
-                        ctrl: _rentCtrl,
-                        label: isSpanish ? 'Ingreso mensual de alquiler' : 'Monthly Rent Income',
-                        hint: '0.00',
-                        isNumeric: true,
-                        prefix: '\$',
-                      ),
-                      const SizedBox(height: 12),
-                      Divider(height: 1, color: CalcwiseTheme.of(context).cardBorder),
-                      const SizedBox(height: 12),
-                      // ── Investor Metrics inputs (optional) ──────────
-                      Row(children: [
-                        const Icon(Icons.analytics_outlined,
-                            size: 14, color: AppTheme.primary),
-                        const SizedBox(width: 6),
-                        Text(
-                          isSpanish
-                              ? 'Métricas de inversión (opcional)'
-                              : 'Investment Metrics (optional)',
-                          style: const TextStyle(
-                              fontSize: 12,
-                              color: AppTheme.primary,
-                              fontWeight: FontWeight.w600),
-                        ),
-                      ]),
-                      const SizedBox(height: 10),
-                      _TextField(
-                        ctrl: _valueCtrl,
-                        label: isSpanish
-                            ? 'Valor de la propiedad (\$)'
-                            : 'Property Value (\$)',
-                        hint: isSpanish ? 'Precio de compra o mercado' : 'Purchase price or market value',
-                        isNumeric: true,
-                        prefix: '\$',
-                      ),
-                      const SizedBox(height: 12),
-                      _TextField(
-                        ctrl: _investCtrl,
-                        label: isSpanish
-                            ? 'Capital invertido (\$)'
-                            : 'Cash Invested (\$)',
-                        hint: isSpanish ? 'Entrada + costos + reformas' : 'Down payment + closing costs + rehab',
-                        isNumeric: true,
-                        prefix: '\$',
-                      ),
-                    ]),
-                    const SizedBox(height: 20),
-
-                    // ── Expense Categories ──────────────────────────────
-                    _SectionLabel(isSpanish ? 'Gastos Mensuales' : 'Monthly Expenses'),
-                    _buildCard([
-                      _TextField(
-                        ctrl: _mortCtrl,
-                        label: isSpanish ? 'Pago de hipoteca' : 'Mortgage Payment',
-                        hint: '0.00',
-                        isNumeric: true,
-                        prefix: '\$',
-                      ),
-                      const SizedBox(height: 12),
-                      _TextField(
-                        ctrl: _taxCtrl,
-                        label: isSpanish
-                            ? 'Impuestos de propiedad (anual ÷ 12)'
-                            : 'Property Taxes (annual ÷ 12)',
-                        hint: '0.00',
-                        isNumeric: true,
-                        prefix: '\$',
-                      ),
-                      const SizedBox(height: 12),
-                      _TextField(
-                        ctrl: _insCtrl,
-                        label: isSpanish ? 'Seguro de propietario' : 'Homeowner\'s Insurance',
-                        hint: '0.00',
-                        isNumeric: true,
-                        prefix: '\$',
-                      ),
-                      const SizedBox(height: 12),
-                      _TextField(
-                        ctrl: _hoaCtrl,
-                        label: isSpanish ? 'Cuotas HOA' : 'HOA Fees',
-                        hint: '0.00',
-                        isNumeric: true,
-                        prefix: '\$',
-                      ),
-                    ]),
-                    const SizedBox(height: 12),
-
-                    // Property Mgmt toggle card
-                    _buildCard([
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              isSpanish
-                                  ? 'Adm. de propiedad'
-                                  : 'Property Management',
-                              style: TextStyle(
-                                  fontSize: 13, color: CalcwiseTheme.of(context).textSecondary),
-                            ),
-                          ),
-                          _ToggleChip(
-                            labelA: '%',
-                            labelB: '\$',
-                            isA: _mgmtIsPercent,
-                            onChanged: (v) =>
-                                setState(() => _mgmtIsPercent = v),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      _TextField(
-                        ctrl: _mgmtCtrl,
-                        label: _mgmtIsPercent
-                            ? (isSpanish ? '% del alquiler' : '% of rent')
-                            : (isSpanish ? 'Cantidad mensual' : 'Monthly amount'),
-                        hint: '0.00',
-                        isNumeric: true,
-                        prefix: _mgmtIsPercent ? null : '\$',
-                        suffix: _mgmtIsPercent ? '%' : null,
-                      ),
-                    ]),
-                    const SizedBox(height: 12),
-
-                    _buildCard([
-                      _TextField(
-                        ctrl: _maintCtrl,
-                        label: isSpanish ? 'Mantenimiento / Reparaciones' : 'Maintenance / Repairs',
-                        hint: '0.00',
-                        isNumeric: true,
-                        prefix: '\$',
-                      ),
-                      const SizedBox(height: 12),
-                      // Vacancy toggle
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              isSpanish ? 'Pérdida por vacante' : 'Vacancy Loss',
-                              style: TextStyle(
-                                  fontSize: 13, color: CalcwiseTheme.of(context).textSecondary),
-                            ),
-                          ),
-                          _ToggleChip(
-                            labelA: '%',
-                            labelB: '\$',
-                            isA: _vacIsPercent,
-                            onChanged: (v) =>
-                                setState(() => _vacIsPercent = v),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      _TextField(
-                        ctrl: _vacCtrl,
-                        label: _vacIsPercent
-                            ? (isSpanish ? '% del alquiler' : '% of rent')
-                            : (isSpanish ? 'Pérdida mensual (\$)' : 'Monthly loss (\$)'),
-                        hint: '0.00',
-                        isNumeric: true,
-                        prefix: _vacIsPercent ? null : '\$',
-                        suffix: _vacIsPercent ? '%' : null,
-                      ),
-                      const SizedBox(height: 12),
-                      _TextField(
-                        ctrl: _utilCtrl,
-                        label: isSpanish ? 'Servicios públicos' : 'Utilities',
-                        hint: '0.00',
-                        isNumeric: true,
-                        prefix: '\$',
-                      ),
-                      const SizedBox(height: 12),
-                      _TextField(
-                        ctrl: _landCtrl,
-                        label: isSpanish ? 'Jardinería / Paisajismo' : 'Landscaping',
-                        hint: '0.00',
-                        isNumeric: true,
-                        prefix: '\$',
-                      ),
-                      const SizedBox(height: 12),
-                      _TextField(
-                        ctrl: _otherCtrl,
-                        label: isSpanish ? 'Otros gastos' : 'Other Expenses',
-                        hint: '0.00',
-                        isNumeric: true,
-                        prefix: '\$',
-                      ),
-                    ]),
-                    const SizedBox(height: 20),
-
-                    // ── Calculate button ────────────────────────────────
-                    Opacity(
-                      opacity: _canCalculate ? 1.0 : 0.45,
-                      child: ElevatedButton.icon(
-                        onPressed: _canCalculate ? () async { await _calculate(isSpanish); } : null,
-                        icon: const Icon(Icons.calculate_rounded),
-                        label: Text(
-                          isSpanish ? 'Calcular Gastos' : 'Calculate Expenses',
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // ── Results ─────────────────────────────────────────
-                    if (_result != null) ...[
-                      _ResultsSection(
-                        calc: _result!,
-                        fmt: _fmt,
-                        isSpanish: isSpanish,
-                      ),
-                      const SizedBox(height: 12),
-                      InsightCard(
-                        insights: InsightEngine.generate(
-                          monthlyRent: _result!.rentIncome,
-                          totalMonthlyExpenses: _result!.totalExpenses,
-                          monthlyCashFlow: _result!.monthlyCashFlow,
-                          expenseRatioPct: _result!.expenseRatio,
-                          vacancyLoss: _result!.vacancyLoss,
-                          capRate: _result!.capRate,
-                          isSpanish: isSpanish,
-                        ),
-                        isSpanish: isSpanish,
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: _saved ? null : () => _save(isSpanish),
-                              icon: Icon(_saved
-                                  ? Icons.check_circle_rounded
-                                  : Icons.save_rounded),
-                              label: Text(_saved
-                                  ? (isSpanish ? 'Guardado' : 'Saved')
-                                  : (isSpanish ? 'Guardar' : 'Save')),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    _saved ? AppTheme.success : AppTheme.primary,
+          body: GestureDetector(
+            onTap: () => FocusScope.of(context).unfocus(),
+            child: Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 600),
+                        child: CalcwisePageEntrance(
+                            child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // ── Property Setup ──────────────────────────────────
+                            _SectionLabel(isSpanish
+                                ? 'Información de la Propiedad'
+                                : 'Property Setup'),
+                            _buildCard([
+                              _TextField(
+                                ctrl: _nameCtrl,
+                                label: isSpanish
+                                    ? 'Nombre de la propiedad'
+                                    : 'Property Name',
+                                hint: isSpanish
+                                    ? 'Ej: Casa Principal'
+                                    : 'e.g. Main St Duplex',
+                                isNumeric: false,
+                                prefix: null,
                               ),
+                              const SizedBox(height: 12),
+                              _TextField(
+                                ctrl: _rentCtrl,
+                                label: isSpanish
+                                    ? 'Ingreso mensual de alquiler'
+                                    : 'Monthly Rent Income',
+                                hint: '0.00',
+                                isNumeric: true,
+                                isCurrency: true,
+                                prefix: '\$',
+                                validator: (v) {
+                                  if (v == null || v.trim().isEmpty) {
+                                    return isSpanish ? 'Requerido' : 'Required';
+                                  }
+                                  final n =
+                                      double.tryParse(v.replaceAll(',', '')) ??
+                                          0;
+                                  if (n <= 0)
+                                    return isSpanish
+                                        ? 'Debe ser > 0'
+                                        : 'Must be > 0';
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 12),
+                              Divider(
+                                  height: 1,
+                                  color: CalcwiseTheme.of(context).cardBorder),
+                              const SizedBox(height: 12),
+                              // ── Investor Metrics inputs (optional) ──────────
+                              Row(children: [
+                                const Icon(Icons.analytics_rounded,
+                                    size: 14, color: AppTheme.primary),
+                                const SizedBox(width: 6),
+                                Text(
+                                  isSpanish
+                                      ? 'Métricas de inversión (opcional)'
+                                      : 'Investment Metrics (optional)',
+                                  style: const TextStyle(
+                                      fontSize: AppTextSize.sm,
+                                      color: AppTheme.primary,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                              ]),
+                              const SizedBox(height: 8),
+                              _TextField(
+                                ctrl: _valueCtrl,
+                                label: isSpanish
+                                    ? 'Valor de la propiedad (\$)'
+                                    : 'Property Value (\$)',
+                                hint: isSpanish
+                                    ? 'Precio de compra o mercado'
+                                    : 'Purchase price or market value',
+                                isNumeric: true,
+                                isCurrency: true,
+                                prefix: '\$',
+                              ),
+                              const SizedBox(height: 12),
+                              _TextField(
+                                ctrl: _investCtrl,
+                                label: isSpanish
+                                    ? 'Capital invertido (\$)'
+                                    : 'Cash Invested (\$)',
+                                hint: isSpanish
+                                    ? 'Entrada + costos + reformas'
+                                    : 'Down payment + closing costs + rehab',
+                                isNumeric: true,
+                                isCurrency: true,
+                                prefix: '\$',
+                              ),
+                            ]),
+                            const SizedBox(height: 24),
+
+                            // ── Expense Categories ──────────────────────────────
+                            _SectionLabel(isSpanish
+                                ? 'Gastos Mensuales'
+                                : 'Monthly Expenses'),
+                            _buildCard([
+                              _TextField(
+                                ctrl: _mortCtrl,
+                                label: isSpanish
+                                    ? 'Pago de hipoteca'
+                                    : 'Mortgage Payment',
+                                hint: '0.00',
+                                isNumeric: true,
+                                isCurrency: true,
+                                prefix: '\$',
+                              ),
+                              const SizedBox(height: 12),
+                              _TextField(
+                                ctrl: _taxCtrl,
+                                label: isSpanish
+                                    ? 'Impuestos de propiedad (anual ÷ 12)'
+                                    : 'Property Taxes (annual ÷ 12)',
+                                hint: '0.00',
+                                isNumeric: true,
+                                isCurrency: true,
+                                prefix: '\$',
+                              ),
+                              const SizedBox(height: 12),
+                              _TextField(
+                                ctrl: _insCtrl,
+                                label: isSpanish
+                                    ? 'Seguro de propietario'
+                                    : 'Homeowner\'s Insurance',
+                                hint: '0.00',
+                                isNumeric: true,
+                                isCurrency: true,
+                                prefix: '\$',
+                              ),
+                              const SizedBox(height: 12),
+                              _TextField(
+                                ctrl: _hoaCtrl,
+                                label: isSpanish ? 'Cuotas HOA' : 'HOA Fees',
+                                hint: '0.00',
+                                isNumeric: true,
+                                isCurrency: true,
+                                prefix: '\$',
+                              ),
+                            ]),
+                            const SizedBox(height: 12),
+
+                            // Property Mgmt toggle card
+                            _buildCard([
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      isSpanish
+                                          ? 'Adm. de propiedad'
+                                          : 'Property Management',
+                                      style: TextStyle(
+                                          fontSize: AppTextSize.md,
+                                          color: CalcwiseTheme.of(context)
+                                              .textSecondary),
+                                    ),
+                                  ),
+                                  _ToggleChip(
+                                    labelA: '%',
+                                    labelB: '\$',
+                                    isA: _mgmtIsPercent,
+                                    onChanged: (v) =>
+                                        setState(() => _mgmtIsPercent = v),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              _TextField(
+                                ctrl: _mgmtCtrl,
+                                label: _mgmtIsPercent
+                                    ? (isSpanish
+                                        ? '% del alquiler'
+                                        : '% of rent')
+                                    : (isSpanish
+                                        ? 'Cantidad mensual'
+                                        : 'Monthly amount'),
+                                hint: '0.00',
+                                isNumeric: true,
+                                isCurrency: !_mgmtIsPercent,
+                                prefix: _mgmtIsPercent ? null : '\$',
+                                suffix: _mgmtIsPercent ? '%' : null,
+                              ),
+                            ]),
+                            const SizedBox(height: 12),
+
+                            _buildCard([
+                              _TextField(
+                                ctrl: _maintCtrl,
+                                label: isSpanish
+                                    ? 'Mantenimiento / Reparaciones'
+                                    : 'Maintenance / Repairs',
+                                hint: '0.00',
+                                isNumeric: true,
+                                isCurrency: true,
+                                prefix: '\$',
+                              ),
+                              const SizedBox(height: 12),
+                              // Vacancy toggle
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      isSpanish
+                                          ? 'Pérdida por vacante'
+                                          : 'Vacancy Loss',
+                                      style: TextStyle(
+                                          fontSize: AppTextSize.md,
+                                          color: CalcwiseTheme.of(context)
+                                              .textSecondary),
+                                    ),
+                                  ),
+                                  _ToggleChip(
+                                    labelA: '%',
+                                    labelB: '\$',
+                                    isA: _vacIsPercent,
+                                    onChanged: (v) =>
+                                        setState(() => _vacIsPercent = v),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              _TextField(
+                                ctrl: _vacCtrl,
+                                label: _vacIsPercent
+                                    ? (isSpanish
+                                        ? '% del alquiler'
+                                        : '% of rent')
+                                    : (isSpanish
+                                        ? 'Pérdida mensual (\$)'
+                                        : 'Monthly loss (\$)'),
+                                hint: '0.00',
+                                isNumeric: true,
+                                isCurrency: !_vacIsPercent,
+                                prefix: _vacIsPercent ? null : '\$',
+                                suffix: _vacIsPercent ? '%' : null,
+                              ),
+                              const SizedBox(height: 12),
+                              _TextField(
+                                ctrl: _utilCtrl,
+                                label: isSpanish
+                                    ? 'Servicios públicos'
+                                    : 'Utilities',
+                                hint: '0.00',
+                                isNumeric: true,
+                                isCurrency: true,
+                                prefix: '\$',
+                              ),
+                              const SizedBox(height: 12),
+                              _TextField(
+                                ctrl: _landCtrl,
+                                label: isSpanish
+                                    ? 'Jardinería / Paisajismo'
+                                    : 'Landscaping',
+                                hint: '0.00',
+                                isNumeric: true,
+                                isCurrency: true,
+                                prefix: '\$',
+                              ),
+                              const SizedBox(height: 12),
+                              _TextField(
+                                ctrl: _otherCtrl,
+                                label: isSpanish
+                                    ? 'Otros gastos'
+                                    : 'Other Expenses',
+                                hint: '0.00',
+                                isNumeric: true,
+                                isCurrency: true,
+                                prefix: '\$',
+                              ),
+                            ]),
+                            const SizedBox(height: 24),
+
+                            // ── Optional recalculate (non-blocking) ─────────────
+                            if (_result != null)
+                              OutlinedButton.icon(
+                                onPressed: _debouncedCalculate,
+                                icon:
+                                    const Icon(Icons.refresh_rounded, size: 18),
+                                label: Text(
+                                    isSpanish ? 'Recalcular' : 'Recalculate'),
+                              ),
+                            const SizedBox(height: 24),
+
+                            // ── Empty state ─────────────────────────────────────
+                            if (_result == null)
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 24),
+                                child: Column(
+                                  children: [
+                                    Icon(Icons.home_work_rounded,
+                                        size: 48,
+                                        color: CalcwiseTheme.of(context)
+                                            .textSecondary
+                                            .withValues(alpha: 0.4)),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      isSpanish
+                                          ? 'Ingresa tus gastos arriba para ver los resultados'
+                                          : 'Enter your expenses above to see results',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                          fontSize: AppTextSize.body,
+                                          color: CalcwiseTheme.of(context)
+                                              .textSecondary),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                            // ── Results ─────────────────────────────────────────
+                            AnimatedSwitcher(
+                              duration: AppDuration.base,
+                              transitionBuilder: (child, anim) =>
+                                  FadeTransition(
+                                opacity: anim,
+                                child: SlideTransition(
+                                  position: Tween<Offset>(
+                                    begin: const Offset(0, 0.04),
+                                    end: Offset.zero,
+                                  ).animate(CurvedAnimation(
+                                      parent: anim, curve: Curves.easeOut)),
+                                  child: child,
+                                ),
+                              ),
+                              child: _result != null
+                                  ? KeyedSubtree(
+                                      key: const ValueKey('results'),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.stretch,
+                                        children: [
+                                          _ResultsSection(
+                                            calc: _result!,
+                                            fmt: _fmt,
+                                            isSpanish: isSpanish,
+                                          ),
+                                          const SizedBox(height: 12),
+                                          InsightCard(
+                                            insights: InsightEngine.generate(
+                                              monthlyRent: _result!.rentIncome,
+                                              totalMonthlyExpenses:
+                                                  _result!.totalExpenses,
+                                              monthlyCashFlow:
+                                                  _result!.monthlyCashFlow,
+                                              expenseRatioPct:
+                                                  _result!.expenseRatio,
+                                              vacancyLoss: _result!.vacancyLoss,
+                                              capRate: _result!.capRate,
+                                              isSpanish: isSpanish,
+                                            ),
+                                            isSpanish: isSpanish,
+                                          ),
+                                          const SizedBox(height: 16),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: ElevatedButton.icon(
+                                                  onPressed: _saved
+                                                      ? null
+                                                      : () => _save(isSpanish),
+                                                  icon: Icon(_saved
+                                                      ? Icons
+                                                          .check_circle_rounded
+                                                      : Icons.save_rounded),
+                                                  label: Text(_saved
+                                                      ? (isSpanish
+                                                          ? 'Guardado'
+                                                          : 'Saved')
+                                                      : (isSpanish
+                                                          ? 'Guardar'
+                                                          : 'Save')),
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                    backgroundColor: _saved
+                                                        ? AppTheme.success
+                                                        : AppTheme.primary,
+                                                    minimumSize:
+                                                        const Size(0, 44),
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              OutlinedButton.icon(
+                                                onPressed: () =>
+                                                    _share(isSpanish),
+                                                icon: const Icon(
+                                                    Icons.share_rounded),
+                                                label: Text(isSpanish
+                                                    ? 'Compartir'
+                                                    : 'Share'),
+                                                style: OutlinedButton.styleFrom(
+                                                    minimumSize:
+                                                        const Size(0, 44)),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 24),
+                                        ],
+                                      ),
+                                    )
+                                  : const SizedBox.shrink(
+                                      key: ValueKey('empty')),
                             ),
-                          ),
-                          const SizedBox(width: 10),
-                          OutlinedButton.icon(
-                            onPressed: () => _share(isSpanish),
-                            icon: const Icon(Icons.share_outlined),
-                            label: Text(isSpanish ? 'Compartir' : 'Share'),
-                          ),
-                        ],
+                          ],
+                        )), // CalcwisePageEntrance closes
                       ),
-                      const SizedBox(height: 24),
-                    ],
-                  ],
-                      )),  // CalcwisePageEntrance closes
                     ),
                   ),
                 ),
-              ),
-              const AdFooter(),
-            ],
+                const CalcwiseAdFooter(),
+              ],
+            ),
           ),
         );
       },
@@ -697,8 +912,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Widget _buildCard(List<Widget> children) => Card(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.xl)),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: children,
@@ -733,7 +950,7 @@ class _ResultsSection extends StatelessWidget {
         // Summary cards
         Card(
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
               children: [
                 _ResultRow(
@@ -743,28 +960,37 @@ class _ResultsSection extends StatelessWidget {
                   value: '\$${fmt.format(calc.totalExpenses)}',
                   bold: true,
                 ),
-                Divider(height: 24, color: CalcwiseTheme.of(context).cardBorder),
-                _ResultRow(
-                  label: isSpanish
-                      ? 'Flujo de caja mensual'
-                      : 'Monthly Cash Flow',
-                  value: '${cf < 0 ? '-' : ''}\$${fmt.format(cf.abs())}',
-                  valueColor: cfColor,
-                  bold: true,
+                Divider(
+                    height: 24, color: CalcwiseTheme.of(context).cardBorder),
+                // Hero number — monthly cash flow
+                Text(
+                  isSpanish ? 'Flujo de caja mensual' : 'Monthly Cash Flow',
+                  style: TextStyle(
+                    fontSize: AppTextSize.sm,
+                    color: CalcwiseTheme.of(context).textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${cf < 0 ? '-' : ''}\$${fmt.format(cf.abs())}',
+                  style: TextStyle(
+                    fontSize: AppTextSize.hero,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -1.5,
+                    color: cfColor,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 _ResultRow(
-                  label: isSpanish
-                      ? 'Flujo de caja anual'
-                      : 'Annual Cash Flow',
-                  value: '${calc.annualCashFlow < 0 ? '-' : ''}\$${fmt.format(calc.annualCashFlow.abs())}',
+                  label: isSpanish ? 'Flujo de caja anual' : 'Annual Cash Flow',
+                  value:
+                      '${calc.annualCashFlow < 0 ? '-' : ''}\$${fmt.format(calc.annualCashFlow.abs())}',
                   valueColor: cfColor,
                 ),
                 const SizedBox(height: 8),
                 _ResultRow(
-                  label: isSpanish
-                      ? 'Ratio de gastos'
-                      : 'Expense Ratio',
+                  label: isSpanish ? 'Ratio de gastos' : 'Expense Ratio',
                   value: '${calc.expenseRatio.toStringAsFixed(1)}%',
                 ),
                 const SizedBox(height: 8),
@@ -780,7 +1006,8 @@ class _ResultsSection extends StatelessWidget {
                       ? 'Ingreso operativo neto (NOI anual)'
                       : 'Net Operating Income (Annual NOI)',
                   value: '\$${fmt.format(calc.noi)}',
-                  valueColor: calc.noi >= 0 ? AppTheme.success : AppTheme.dangerRed,
+                  valueColor:
+                      calc.noi >= 0 ? AppTheme.success : AppTheme.dangerRed,
                 ),
               ],
             ),
@@ -791,10 +1018,11 @@ class _ResultsSection extends StatelessWidget {
         // ── Investor Metrics card (Cap Rate, Yield, CoC ROI) ─────────
         if (calc.capRate != null || calc.cocRoi != null) ...[
           const SizedBox(height: 16),
-          _SectionLabel(isSpanish ? 'Métricas de Inversión' : 'Investment Metrics'),
+          _SectionLabel(
+              isSpanish ? 'Métricas de Inversión' : 'Investment Metrics'),
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(AppSpacing.lg),
               child: Column(children: [
                 if (calc.capRate != null) ...[
                   _InvestorMetricRow(
@@ -839,12 +1067,15 @@ class _ResultsSection extends StatelessWidget {
                   ),
                 ],
                 const SizedBox(height: 8),
-                Divider(height: 12, color: CalcwiseTheme.of(context).cardBorder),
+                Divider(
+                    height: 12, color: CalcwiseTheme.of(context).cardBorder),
                 Text(
                   isSpanish
                       ? 'Cap Rate > 6% = bueno  •  CoC ROI > 8% = excelente'
                       : 'Cap Rate > 6% = good  •  CoC ROI > 8% = excellent',
-                  style: TextStyle(fontSize: 10, color: CalcwiseTheme.of(context).textSecondary),
+                  style: TextStyle(
+                      fontSize: 10,
+                      color: CalcwiseTheme.of(context).textSecondary),
                   textAlign: TextAlign.center,
                 ),
               ]),
@@ -859,7 +1090,7 @@ class _ResultsSection extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
           decoration: BoxDecoration(
             color: cfColor.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(AppRadius.xl),
             border: Border.all(color: cfColor.withValues(alpha: 0.3)),
           ),
           child: Row(
@@ -872,7 +1103,7 @@ class _ResultsSection extends StatelessWidget {
                 color: cfColor,
                 size: 22,
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               Text(
                 cf >= 0
                     ? (isSpanish
@@ -884,7 +1115,7 @@ class _ResultsSection extends StatelessWidget {
                 style: TextStyle(
                     color: cfColor,
                     fontWeight: FontWeight.w600,
-                    fontSize: 13),
+                    fontSize: AppTextSize.md),
               ),
             ],
           ),
@@ -892,11 +1123,10 @@ class _ResultsSection extends StatelessWidget {
         const SizedBox(height: 16),
 
         // Expense breakdown
-        _SectionLabel(
-            isSpanish ? 'Desglose de Gastos' : 'Expense Breakdown'),
+        _SectionLabel(isSpanish ? 'Desglose de Gastos' : 'Expense Breakdown'),
         Card(
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSpacing.lg),
             child: _BreakdownList(calc: calc, fmt: fmt, isSpanish: isSpanish),
           ),
         ),
@@ -920,7 +1150,8 @@ class _BreakdownList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final entries = (isSpanish ? calc.breakdownES : calc.breakdown).entries
+    final entries = (isSpanish ? calc.breakdownES : calc.breakdown)
+        .entries
         .where((e) => e.value > 0)
         .toList()
       ..sort((a, b) => b.value.compareTo(a.value));
@@ -936,7 +1167,7 @@ class _BreakdownList extends StatelessWidget {
     return Column(
       children: [
         for (var i = 0; i < entries.length; i++) ...[
-          if (i > 0) const SizedBox(height: 10),
+          if (i > 0) const SizedBox(height: 8),
           _BreakdownRow(
             label: entries[i].key,
             amount: entries[i].value,
@@ -979,13 +1210,13 @@ class _BreakdownRow extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: Text(label,
-                  style: const TextStyle(fontSize: 13)),
+              child:
+                  Text(label, style: const TextStyle(fontSize: AppTextSize.md)),
             ),
             Text(
               '\$${fmt.format(amount)}',
               style: const TextStyle(
-                  fontSize: 13, fontWeight: FontWeight.w600),
+                  fontSize: AppTextSize.md, fontWeight: FontWeight.w600),
             ),
             const SizedBox(width: 8),
             SizedBox(
@@ -994,14 +1225,15 @@ class _BreakdownRow extends StatelessWidget {
                 '${pct.toStringAsFixed(1)}%',
                 textAlign: TextAlign.end,
                 style: TextStyle(
-                    fontSize: 12, color: CalcwiseTheme.of(context).textSecondary),
+                    fontSize: AppTextSize.sm,
+                    color: CalcwiseTheme.of(context).textSecondary),
               ),
             ),
           ],
         ),
         const SizedBox(height: 4),
         ClipRRect(
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(AppRadius.xs),
           child: LinearProgressIndicator(
             value: pct / 100,
             minHeight: 5,
@@ -1026,7 +1258,7 @@ class _SectionLabel extends StatelessWidget {
         child: Text(
           label.toUpperCase(),
           style: TextStyle(
-              fontSize: 12,
+              fontSize: AppTextSize.sm,
               fontWeight: FontWeight.bold,
               color: CalcwiseTheme.of(context).textSecondary,
               letterSpacing: 0.6),
@@ -1041,6 +1273,8 @@ class _TextField extends StatelessWidget {
   final bool isNumeric;
   final String? prefix;
   final String? suffix;
+  final bool isCurrency;
+  final String? Function(String?)? validator;
 
   const _TextField({
     required this.ctrl,
@@ -1049,22 +1283,37 @@ class _TextField extends StatelessWidget {
     required this.isNumeric,
     this.prefix,
     this.suffix,
+    this.isCurrency = false,
+    this.validator,
   });
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
+    return TextFormField(
       controller: ctrl,
       keyboardType: isNumeric
           ? const TextInputType.numberWithOptions(decimal: true)
           : TextInputType.text,
-      inputFormatters:
-          isNumeric ? [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))] : null,
+      inputFormatters: isCurrency
+          ? [CurrencyInputFormatter(locale: 'en_US')]
+          : (isNumeric
+              ? [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))]
+              : null),
+      autovalidateMode: validator != null
+          ? AutovalidateMode.onUserInteraction
+          : AutovalidateMode.disabled,
+      validator: validator,
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
         prefixText: prefix,
         suffixText: suffix,
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppRadius.lg)),
+        enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppRadius.lg)),
+        focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppRadius.lg)),
       ),
     );
   }
@@ -1087,7 +1336,7 @@ class _ToggleChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return SegmentedButton<bool>(
       segments: [
-        ButtonSegment(value: true,  label: Text(labelA)),
+        ButtonSegment(value: true, label: Text(labelA)),
         ButtonSegment(value: false, label: Text(labelB)),
       ],
       selected: {isA},
@@ -1098,10 +1347,10 @@ class _ToggleChip extends StatelessWidget {
           return null;
         }),
         foregroundColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return Colors.white;
+          if (states.contains(WidgetState.selected))
+            return Theme.of(context).colorScheme.onPrimary;
           return null;
         }),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         visualDensity: VisualDensity.compact,
       ),
     );
@@ -1171,27 +1420,30 @@ class _InvestorMetricRow extends StatelessWidget {
           height: 36,
           decoration: BoxDecoration(
             color: color,
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(AppRadius.xs),
           ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 8),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(label,
                   style: const TextStyle(
-                      fontWeight: FontWeight.w600, fontSize: 14)),
+                      fontWeight: FontWeight.w600, fontSize: AppTextSize.body)),
               Text(hint,
                   style: TextStyle(
-                      fontSize: 11, color: CalcwiseTheme.of(context).textSecondary)),
+                      fontSize: AppTextSize.xs,
+                      color: CalcwiseTheme.of(context).textSecondary)),
             ],
           ),
         ),
         Text(
           value,
           style: TextStyle(
-              fontSize: 18, fontWeight: FontWeight.bold, color: color),
+              fontSize: AppTextSize.subtitle,
+              fontWeight: FontWeight.bold,
+              color: color),
         ),
       ],
     );

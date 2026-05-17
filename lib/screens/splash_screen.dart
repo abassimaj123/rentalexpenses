@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:calcwise_core/calcwise_core.dart';
 import '../core/theme/app_theme.dart';
 import '../core/firebase/analytics_service.dart';
+import '../main.dart' show MainShell;
+import 'onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -13,18 +15,30 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    try { AnalyticsService.instance.logAppOpen(); } catch (_) {}
+    try {
+      AnalyticsService.instance.logAppOpen();
+    } catch (_) {}
   }
 
   @override
   Widget build(BuildContext context) => CalcwiseSplash(
-    appName:     'Rental',
-    appSuffix:   'Pro',
-    tagline:     'Track every rental dollar',
-    chips:       const ['ROI', 'Tax Deductions', 'Cash Flow'],
-    badgeSymbol: r'$-',
-    badgeIcon: Icons.receipt_long_rounded,
-    backgroundColor: AppTheme.primary,
-    onComplete: () => Navigator.of(context).pushReplacementNamed('/home'),
-  );
+        appName: 'Rental',
+        appSuffix: 'Pro',
+        tagline: 'Track every rental dollar',
+        chips: const ['ROI', 'Tax Deductions', 'Cash Flow'],
+        badgeSymbol: r'$-',
+        badgeIcon: Icons.receipt_long_rounded,
+        backgroundColor: AppTheme.primary,
+        onComplete: () async {
+          final done = await isOnboardingComplete('rentalexpenses');
+          if (!context.mounted) return;
+          Navigator.of(context).pushReplacement(PageRouteBuilder(
+            pageBuilder: (_, __, ___) =>
+                done ? const MainShell() : const OnboardingScreen(),
+            transitionsBuilder: (_, anim, __, child) =>
+                FadeTransition(opacity: anim, child: child),
+            transitionDuration: const Duration(milliseconds: 250),
+          ));
+        },
+      );
 }

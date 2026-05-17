@@ -1,4 +1,3 @@
-import '../core/ads/ad_footer.dart';
 import 'dart:io';
 import 'package:calcwise_core/calcwise_core.dart';
 import 'package:flutter/material.dart';
@@ -38,19 +37,19 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
 
   late DateTime _selectedMonth;
 
-  final _mortCtrl  = TextEditingController();
-  final _taxCtrl   = TextEditingController();
-  final _insCtrl   = TextEditingController();
-  final _hoaCtrl   = TextEditingController();
-  final _mgmtCtrl  = TextEditingController();
+  final _mortCtrl = TextEditingController();
+  final _taxCtrl = TextEditingController();
+  final _insCtrl = TextEditingController();
+  final _hoaCtrl = TextEditingController();
+  final _mgmtCtrl = TextEditingController();
   final _maintCtrl = TextEditingController();
-  final _vacCtrl   = TextEditingController();
-  final _utilCtrl  = TextEditingController();
-  final _landCtrl  = TextEditingController();
+  final _vacCtrl = TextEditingController();
+  final _utilCtrl = TextEditingController();
+  final _landCtrl = TextEditingController();
   final _otherCtrl = TextEditingController();
 
   bool _mgmtIsPercent = false;
-  bool _vacIsPercent  = false;
+  bool _vacIsPercent = false;
   bool _isSaving = false;
 
   // Feature 2 — recurring
@@ -62,29 +61,35 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
 
   // Live results
   double _totalExpenses = 0;
-  double _monthlyCF    = 0;
+  double _monthlyCF = 0;
   double _expenseRatio = 0;
-  double _breakEven    = 0;
+  double _breakEven = 0;
 
   @override
   void initState() {
     super.initState();
-    _selectedMonth = DateTime(widget.targetMonth.year, widget.targetMonth.month);
+    _selectedMonth =
+        DateTime(widget.targetMonth.year, widget.targetMonth.month);
     final e = widget.existing;
     if (e != null) {
-      _mortCtrl.text  = e.mortgage      > 0 ? e.mortgage.toStringAsFixed(2) : '';
-      _taxCtrl.text   = e.propertyTaxes > 0 ? e.propertyTaxes.toStringAsFixed(2) : '';
-      _insCtrl.text   = e.insurance     > 0 ? e.insurance.toStringAsFixed(2) : '';
-      _hoaCtrl.text   = e.hoaFees       > 0 ? e.hoaFees.toStringAsFixed(2) : '';
-      _mgmtCtrl.text  = e.propertyMgmt  > 0 ? e.propertyMgmt.toStringAsFixed(2) : '';
-      _maintCtrl.text = e.maintenance   > 0 ? e.maintenance.toStringAsFixed(2) : '';
-      _vacCtrl.text   = e.vacancyLoss   > 0 ? e.vacancyLoss.toStringAsFixed(2) : '';
-      _utilCtrl.text  = e.utilities     > 0 ? e.utilities.toStringAsFixed(2) : '';
-      _landCtrl.text  = e.landscaping   > 0 ? e.landscaping.toStringAsFixed(2) : '';
-      _otherCtrl.text = e.otherExpenses > 0 ? e.otherExpenses.toStringAsFixed(2) : '';
-      _isRecurring    = e.isRecurring;
+      _mortCtrl.text = e.mortgage > 0 ? e.mortgage.toStringAsFixed(2) : '';
+      _taxCtrl.text =
+          e.propertyTaxes > 0 ? e.propertyTaxes.toStringAsFixed(2) : '';
+      _insCtrl.text = e.insurance > 0 ? e.insurance.toStringAsFixed(2) : '';
+      _hoaCtrl.text = e.hoaFees > 0 ? e.hoaFees.toStringAsFixed(2) : '';
+      _mgmtCtrl.text =
+          e.propertyMgmt > 0 ? e.propertyMgmt.toStringAsFixed(2) : '';
+      _maintCtrl.text =
+          e.maintenance > 0 ? e.maintenance.toStringAsFixed(2) : '';
+      _vacCtrl.text = e.vacancyLoss > 0 ? e.vacancyLoss.toStringAsFixed(2) : '';
+      _utilCtrl.text = e.utilities > 0 ? e.utilities.toStringAsFixed(2) : '';
+      _landCtrl.text =
+          e.landscaping > 0 ? e.landscaping.toStringAsFixed(2) : '';
+      _otherCtrl.text =
+          e.otherExpenses > 0 ? e.otherExpenses.toStringAsFixed(2) : '';
+      _isRecurring = e.isRecurring;
       _recurrenceType = e.recurrenceType ?? 'monthly';
-      _receiptPath    = e.receiptPath;
+      _receiptPath = e.receiptPath;
     }
     for (final c in _allControllers) {
       c.addListener(_recalculate);
@@ -93,9 +98,17 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
   }
 
   List<TextEditingController> get _allControllers => [
-    _mortCtrl, _taxCtrl, _insCtrl, _hoaCtrl, _mgmtCtrl,
-    _maintCtrl, _vacCtrl, _utilCtrl, _landCtrl, _otherCtrl,
-  ];
+        _mortCtrl,
+        _taxCtrl,
+        _insCtrl,
+        _hoaCtrl,
+        _mgmtCtrl,
+        _maintCtrl,
+        _vacCtrl,
+        _utilCtrl,
+        _landCtrl,
+        _otherCtrl,
+      ];
 
   double _parseD(TextEditingController c) {
     final v = c.text;
@@ -109,30 +122,31 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
   void _recalculate() {
     final rent = widget.property.monthlyRent;
     final mort = _parseD(_mortCtrl);
-    final tax  = _parseD(_taxCtrl);
-    final ins  = _parseD(_insCtrl);
-    final hoa  = _parseD(_hoaCtrl);
+    final tax = _parseD(_taxCtrl);
+    final ins = _parseD(_insCtrl);
+    final hoa = _parseD(_hoaCtrl);
     final mgmtRaw = _parseD(_mgmtCtrl);
     final mgmt = _mgmtIsPercent ? (rent * mgmtRaw / 100) : mgmtRaw;
     final maint = _parseD(_maintCtrl);
     final vacRaw = _parseD(_vacCtrl);
     final vac = _vacIsPercent ? (rent * vacRaw / 100) : vacRaw;
-    final util  = _parseD(_utilCtrl);
-    final land  = _parseD(_landCtrl);
+    final util = _parseD(_utilCtrl);
+    final land = _parseD(_landCtrl);
     final other = _parseD(_otherCtrl);
 
-    final total = mort + tax + ins + hoa + mgmt + maint + vac + util + land + other;
+    final total =
+        mort + tax + ins + hoa + mgmt + maint + vac + util + land + other;
     setState(() {
       _totalExpenses = total;
-      _monthlyCF    = rent - total;
+      _monthlyCF = rent - total;
       _expenseRatio = rent > 0 ? (total / rent * 100) : 0;
-      _breakEven    = total;
+      _breakEven = total;
     });
   }
 
   Future<void> _pickMonth(bool isSpanish) async {
     // Show a year/month picker via a dialog
-    int pickedYear  = _selectedMonth.year;
+    int pickedYear = _selectedMonth.year;
     int pickedMonth = _selectedMonth.month;
 
     await showDialog<void>(
@@ -187,8 +201,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
 
     // Copy file to app documents directory so it persists independently
     final docsDir = await getApplicationDocumentsDirectory();
-    final receiptsDir =
-        Directory(path_pkg.join(docsDir.path, 'receipts'));
+    final receiptsDir = Directory(path_pkg.join(docsDir.path, 'receipts'));
     if (!receiptsDir.existsSync()) receiptsDir.createSync(recursive: true);
 
     final ext = path_pkg.extension(picked.path).isNotEmpty
@@ -294,7 +307,8 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (_, isSpanish, __) {
-        final monthLabel = DateFormat('MMMM yyyy', isSpanish ? 'es' : 'en').format(_selectedMonth);
+        final monthLabel = DateFormat('MMMM yyyy', isSpanish ? 'es' : 'en')
+            .format(_selectedMonth);
         final cfColor = _monthlyCF >= 0 ? AppTheme.success : Colors.red;
 
         return Scaffold(
@@ -307,19 +321,22 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
             children: [
               Expanded(
                 child: ListView(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(AppSpacing.lg),
                   children: [
                     // Property name banner
                     Container(
-                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 10, horizontal: 16),
                       decoration: BoxDecoration(
                         color: AppTheme.primary.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
+                        borderRadius: BorderRadius.circular(AppRadius.lg),
+                        border: Border.all(
+                            color: AppTheme.primary.withValues(alpha: 0.2)),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.home_rounded, color: AppTheme.primary, size: 18),
+                          const Icon(Icons.home_rounded,
+                              color: AppTheme.primary, size: 18),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -339,31 +356,45 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                     _SectionLabel(isSpanish ? 'PERÍODO' : 'PERIOD'),
                     Card(
                       child: ListTile(
-                        leading: const Icon(Icons.calendar_month_rounded, color: AppTheme.primary),
+                        leading: const Icon(Icons.calendar_month_rounded,
+                            color: AppTheme.primary),
                         title: Text(
                           monthLabel,
                           style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
-                        trailing: Icon(Icons.edit_rounded, size: 18, color: CalcwiseTheme.of(context).textSecondary),
+                        trailing: Icon(Icons.edit_rounded,
+                            size: 18,
+                            color: CalcwiseTheme.of(context).textSecondary),
                         onTap: () => _pickMonth(isSpanish),
                       ),
                     ),
                     const SizedBox(height: 20),
 
                     // Expense fields
-                    _SectionLabel(isSpanish ? 'GASTOS MENSUALES' : 'MONTHLY EXPENSES'),
+                    _SectionLabel(
+                        isSpanish ? 'GASTOS MENSUALES' : 'MONTHLY EXPENSES'),
                     Card(
                       child: Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(AppSpacing.lg),
                         child: Column(
                           children: [
-                            _NumField(ctrl: _mortCtrl,  label: isSpanish ? 'Hipoteca' : 'Mortgage'),
+                            _NumField(
+                                ctrl: _mortCtrl,
+                                label: isSpanish ? 'Hipoteca' : 'Mortgage'),
                             const SizedBox(height: 12),
-                            _NumField(ctrl: _taxCtrl,   label: isSpanish ? 'Impuestos de propiedad' : 'Property Taxes'),
+                            _NumField(
+                                ctrl: _taxCtrl,
+                                label: isSpanish
+                                    ? 'Impuestos de propiedad'
+                                    : 'Property Taxes'),
                             const SizedBox(height: 12),
-                            _NumField(ctrl: _insCtrl,   label: isSpanish ? 'Seguro' : 'Insurance'),
+                            _NumField(
+                                ctrl: _insCtrl,
+                                label: isSpanish ? 'Seguro' : 'Insurance'),
                             const SizedBox(height: 12),
-                            _NumField(ctrl: _hoaCtrl,   label: isSpanish ? 'Cuotas HOA' : 'HOA Fees'),
+                            _NumField(
+                                ctrl: _hoaCtrl,
+                                label: isSpanish ? 'Cuotas HOA' : 'HOA Fees'),
                           ],
                         ),
                       ),
@@ -373,7 +404,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                     // Property management toggle
                     Card(
                       child: Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(AppSpacing.lg),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -381,8 +412,13 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                               children: [
                                 Expanded(
                                   child: Text(
-                                    isSpanish ? 'Adm. de propiedad' : 'Property Management',
-                                    style: TextStyle(fontSize: 13, color: CalcwiseTheme.of(context).textSecondary),
+                                    isSpanish
+                                        ? 'Adm. de propiedad'
+                                        : 'Property Management',
+                                    style: TextStyle(
+                                        fontSize: AppTextSize.md,
+                                        color: CalcwiseTheme.of(context)
+                                            .textSecondary),
                                   ),
                                 ),
                                 _ToggleChip(
@@ -401,7 +437,9 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                               ctrl: _mgmtCtrl,
                               label: _mgmtIsPercent
                                   ? (isSpanish ? '% del alquiler' : '% of rent')
-                                  : (isSpanish ? 'Cantidad mensual' : 'Monthly amount'),
+                                  : (isSpanish
+                                      ? 'Cantidad mensual'
+                                      : 'Monthly amount'),
                               prefix: _mgmtIsPercent ? null : '\$',
                               suffix: _mgmtIsPercent ? '%' : null,
                             ),
@@ -413,11 +451,15 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
 
                     Card(
                       child: Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(AppSpacing.lg),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _NumField(ctrl: _maintCtrl, label: isSpanish ? 'Mantenimiento / Reparaciones' : 'Maintenance / Repairs'),
+                            _NumField(
+                                ctrl: _maintCtrl,
+                                label: isSpanish
+                                    ? 'Mantenimiento / Reparaciones'
+                                    : 'Maintenance / Repairs'),
                             const SizedBox(height: 12),
 
                             // Vacancy toggle
@@ -425,8 +467,13 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                               children: [
                                 Expanded(
                                   child: Text(
-                                    isSpanish ? 'Pérdida por vacante' : 'Vacancy Loss',
-                                    style: TextStyle(fontSize: 13, color: CalcwiseTheme.of(context).textSecondary),
+                                    isSpanish
+                                        ? 'Pérdida por vacante'
+                                        : 'Vacancy Loss',
+                                    style: TextStyle(
+                                        fontSize: AppTextSize.md,
+                                        color: CalcwiseTheme.of(context)
+                                            .textSecondary),
                                   ),
                                 ),
                                 _ToggleChip(
@@ -445,16 +492,29 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                               ctrl: _vacCtrl,
                               label: _vacIsPercent
                                   ? (isSpanish ? '% del alquiler' : '% of rent')
-                                  : (isSpanish ? 'Pérdida mensual' : 'Monthly loss'),
+                                  : (isSpanish
+                                      ? 'Pérdida mensual'
+                                      : 'Monthly loss'),
                               prefix: _vacIsPercent ? null : '\$',
                               suffix: _vacIsPercent ? '%' : null,
                             ),
                             const SizedBox(height: 12),
-                            _NumField(ctrl: _utilCtrl,  label: isSpanish ? 'Servicios públicos' : 'Utilities'),
+                            _NumField(
+                                ctrl: _utilCtrl,
+                                label: isSpanish
+                                    ? 'Servicios públicos'
+                                    : 'Utilities'),
                             const SizedBox(height: 12),
-                            _NumField(ctrl: _landCtrl,  label: isSpanish ? 'Jardinería' : 'Landscaping'),
+                            _NumField(
+                                ctrl: _landCtrl,
+                                label:
+                                    isSpanish ? 'Jardinería' : 'Landscaping'),
                             const SizedBox(height: 12),
-                            _NumField(ctrl: _otherCtrl, label: isSpanish ? 'Otros gastos' : 'Other Expenses'),
+                            _NumField(
+                                ctrl: _otherCtrl,
+                                label: isSpanish
+                                    ? 'Otros gastos'
+                                    : 'Other Expenses'),
                           ],
                         ),
                       ),
@@ -476,7 +536,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                                     ? 'Gasto recurrente'
                                     : 'Recurring expense',
                                 style: const TextStyle(
-                                    fontSize: 14,
+                                    fontSize: AppTextSize.body,
                                     fontWeight: FontWeight.w500),
                               ),
                               subtitle: Text(
@@ -484,8 +544,9 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                                     ? 'Se repite automáticamente'
                                     : 'Repeats automatically',
                                 style: TextStyle(
-                                    fontSize: 12,
-                                    color: CalcwiseTheme.of(context).textSecondary),
+                                    fontSize: AppTextSize.sm,
+                                    color: CalcwiseTheme.of(context)
+                                        .textSecondary),
                               ),
                               value: _isRecurring,
                               activeThumbColor: AppTheme.primary,
@@ -493,27 +554,25 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                                   setState(() => _isRecurring = v),
                             ),
                             if (_isRecurring) ...[
-                              Divider(height: 1, color: CalcwiseTheme.of(context).cardBorder),
+                              Divider(
+                                  height: 1,
+                                  color: CalcwiseTheme.of(context).cardBorder),
                               const SizedBox(height: 8),
                               DropdownButtonFormField<String>(
                                 initialValue: _recurrenceType,
                                 decoration: InputDecoration(
-                                  labelText: isSpanish
-                                      ? 'Frecuencia'
-                                      : 'Frequency',
+                                  labelText:
+                                      isSpanish ? 'Frecuencia' : 'Frequency',
                                 ),
                                 items: [
                                   DropdownMenuItem(
                                     value: 'monthly',
-                                    child: Text(isSpanish
-                                        ? 'Mensual'
-                                        : 'Monthly'),
+                                    child:
+                                        Text(isSpanish ? 'Mensual' : 'Monthly'),
                                   ),
                                   DropdownMenuItem(
                                     value: 'annual',
-                                    child: Text(isSpanish
-                                        ? 'Anual'
-                                        : 'Annual'),
+                                    child: Text(isSpanish ? 'Anual' : 'Annual'),
                                   ),
                                 ],
                                 onChanged: (v) => setState(
@@ -528,22 +587,26 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                     const SizedBox(height: 20),
 
                     // Feature 3 — Receipt photo attachment
-                    _SectionLabel(isSpanish ? 'RECIBO / FOTO' : 'RECEIPT / PHOTO'),
+                    _SectionLabel(
+                        isSpanish ? 'RECIBO / FOTO' : 'RECEIPT / PHOTO'),
                     _ReceiptSection(
                       isSpanish: isSpanish,
                       receiptPath: _receiptPath,
-                      isPremium: freemiumService.isPremium,
+                      isPremium: freemiumService.hasFullAccess,
                       onAdd: () => _pickReceipt(isSpanish),
                       onDelete: _deleteReceipt,
                       onView: () {
                         if (_receiptPath == null) return;
-                        Navigator.of(context).push(MaterialPageRoute(
-                          builder: (_) => ReceiptViewerScreen(
+                        Navigator.of(context).push(PageRouteBuilder(
+                          pageBuilder: (_, __, ___) => ReceiptViewerScreen(
                             imagePath: _receiptPath!,
                             onDelete: () {
                               _deleteReceipt();
                             },
                           ),
+                          transitionsBuilder: (_, anim, __, child) =>
+                              FadeTransition(opacity: anim, child: child),
+                          transitionDuration: AppDuration.base,
                         ));
                       },
                       onPremiumTap: () => PaywallHard.show(context),
@@ -551,32 +614,43 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                     const SizedBox(height: 20),
 
                     // Live results
-                    _SectionLabel(isSpanish ? 'RESULTADOS EN VIVO' : 'LIVE RESULTS'),
+                    _SectionLabel(
+                        isSpanish ? 'RESULTADOS EN VIVO' : 'LIVE RESULTS'),
                     Card(
                       child: Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(AppSpacing.lg),
                         child: Column(
                           children: [
                             _ResultRow(
-                              label: isSpanish ? 'Total gastos' : 'Total Expenses',
+                              label:
+                                  isSpanish ? 'Total gastos' : 'Total Expenses',
                               value: '\$${_fmt.format(_totalExpenses)}',
                               bold: true,
                             ),
-                            Divider(height: 20, color: CalcwiseTheme.of(context).cardBorder),
+                            Divider(
+                                height: 20,
+                                color: CalcwiseTheme.of(context).cardBorder),
                             _ResultRow(
-                              label: isSpanish ? 'Flujo de caja mensual' : 'Monthly Cash Flow',
-                              value: '${_monthlyCF < 0 ? '-' : ''}\$${_fmt.format(_monthlyCF.abs())}',
+                              label: isSpanish
+                                  ? 'Flujo de caja mensual'
+                                  : 'Monthly Cash Flow',
+                              value:
+                                  '${_monthlyCF < 0 ? '-' : ''}\$${_fmt.format(_monthlyCF.abs())}',
                               valueColor: cfColor,
                               bold: true,
                             ),
                             const SizedBox(height: 8),
                             _ResultRow(
-                              label: isSpanish ? 'Ratio de gastos' : 'Expense Ratio',
+                              label: isSpanish
+                                  ? 'Ratio de gastos'
+                                  : 'Expense Ratio',
                               value: '${_expenseRatio.toStringAsFixed(1)}%',
                             ),
                             const SizedBox(height: 8),
                             _ResultRow(
-                              label: isSpanish ? 'Alquiler mínimo' : 'Break-Even Rent',
+                              label: isSpanish
+                                  ? 'Alquiler mínimo'
+                                  : 'Break-Even Rent',
                               value: '\$${_fmt.format(_breakEven)}',
                             ),
                           ],
@@ -589,17 +663,20 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                       onPressed: _isSaving ? null : () => _save(isSpanish),
                       icon: _isSaving
                           ? const SizedBox(
-                              width: 20, height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2, color: Colors.white),
                             )
                           : const Icon(Icons.save_rounded),
-                      label: Text(isSpanish ? 'Guardar Gastos' : 'Save Expenses'),
+                      label:
+                          Text(isSpanish ? 'Guardar Gastos' : 'Save Expenses'),
                     ),
                     const SizedBox(height: 24),
                   ],
                 ),
               ),
-              const AdFooter(),
+              const CalcwiseAdFooter(),
             ],
           ),
         );
@@ -634,17 +711,37 @@ class _MonthPickerDialogState extends State<_MonthPickerDialog> {
   @override
   void initState() {
     super.initState();
-    _year  = widget.initialYear;
+    _year = widget.initialYear;
     _month = widget.initialMonth;
   }
 
   static const List<String> _monthsEn = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
   ];
   static const List<String> _monthsEs = [
-    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    'Enero',
+    'Febrero',
+    'Marzo',
+    'Abril',
+    'Mayo',
+    'Junio',
+    'Julio',
+    'Agosto',
+    'Septiembre',
+    'Octubre',
+    'Noviembre',
+    'Diciembre'
   ];
 
   @override
@@ -659,12 +756,15 @@ class _MonthPickerDialogState extends State<_MonthPickerDialog> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               IconButton(
-                icon: const Icon(Icons.chevron_left),
+                icon: const Icon(Icons.chevron_left_rounded),
                 onPressed: () => setState(() => _year--),
               ),
-              Text('$_year', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text('$_year',
+                  style: const TextStyle(
+                      fontSize: AppTextSize.subtitle,
+                      fontWeight: FontWeight.bold)),
               IconButton(
-                icon: const Icon(Icons.chevron_right),
+                icon: const Icon(Icons.chevron_right_rounded),
                 onPressed: () => setState(() => _year++),
               ),
             ],
@@ -681,10 +781,14 @@ class _MonthPickerDialogState extends State<_MonthPickerDialog> {
                   width: 72,
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   decoration: BoxDecoration(
-                    color: selected ? AppTheme.primary : CalcwiseTheme.of(context).surfaceHigh,
-                    borderRadius: BorderRadius.circular(8),
+                    color: selected
+                        ? AppTheme.primary
+                        : CalcwiseTheme.of(context).surfaceHigh,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                     border: Border.all(
-                      color: selected ? AppTheme.primary : CalcwiseTheme.of(context).cardBorder,
+                      color: selected
+                          ? AppTheme.primary
+                          : CalcwiseTheme.of(context).cardBorder,
                     ),
                   ),
                   child: Text(
@@ -692,8 +796,9 @@ class _MonthPickerDialogState extends State<_MonthPickerDialog> {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: selected ? Colors.white : null,
-                      fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-                      fontSize: 13,
+                      fontWeight:
+                          selected ? FontWeight.bold : FontWeight.normal,
+                      fontSize: AppTextSize.md,
                     ),
                   ),
                 ),
@@ -747,14 +852,13 @@ class _ReceiptSection extends StatelessWidget {
     if (!isPremium) {
       return InkWell(
         onTap: onPremiumTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
         child: Container(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.all(AppSpacing.mdPlus),
           decoration: BoxDecoration(
             color: AppTheme.primary.withValues(alpha: 0.07),
-            borderRadius: BorderRadius.circular(12),
-            border:
-                Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
           ),
           child: Row(
             children: [
@@ -769,7 +873,7 @@ class _ReceiptSection extends StatelessWidget {
                   style: const TextStyle(
                     color: AppTheme.primary,
                     fontWeight: FontWeight.w600,
-                    fontSize: 14,
+                    fontSize: AppTextSize.body,
                   ),
                 ),
               ),
@@ -785,14 +889,14 @@ class _ReceiptSection extends StatelessWidget {
     if (receiptPath == null) {
       return OutlinedButton.icon(
         onPressed: onAdd,
-        icon: const Icon(Icons.add_a_photo_outlined),
+        icon: const Icon(Icons.add_a_photo_rounded),
         label: Text(isSpanish ? 'Agregar Recibo' : 'Add Receipt'),
         style: OutlinedButton.styleFrom(
           foregroundColor: AppTheme.primary,
           side: const BorderSide(color: AppTheme.primary),
           minimumSize: const Size(double.infinity, 52),
           shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14)),
+              borderRadius: BorderRadius.circular(AppRadius.xl)),
         ),
       );
     }
@@ -800,14 +904,14 @@ class _ReceiptSection extends StatelessWidget {
     // Premium user with photo attached
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Row(
           children: [
             // Thumbnail
             GestureDetector(
               onTap: onView,
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(AppRadius.mdPlus),
                 child: Image.file(
                   File(receiptPath!),
                   width: 72,
@@ -817,7 +921,7 @@ class _ReceiptSection extends StatelessWidget {
                     width: 72,
                     height: 72,
                     color: CalcwiseTheme.of(context).cardBorder,
-                    child: Icon(Icons.broken_image_outlined,
+                    child: Icon(Icons.broken_image_rounded,
                         color: CalcwiseTheme.of(context).textSecondary),
                   ),
                 ),
@@ -837,7 +941,7 @@ class _ReceiptSection extends StatelessWidget {
                         isSpanish ? 'Recibo adjunto' : 'Receipt attached',
                         style: const TextStyle(
                           fontWeight: FontWeight.w600,
-                          fontSize: 14,
+                          fontSize: AppTextSize.body,
                         ),
                       ),
                     ],
@@ -850,7 +954,7 @@ class _ReceiptSection extends StatelessWidget {
                         icon: const Icon(Icons.zoom_in_rounded, size: 16),
                         label: Text(
                           isSpanish ? 'Ver' : 'View',
-                          style: const TextStyle(fontSize: 13),
+                          style: const TextStyle(fontSize: AppTextSize.md),
                         ),
                         style: TextButton.styleFrom(
                           foregroundColor: AppTheme.primary,
@@ -865,10 +969,11 @@ class _ReceiptSection extends StatelessWidget {
                         icon: const Icon(Icons.swap_horiz_rounded, size: 16),
                         label: Text(
                           isSpanish ? 'Cambiar' : 'Change',
-                          style: const TextStyle(fontSize: 13),
+                          style: const TextStyle(fontSize: AppTextSize.md),
                         ),
                         style: TextButton.styleFrom(
-                          foregroundColor: CalcwiseTheme.of(context).textSecondary,
+                          foregroundColor:
+                              CalcwiseTheme.of(context).textSecondary,
                           padding: EdgeInsets.zero,
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           minimumSize: Size.zero,
@@ -877,11 +982,11 @@ class _ReceiptSection extends StatelessWidget {
                       const SizedBox(width: 14),
                       TextButton.icon(
                         onPressed: onDelete,
-                        icon: const Icon(Icons.delete_outline_rounded,
-                            size: 16),
+                        icon:
+                            const Icon(Icons.delete_outline_rounded, size: 16),
                         label: Text(
                           isSpanish ? 'Quitar' : 'Remove',
-                          style: const TextStyle(fontSize: 13),
+                          style: const TextStyle(fontSize: AppTextSize.md),
                         ),
                         style: TextButton.styleFrom(
                           foregroundColor: AppTheme.dangerRed,
@@ -914,7 +1019,7 @@ class _SectionLabel extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-              fontSize: 11,
+              fontSize: AppTextSize.xs,
               fontWeight: FontWeight.bold,
               color: CalcwiseTheme.of(context).textSecondary,
               letterSpacing: 0.8),
@@ -968,7 +1073,7 @@ class _ToggleChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return SegmentedButton<bool>(
       segments: [
-        ButtonSegment(value: true,  label: Text(labelA)),
+        ButtonSegment(value: true, label: Text(labelA)),
         ButtonSegment(value: false, label: Text(labelB)),
       ],
       selected: {isA},

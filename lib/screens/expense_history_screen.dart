@@ -1,4 +1,3 @@
-import '../core/ads/ad_footer.dart';
 import 'package:calcwise_core/calcwise_core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -36,7 +35,11 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
     setState(() => _loading = true);
     final list = await PropertyDatabaseService.instance
         .getExpensesForProperty(widget.property.id);
-    if (mounted) setState(() { _expenses = list; _loading = false; });
+    if (mounted)
+      setState(() {
+        _expenses = list;
+        _loading = false;
+      });
   }
 
   Future<void> _delete(MonthlyExpense e, bool isSpanish) async {
@@ -51,15 +54,17 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
   }
 
   Future<void> _openEntry(MonthlyExpense e) async {
-    final result = await Navigator.of(context).push<bool>(PageRouteBuilder(
-                    pageBuilder: (_, __, ___) => ExpenseEntryScreen(
-        property: widget.property,
-        existing: e,
-        targetMonth: e.date,),
-                    transitionsBuilder: (_, anim, __, child) =>
-                        FadeTransition(opacity: anim, child: child),
-                    transitionDuration: const Duration(milliseconds: 250),
-                  ),
+    final result = await Navigator.of(context).push<bool>(
+      PageRouteBuilder(
+        pageBuilder: (_, __, ___) => ExpenseEntryScreen(
+          property: widget.property,
+          existing: e,
+          targetMonth: e.date,
+        ),
+        transitionsBuilder: (_, anim, __, child) =>
+            FadeTransition(opacity: anim, child: child),
+        transitionDuration: AppDuration.base,
+      ),
     );
     if (result == true) _load();
   }
@@ -69,7 +74,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (_, isSpanish, __) {
-        final isPremium = freemiumService.isPremium;
+        final isPremium = freemiumService.hasFullAccess;
         final freeLimit = MonetizationConfig.freeCalculationLimit;
         final dateFmt = DateFormat('MMMM yyyy', isSpanish ? 'es' : 'en');
 
@@ -91,16 +96,18 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                     : _expenses.isEmpty
                         ? _EmptyState(isSpanish: isSpanish)
                         : ListView.builder(
-                            padding: const EdgeInsets.all(16),
+                            padding: const EdgeInsets.all(AppSpacing.lg),
                             itemCount: _expenses.length,
                             itemBuilder: (ctx, i) {
                               final e = _expenses[i];
                               final rent = widget.property.monthlyRent;
-                              final cf   = rent - e.totalExpenses;
+                              final cf = rent - e.totalExpenses;
                               final ratio = rent > 0
                                   ? (e.totalExpenses / rent * 100)
                                   : 0.0;
-                              final cfColor = cf >= 0 ? AppTheme.success : AppTheme.dangerRed;
+                              final cfColor = cf >= 0
+                                  ? AppTheme.success
+                                  : AppTheme.dangerRed;
 
                               // Free users: blur entries beyond freeLimit
                               final isLocked = !isPremium && i >= freeLimit;
@@ -119,50 +126,69 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                   alignment: Alignment.centerRight,
                                   padding: const EdgeInsets.only(right: 20),
                                   decoration: BoxDecoration(
-                                    color: AppTheme.dangerRed.withValues(alpha: 0.12),
-                                    borderRadius: BorderRadius.circular(16),
+                                    color: AppTheme.dangerRed
+                                        .withValues(alpha: 0.12),
+                                    borderRadius:
+                                        BorderRadius.circular(AppRadius.xl),
                                   ),
                                   child: const Icon(Icons.delete_rounded,
                                       color: AppTheme.dangerRed),
                                 ),
                                 confirmDismiss: (_) async {
                                   return await showDialog<bool>(
-                                    context: ctx,
-                                    builder: (d) => AlertDialog(
-                                      title: Text(isSpanish ? 'Eliminar entrada' : 'Delete entry'),
-                                      content: Text(isSpanish
-                                          ? '¿Eliminar gastos de ${dateFmt.format(e.date)}?'
-                                          : 'Delete expenses for ${dateFmt.format(e.date)}?'),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () => Navigator.pop(d, false),
-                                          child: Text(isSpanish ? 'Cancelar' : 'Cancel'),
+                                        context: ctx,
+                                        builder: (d) => AlertDialog(
+                                          title: Text(isSpanish
+                                              ? 'Eliminar entrada'
+                                              : 'Delete entry'),
+                                          content: Text(isSpanish
+                                              ? '¿Eliminar gastos de ${dateFmt.format(e.date)}?'
+                                              : 'Delete expenses for ${dateFmt.format(e.date)}?'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.pop(d, false),
+                                              child: Text(isSpanish
+                                                  ? 'Cancelar'
+                                                  : 'Cancel'),
+                                            ),
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.pop(d, true),
+                                              child: Text(
+                                                  isSpanish
+                                                      ? 'Eliminar'
+                                                      : 'Delete',
+                                                  style: const TextStyle(
+                                                      color:
+                                                          AppTheme.dangerRed)),
+                                            ),
+                                          ],
                                         ),
-                                        TextButton(
-                                          onPressed: () => Navigator.pop(d, true),
-                                          child: Text(isSpanish ? 'Eliminar' : 'Delete',
-                                              style: const TextStyle(color: AppTheme.dangerRed)),
-                                        ),
-                                      ],
-                                    ),
-                                  ) ?? false;
+                                      ) ??
+                                      false;
                                 },
                                 onDismissed: (_) => _delete(e, isSpanish),
                                 child: Card(
                                   margin: const EdgeInsets.only(bottom: 10),
                                   child: InkWell(
-                                    borderRadius: BorderRadius.circular(16),
+                                    borderRadius:
+                                        BorderRadius.circular(AppRadius.xl),
                                     onTap: () => _openEntry(e),
                                     child: Padding(
-                                      padding: const EdgeInsets.all(16),
+                                      padding:
+                                          const EdgeInsets.all(AppSpacing.lg),
                                       child: Row(
                                         children: [
                                           Container(
                                             width: 44,
                                             height: 44,
                                             decoration: BoxDecoration(
-                                              color: cfColor.withValues(alpha: 0.1),
-                                              borderRadius: BorderRadius.circular(10),
+                                              color: cfColor.withValues(
+                                                  alpha: 0.1),
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                      AppRadius.mdPlus),
                                             ),
                                             child: Icon(
                                               cf >= 0
@@ -174,21 +200,25 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                           const SizedBox(width: 14),
                                           Expanded(
                                             child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
                                               children: [
                                                 Text(
                                                   dateFmt.format(e.date),
                                                   style: const TextStyle(
                                                     fontWeight: FontWeight.w600,
-                                                    fontSize: 15,
+                                                    fontSize:
+                                                        AppTextSize.bodyMd,
                                                   ),
                                                 ),
                                                 const SizedBox(height: 4),
                                                 Text(
                                                   '${isSpanish ? 'Gastos' : 'Expenses'}: \$${_fmt.format(e.totalExpenses)}  •  ${ratio.toStringAsFixed(1)}%',
                                                   style: TextStyle(
-                                                    fontSize: 13,
-                                                    color: CalcwiseTheme.of(context).textSecondary,
+                                                    fontSize: AppTextSize.md,
+                                                    color: CalcwiseTheme.of(
+                                                            context)
+                                                        .textSecondary,
                                                   ),
                                                 ),
                                               ],
@@ -200,12 +230,18 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                             GestureDetector(
                                               onTap: () {
                                                 Navigator.of(ctx).push(
-                                                  MaterialPageRoute(
-                                                    builder: (_) =>
+                                                  PageRouteBuilder(
+                                                    pageBuilder: (_, __, ___) =>
                                                         ReceiptViewerScreen(
-                                                      imagePath:
-                                                          e.receiptPath!,
+                                                      imagePath: e.receiptPath!,
                                                     ),
+                                                    transitionsBuilder:
+                                                        (_, anim, __, child) =>
+                                                            FadeTransition(
+                                                                opacity: anim,
+                                                                child: child),
+                                                    transitionDuration:
+                                                        AppDuration.base,
                                                   ),
                                                 );
                                               },
@@ -216,7 +252,8 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                                   color: AppTheme.success
                                                       .withValues(alpha: 0.12),
                                                   borderRadius:
-                                                      BorderRadius.circular(8),
+                                                      BorderRadius.circular(
+                                                          AppRadius.md),
                                                 ),
                                                 child: const Icon(
                                                   Icons.check_circle_rounded,
@@ -228,22 +265,27 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                             const SizedBox(width: 8),
                                           ],
                                           Column(
-                                            crossAxisAlignment: CrossAxisAlignment.end,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.end,
                                             children: [
                                               Text(
                                                 '${cf < 0 ? '-' : '+'}\$${_fmt.format(cf.abs())}',
                                                 style: TextStyle(
-                                                  fontSize: 15,
+                                                  fontSize: AppTextSize.bodyMd,
                                                   fontWeight: FontWeight.bold,
                                                   color: cfColor,
                                                 ),
                                               ),
                                               const SizedBox(height: 2),
                                               Text(
-                                                isSpanish ? 'flujo mensual' : 'monthly CF',
+                                                isSpanish
+                                                    ? 'flujo mensual'
+                                                    : 'monthly CF',
                                                 style: TextStyle(
-                                                  fontSize: 11,
-                                                  color: CalcwiseTheme.of(context).textSecondary,
+                                                  fontSize: AppTextSize.xs,
+                                                  color:
+                                                      CalcwiseTheme.of(context)
+                                                          .textSecondary,
                                                 ),
                                               ),
                                             ],
@@ -257,7 +299,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                             },
                           ),
               ),
-              const AdFooter(),
+              const CalcwiseAdFooter(),
             ],
           ),
         );
@@ -274,15 +316,20 @@ class _EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(AppSpacing.xxxl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.receipt_long_rounded, size: 72, color: CalcwiseTheme.of(context).textSecondary.withValues(alpha: 0.4)),
+            Icon(Icons.receipt_long_rounded,
+                size: 72,
+                color: CalcwiseTheme.of(context)
+                    .textSecondary
+                    .withValues(alpha: 0.4)),
             const SizedBox(height: 16),
             Text(
               isSpanish ? 'Sin entradas de gastos' : 'No expense entries yet',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              style: const TextStyle(
+                  fontSize: AppTextSize.subtitle, fontWeight: FontWeight.w600),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
@@ -310,29 +357,38 @@ class _LockedRow extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.xl),
         onTap: onUnlock,
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           child: Row(
             children: [
               Container(
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: CalcwiseTheme.of(context).textSecondary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
+                  color: CalcwiseTheme.of(context)
+                      .textSecondary
+                      .withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(AppRadius.mdPlus),
                 ),
-                child: Icon(Icons.lock_rounded, color: CalcwiseTheme.of(context).textSecondary),
+                child: Icon(Icons.lock_rounded,
+                    color: CalcwiseTheme.of(context).textSecondary),
               ),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(height: 14, width: 120, color: CalcwiseTheme.of(context).cardBorder),
+                    Container(
+                        height: 14,
+                        width: 120,
+                        color: CalcwiseTheme.of(context).cardBorder),
                     const SizedBox(height: 6),
-                    Container(height: 12, width: 180, color: CalcwiseTheme.of(context).cardBorder),
+                    Container(
+                        height: 12,
+                        width: 180,
+                        color: CalcwiseTheme.of(context).cardBorder),
                   ],
                 ),
               ),
@@ -341,7 +397,7 @@ class _LockedRow extends StatelessWidget {
                 style: const TextStyle(
                   color: AppTheme.primary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 13,
+                  fontSize: AppTextSize.md,
                 ),
               ),
             ],

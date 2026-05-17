@@ -3,21 +3,21 @@ import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import '../ads/ad_service.dart';
 import '../freemium/iap_service.dart';
 import '../theme/app_theme.dart';
 import '../../main.dart';
+import 'package:calcwise_core/calcwise_core.dart';
 
 const _orange = PdfColor(0.863, 0.439, 0.039); // RentalExpenses orange
-const _navy   = PdfColor(0.059, 0.200, 0.353);
-const _light  = PdfColor(0.996, 0.957, 0.922);
+const _navy = PdfColor(0.059, 0.200, 0.353);
+const _light = PdfColor(0.996, 0.957, 0.922);
 
 class PdfExportService {
-  static final _cur2 = NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 2);
-  static final _cur0 = NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 0);
+  static final _cur2 =
+      NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 2);
+  static final _cur0 =
+      NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 0);
   static final _date = DateFormat('MMMM d, yyyy');
-  static final _pct  = NumberFormat.percentPattern()..maximumFractionDigits = 1;
-
   static Future<void> exportReport({
     required BuildContext context,
     required String propertyName,
@@ -35,7 +35,8 @@ class PdfExportService {
       margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 28),
       build: (_) => _buildPage(
         propertyName: propertyName,
-        monthlyRent: monthlyRent, annualRent: annualRent,
+        monthlyRent: monthlyRent,
+        annualRent: annualRent,
         expenses: expenses,
         totalMonthlyExpenses: totalMonthlyExpenses,
         netMonthlyIncome: netMonthlyIncome,
@@ -51,90 +52,128 @@ class PdfExportService {
 
   static pw.Widget _buildPage({
     required String propertyName,
-    required double monthlyRent, required double annualRent,
+    required double monthlyRent,
+    required double annualRent,
     required List<Map<String, dynamic>> expenses,
     required double totalMonthlyExpenses,
-    required double netMonthlyIncome, required double netAnnualIncome,
+    required double netMonthlyIncome,
+    required double netAnnualIncome,
     required double expenseRatio,
   }) {
     final now = DateTime.now();
-    return pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
-      pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: pw.CrossAxisAlignment.end,
-        children: [
-          pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
-            pw.Text('Rental Expenses Calculator',
-                style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold, color: _orange)),
-            pw.Text(propertyName.isNotEmpty ? propertyName : 'Property Expense Report',
-                style: const pw.TextStyle(fontSize: 11, color: PdfColors.grey700)),
+    return pw
+        .Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+      pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: pw.CrossAxisAlignment.end,
+          children: [
+            pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text('Rental Expenses Calculator',
+                      style: pw.TextStyle(
+                          fontSize: AppTextSize.title,
+                          fontWeight: pw.FontWeight.bold,
+                          color: _orange)),
+                  pw.Text(
+                      propertyName.isNotEmpty
+                          ? propertyName
+                          : 'Property Expense Report',
+                      style: const pw.TextStyle(
+                          fontSize: AppTextSize.xs, color: PdfColors.grey700)),
+                ]),
+            pw.Text(_date.format(now),
+                style:
+                    const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
           ]),
-          pw.Text(_date.format(now),
-              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
-        ]),
-      pw.Container(height: 2, color: _orange, margin: const pw.EdgeInsets.only(top: 6, bottom: 14)),
-
+      pw.Container(
+          height: 2,
+          color: _orange,
+          margin: const pw.EdgeInsets.only(top: 6, bottom: 14)),
       pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
-        pw.Expanded(child: pw.Column(children: [
+        pw.Expanded(
+            child: pw.Column(children: [
           _sectionBox('INCOME', [
-            _row2('Monthly Rent',   _cur0.format(monthlyRent)),
-            _row2('Annual Rent',    _cur0.format(annualRent), bold: true, color: _navy),
+            _row2('Monthly Rent', _cur0.format(monthlyRent)),
+            _row2('Annual Rent', _cur0.format(annualRent),
+                bold: true, color: _navy),
           ]),
           pw.SizedBox(height: 10),
           _sectionBox('NET INCOME', [
-            _row2('Monthly Net',   _cur0.format(netMonthlyIncome),
-                bold: true, color: netMonthlyIncome >= 0 ? _navy : PdfColors.red700),
-            _row2('Annual Net',    _cur0.format(netAnnualIncome),
-                bold: true, color: netAnnualIncome >= 0 ? _navy : PdfColors.red700),
-            _row2('Expense Ratio', '${(expenseRatio * 100).toStringAsFixed(1)}%'),
+            _row2('Monthly Net', _cur0.format(netMonthlyIncome),
+                bold: true,
+                color: netMonthlyIncome >= 0 ? _navy : PdfColors.red700),
+            _row2('Annual Net', _cur0.format(netAnnualIncome),
+                bold: true,
+                color: netAnnualIncome >= 0 ? _navy : PdfColors.red700),
+            _row2(
+                'Expense Ratio', '${(expenseRatio * 100).toStringAsFixed(1)}%'),
           ]),
         ])),
         pw.SizedBox(width: 14),
-        pw.Expanded(child: pw.Column(children: [
+        pw.Expanded(
+            child: pw.Column(children: [
           _sectionBox('MONTHLY EXPENSES', [
-            ...expenses.map((e) => _row2(e['name'] as String, _cur2.format(e['monthly']))),
+            ...expenses.map(
+                (e) => _row2(e['name'] as String, _cur2.format(e['monthly']))),
             pw.Divider(color: PdfColors.grey300, height: 6),
-            _row2('Total Expenses', _cur0.format(totalMonthlyExpenses), bold: true, color: _orange),
+            _row2('Total Expenses', _cur0.format(totalMonthlyExpenses),
+                bold: true, color: _orange),
           ]),
         ])),
       ]),
-
       pw.Spacer(),
       pw.Column(children: [
         pw.Divider(color: PdfColors.grey300, height: 12),
-        pw.Text('Generated by Rental Expenses Calculator · For illustration purposes only. Not financial advice.',
+        pw.Text(
+            'Generated by Rental Expenses Calculator · For illustration purposes only. Not financial advice.',
             style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey500)),
       ]),
     ]);
   }
 
   static pw.Widget _sectionBox(String title, List<pw.Widget> rows) => pw.Column(
-    crossAxisAlignment: pw.CrossAxisAlignment.start,
-    children: [
-      pw.Container(width: double.infinity,
-        padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        color: _navy,
-        child: pw.Text(title, style: pw.TextStyle(
-            fontSize: 8, fontWeight: pw.FontWeight.bold, color: PdfColors.white))),
-      pw.Container(padding: const pw.EdgeInsets.all(8),
-        decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey300, width: 0.5)),
-        child: pw.Column(children: rows)),
-    ],
-  );
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Container(
+              width: double.infinity,
+              padding:
+                  const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              color: _navy,
+              child: pw.Text(title,
+                  style: pw.TextStyle(
+                      fontSize: 8,
+                      fontWeight: pw.FontWeight.bold,
+                      color: PdfColors.white))),
+          pw.Container(
+              padding: const pw.EdgeInsets.all(AppSpacing.sm),
+              decoration: pw.BoxDecoration(
+                  border: pw.Border.all(color: PdfColors.grey300, width: 0.5)),
+              child: pw.Column(children: rows)),
+        ],
+      );
 
-  static pw.Widget _row2(String label, String value, {bool bold = false, PdfColor? color}) =>
+  static pw.Widget _row2(String label, String value,
+          {bool bold = false, PdfColor? color}) =>
       pw.Padding(
         padding: const pw.EdgeInsets.symmetric(vertical: 2.5),
-        child: pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
-          pw.Text(label, style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey800)),
-          pw.Text(value, style: pw.TextStyle(
-              fontSize: 9,
-              fontWeight: bold ? pw.FontWeight.bold : pw.FontWeight.normal,
-              color: color ?? PdfColors.black)),
-        ]),
+        child: pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Text(label,
+                  style: const pw.TextStyle(
+                      fontSize: 9, color: PdfColors.grey800)),
+              pw.Text(value,
+                  style: pw.TextStyle(
+                      fontSize: 9,
+                      fontWeight:
+                          bold ? pw.FontWeight.bold : pw.FontWeight.normal,
+                      color: color ?? PdfColors.black)),
+            ]),
       );
 
   static Future<void> showUnlockOrPay(
-    BuildContext context, Future<void> Function() onExport) async {
+      BuildContext context, Future<void> Function() onExport) async {
     await showModalBottomSheet<void>(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -147,77 +186,138 @@ class PdfExportService {
 class _PdfUnlockSheet extends StatefulWidget {
   final Future<void> Function() onExport;
   const _PdfUnlockSheet({required this.onExport});
-  @override State<_PdfUnlockSheet> createState() => _PdfUnlockSheetState();
+  @override
+  State<_PdfUnlockSheet> createState() => _PdfUnlockSheetState();
 }
 
 class _PdfUnlockSheetState extends State<_PdfUnlockSheet> {
   bool _loading = false;
   Future<void> _watchAd() async {
     setState(() => _loading = true);
-    final earned = await AdService.instance.showRewarded();
+    final earned = await adService.showRewarded();
     if (!mounted) return;
     setState(() => _loading = false);
-    if (earned) { Navigator.pop(context); await widget.onExport(); }
-    else ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(isSpanishNotifier.value
-            ? 'Anuncio no disponible. Inténtalo más tarde.'
-            : 'Ad not available. Try again later.')));
+    if (earned) {
+      Navigator.pop(context);
+      await widget.onExport();
+    } else
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(isSpanishNotifier.value
+              ? 'Anuncio no disponible. Inténtalo más tarde.'
+              : 'Ad not available. Try again later.')));
   }
+
   @override
   Widget build(BuildContext context) {
-    final adReady = AdService.instance.isRewardedReady;
+    final adReady = adService.isRewardedReady;
+    final isEs = isSpanishNotifier.value;
     return Padding(
-      padding: EdgeInsets.only(left: 24, right: 24, top: 12,
+      padding: EdgeInsets.only(
+          left: 24,
+          right: 24,
+          top: 12,
           bottom: MediaQuery.of(context).viewInsets.bottom + 28),
       child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Center(child: Container(width: 40, height: 4,
-            decoration: BoxDecoration(color: const Color(0xFFCBD5E1),
-                borderRadius: BorderRadius.circular(2)))),
-        const SizedBox(height: 20),
-        const Icon(Icons.picture_as_pdf_outlined, size: 36, color: AppTheme.primary),
-        const SizedBox(height: 12),
-        const Text('Export PDF Report', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 6),
-        const Text('Choose how to unlock PDF export',
-            style: TextStyle(fontSize: 13, color: Color(0xFF475569))),
-        const SizedBox(height: 24),
-        Opacity(opacity: adReady ? 1.0 : 0.45,
-          child: InkWell(onTap: (adReady && !_loading) ? _watchAd : null,
-            borderRadius: BorderRadius.circular(14),
+        Center(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              decoration: BoxDecoration(
-                  border: Border.all(color: AppTheme.primary.withValues(alpha: 0.3)),
-                  borderRadius: BorderRadius.circular(14)),
-              child: Row(children: [
-                Container(width: 44, height: 44,
-                    decoration: BoxDecoration(
-                        color: AppTheme.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
-                    child: const Icon(Icons.play_circle_outline, color: AppTheme.primary, size: 24)),
-                const SizedBox(width: 14),
-                const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('Watch a short video', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
-                  SizedBox(height: 2),
-                  Text('Export once — free', style: TextStyle(color: Color(0xFF475569), fontSize: 13)),
-                ])),
-                if (_loading)
-                  const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                else const Icon(Icons.chevron_right, color: Color(0xFF94A3B8)),
-              ]),
-            ))),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                    color: const Color(0xFFCBD5E1),
+                    borderRadius: BorderRadius.circular(2)))),
+        const SizedBox(height: 20),
+        const Icon(Icons.picture_as_pdf_rounded,
+            size: 36, color: AppTheme.primary),
         const SizedBox(height: 12),
-        SizedBox(width: double.infinity, child: ElevatedButton.icon(
-          onPressed: () { Navigator.pop(context); IAPService.instance.buy(); },
-          icon: const Icon(Icons.workspace_premium, size: 18),
-          label: const Text('Premium — \$3.99 (unlimited)', style: TextStyle(fontWeight: FontWeight.bold)),
-          style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primary, foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
-        )),
+        Text(isEs ? 'Exportar Informe PDF' : 'Export PDF Report',
+            style: const TextStyle(
+                fontSize: AppTextSize.subtitle, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 6),
+        Text(
+            isEs
+                ? 'Elige cómo desbloquear la exportación'
+                : 'Choose how to unlock PDF export',
+            style: const TextStyle(
+                fontSize: AppTextSize.md, color: Color(0xFF475569))),
+        const SizedBox(height: 24),
+        Opacity(
+            opacity: adReady ? 1.0 : 0.45,
+            child: InkWell(
+                onTap: (adReady && !_loading) ? _watchAd : null,
+                borderRadius: BorderRadius.circular(AppRadius.xl),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                      border: Border.all(
+                          color: AppTheme.primary.withValues(alpha: 0.3)),
+                      borderRadius: BorderRadius.circular(AppRadius.xl)),
+                  child: Row(children: [
+                    Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                            color: AppTheme.primary.withValues(alpha: 0.1),
+                            shape: BoxShape.circle),
+                        child: const Icon(Icons.play_circle_outline,
+                            color: AppTheme.primary, size: 24)),
+                    const SizedBox(width: 14),
+                    Expanded(
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                          Text(
+                              isEs
+                                  ? 'Ver un video corto'
+                                  : 'Watch a short video',
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: AppTextSize.bodyMd)),
+                          const SizedBox(height: 2),
+                          Text(
+                              isEs
+                                  ? 'Exportar una vez — gratis'
+                                  : 'Export once — free',
+                              style: const TextStyle(
+                                  color: Color(0xFF475569),
+                                  fontSize: AppTextSize.md)),
+                        ])),
+                    if (_loading)
+                      const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2))
+                    else
+                      const Icon(Icons.chevron_right_rounded,
+                          color: AppTheme.labelGray),
+                  ]),
+                ))),
+        const SizedBox(height: 12),
+        SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                Navigator.pop(context);
+                IAPService.instance.buy();
+              },
+              icon: const Icon(Icons.workspace_premium, size: 18),
+              label: Text(
+                  isEs
+                      ? 'Premium — \$3.99 (ilimitado)'
+                      : 'Premium — \$3.99 (unlimited)',
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.xl))),
+            )),
         const SizedBox(height: 10),
-        TextButton(onPressed: () => Navigator.pop(context),
-            child: const Text('Not now', style: TextStyle(color: Color(0xFF64748B)))),
+        TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(isEs ? 'Ahora no' : 'Not now',
+                style: const TextStyle(color: Color(0xFF64748B)))),
       ]),
     );
   }

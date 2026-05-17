@@ -1,4 +1,3 @@
-import '../core/ads/ad_footer.dart';
 import 'package:calcwise_core/calcwise_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -36,7 +35,11 @@ class _TenantsScreenState extends State<TenantsScreen> {
     setState(() => _loading = true);
     final list = await PropertyDatabaseService.instance
         .getTenantsForProperty(widget.property.id);
-    if (mounted) setState(() { _tenants = list; _loading = false; });
+    if (mounted)
+      setState(() {
+        _tenants = list;
+        _loading = false;
+      });
   }
 
   String _fmt(DateTime dt, bool isSpanish) =>
@@ -55,18 +58,19 @@ class _TenantsScreenState extends State<TenantsScreen> {
 
   Future<void> _showTenantDialog(BuildContext ctx, bool isSpanish,
       {Tenant? existing}) async {
-    final nameCtrl  = TextEditingController(text: existing?.name ?? '');
+    final nameCtrl = TextEditingController(text: existing?.name ?? '');
     final emailCtrl = TextEditingController(text: existing?.email ?? '');
     final phoneCtrl = TextEditingController(text: existing?.phone ?? '');
-    final rentCtrl  = TextEditingController(
+    final rentCtrl = TextEditingController(
         text: existing != null && existing.monthlyRent > 0
             ? existing.monthlyRent.toStringAsFixed(2)
             : '');
     final notesCtrl = TextEditingController(text: existing?.notes ?? '');
 
     DateTime leaseStart = existing?.leaseStart ?? DateTime.now();
-    DateTime leaseEnd   = existing?.leaseEnd ??
-        DateTime(DateTime.now().year + 1, DateTime.now().month, DateTime.now().day);
+    DateTime leaseEnd = existing?.leaseEnd ??
+        DateTime(
+            DateTime.now().year + 1, DateTime.now().month, DateTime.now().day);
 
     await showDialog<void>(
       context: ctx,
@@ -91,7 +95,8 @@ class _TenantsScreenState extends State<TenantsScreen> {
                 controller: emailCtrl,
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
-                  labelText: isSpanish ? 'Email (opcional)' : 'Email (optional)',
+                  labelText:
+                      isSpanish ? 'Email (opcional)' : 'Email (optional)',
                   prefixIcon: const Icon(Icons.email_rounded),
                 ),
               ),
@@ -100,9 +105,8 @@ class _TenantsScreenState extends State<TenantsScreen> {
                 controller: phoneCtrl,
                 keyboardType: TextInputType.phone,
                 decoration: InputDecoration(
-                  labelText: isSpanish
-                      ? 'Teléfono (opcional)'
-                      : 'Phone (optional)',
+                  labelText:
+                      isSpanish ? 'Teléfono (opcional)' : 'Phone (optional)',
                   prefixIcon: const Icon(Icons.phone_rounded),
                 ),
               ),
@@ -115,9 +119,8 @@ class _TenantsScreenState extends State<TenantsScreen> {
                   FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))
                 ],
                 decoration: InputDecoration(
-                  labelText: isSpanish
-                      ? 'Alquiler mensual (\$)'
-                      : 'Monthly Rent (\$)',
+                  labelText:
+                      isSpanish ? 'Alquiler mensual (\$)' : 'Monthly Rent (\$)',
                   prefixText: '\$',
                 ),
               ),
@@ -205,14 +208,14 @@ class _TenantsScreenState extends State<TenantsScreen> {
     );
   }
 
-  Future<void> _confirmDelete(BuildContext ctx, bool isSpanish, Tenant t) async {
+  Future<void> _confirmDelete(
+      BuildContext ctx, bool isSpanish, Tenant t) async {
     final confirmed = await showDialog<bool>(
       context: ctx,
       builder: (d) => AlertDialog(
         title: Text(isSpanish ? 'Eliminar locatario' : 'Delete tenant'),
-        content: Text(isSpanish
-            ? '¿Eliminar a ${t.name}?'
-            : 'Delete ${t.name}?'),
+        content:
+            Text(isSpanish ? '¿Eliminar a ${t.name}?' : 'Delete ${t.name}?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(d, false),
@@ -276,11 +279,13 @@ class _TenantsScreenState extends State<TenantsScreen> {
 
                               return Card(
                                 child: InkWell(
-                                  borderRadius: BorderRadius.circular(16),
-                                  onTap: () => _showTenantDialog(ctx,
-                                      isSpanish, existing: t),
+                                  borderRadius:
+                                      BorderRadius.circular(AppRadius.xl),
+                                  onTap: () => _showTenantDialog(ctx, isSpanish,
+                                      existing: t),
                                   child: Padding(
-                                    padding: const EdgeInsets.all(14),
+                                    padding:
+                                        const EdgeInsets.all(AppSpacing.mdPlus),
                                     child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
@@ -294,7 +299,8 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                                 color: t.statusColor
                                                     .withValues(alpha: 0.12),
                                                 borderRadius:
-                                                    BorderRadius.circular(10),
+                                                    BorderRadius.circular(
+                                                        AppRadius.mdPlus),
                                               ),
                                               child: Icon(
                                                 Icons.person_rounded,
@@ -313,13 +319,15 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                                     style: const TextStyle(
                                                         fontWeight:
                                                             FontWeight.bold,
-                                                        fontSize: 15),
+                                                        fontSize:
+                                                            AppTextSize.bodyMd),
                                                   ),
                                                   if (t.monthlyRent > 0)
                                                     Text(
                                                       '\$${fmt.format(t.monthlyRent)}/mo',
                                                       style: const TextStyle(
-                                                          fontSize: 12,
+                                                          fontSize:
+                                                              AppTextSize.sm,
                                                           color: AppTheme
                                                               .labelGray),
                                                     ),
@@ -339,12 +347,13 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                                     BorderRadius.circular(20),
                                                 border: Border.all(
                                                     color: t.statusColor
-                                                        .withValues(alpha: 0.4)),
+                                                        .withValues(
+                                                            alpha: 0.4)),
                                               ),
                                               child: Text(
                                                 statusLabel,
                                                 style: TextStyle(
-                                                  fontSize: 11,
+                                                  fontSize: AppTextSize.xs,
                                                   fontWeight: FontWeight.bold,
                                                   color: t.statusColor,
                                                 ),
@@ -355,7 +364,8 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                         const SizedBox(height: 10),
                                         Divider(
                                             height: 1,
-                                            color: CalcwiseTheme.of(context).cardBorder),
+                                            color: CalcwiseTheme.of(context)
+                                                .cardBorder),
                                         const SizedBox(height: 10),
                                         Row(
                                           children: [
@@ -393,7 +403,8 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                               color: AppTheme.warning
                                                   .withValues(alpha: 0.1),
                                               borderRadius:
-                                                  BorderRadius.circular(8),
+                                                  BorderRadius.circular(
+                                                      AppRadius.md),
                                               border: Border.all(
                                                   color: AppTheme.warning
                                                       .withValues(alpha: 0.4)),
@@ -411,7 +422,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                                       ? 'Vence en $daysLeft días'
                                                       : 'Expires in $daysLeft days',
                                                   style: const TextStyle(
-                                                    fontSize: 12,
+                                                    fontSize: AppTextSize.sm,
                                                     color: AppTheme.warning,
                                                     fontWeight: FontWeight.w600,
                                                   ),
@@ -420,7 +431,8 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                             ),
                                           ),
                                         ],
-                                        if (t.status == LeaseStatus.expired) ...[
+                                        if (t.status ==
+                                            LeaseStatus.expired) ...[
                                           const SizedBox(height: 8),
                                           Container(
                                             padding: const EdgeInsets.symmetric(
@@ -429,7 +441,8 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                               color: Colors.red
                                                   .withValues(alpha: 0.08),
                                               borderRadius:
-                                                  BorderRadius.circular(8),
+                                                  BorderRadius.circular(
+                                                      AppRadius.md),
                                             ),
                                             child: Row(
                                               children: [
@@ -444,7 +457,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                                       ? 'Bail vencido hace ${(-daysLeft)} días'
                                                       : 'Lease expired ${(-daysLeft)} days ago',
                                                   style: const TextStyle(
-                                                    fontSize: 12,
+                                                    fontSize: AppTextSize.sm,
                                                     color: Colors.red,
                                                     fontWeight: FontWeight.w500,
                                                   ),
@@ -464,15 +477,16 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                                   mainAxisSize:
                                                       MainAxisSize.min,
                                                   children: [
-                                                    Icon(
-                                                        Icons.email_rounded,
+                                                    Icon(Icons.email_rounded,
                                                         size: 13,
-                                                        color:
-                                                            CalcwiseTheme.of(context).textSecondary),
+                                                        color: CalcwiseTheme.of(
+                                                                context)
+                                                            .textSecondary),
                                                     const SizedBox(width: 4),
                                                     Text(t.email,
                                                         style: const TextStyle(
-                                                            fontSize: 12,
+                                                            fontSize:
+                                                                AppTextSize.sm,
                                                             color: AppTheme
                                                                 .labelGray)),
                                                   ],
@@ -482,15 +496,16 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                                   mainAxisSize:
                                                       MainAxisSize.min,
                                                   children: [
-                                                    Icon(
-                                                        Icons.phone_rounded,
+                                                    Icon(Icons.phone_rounded,
                                                         size: 13,
-                                                        color:
-                                                            CalcwiseTheme.of(context).textSecondary),
+                                                        color: CalcwiseTheme.of(
+                                                                context)
+                                                            .textSecondary),
                                                     const SizedBox(width: 4),
                                                     Text(t.phone,
                                                         style: const TextStyle(
-                                                            fontSize: 12,
+                                                            fontSize:
+                                                                AppTextSize.sm,
                                                             color: AppTheme
                                                                 .labelGray)),
                                                   ],
@@ -518,7 +533,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                             },
                           ),
               ),
-              const AdFooter(),
+              const CalcwiseAdFooter(),
             ],
           ),
         );
@@ -546,11 +561,12 @@ class _LeaseDateTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(label,
-                style:
-                    TextStyle(fontSize: 10, color: CalcwiseTheme.of(context).textSecondary)),
+                style: TextStyle(
+                    fontSize: 10,
+                    color: CalcwiseTheme.of(context).textSecondary)),
             Text(value,
                 style: const TextStyle(
-                    fontSize: 12, fontWeight: FontWeight.w600)),
+                    fontSize: AppTextSize.sm, fontWeight: FontWeight.w600)),
           ],
         ),
       ],
@@ -577,12 +593,12 @@ class _DateRow extends StatelessWidget {
         : DateFormat('MMM d, yyyy', 'en');
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(AppRadius.lg),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: const Color(0xFFF1F5F9),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
         ),
         child: Row(
           children: [
@@ -594,10 +610,12 @@ class _DateRow extends StatelessWidget {
               children: [
                 Text(label,
                     style: TextStyle(
-                        fontSize: 11, color: CalcwiseTheme.of(context).textSecondary)),
+                        fontSize: AppTextSize.xs,
+                        color: CalcwiseTheme.of(context).textSecondary)),
                 Text(fmt.format(date),
                     style: const TextStyle(
-                        fontSize: 14, fontWeight: FontWeight.w600)),
+                        fontSize: AppTextSize.body,
+                        fontWeight: FontWeight.w600)),
               ],
             ),
             const Spacer(),
@@ -624,12 +642,14 @@ class _EmptyTenantsState extends StatelessWidget {
           children: [
             Icon(Icons.people_outline_rounded,
                 size: 72,
-                color: CalcwiseTheme.of(context).textSecondary.withValues(alpha: 0.35)),
+                color: CalcwiseTheme.of(context)
+                    .textSecondary
+                    .withValues(alpha: 0.35)),
             const SizedBox(height: 16),
             Text(
               isSpanish ? 'Sin locatarios' : 'No tenants yet',
               style: const TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.w600),
+                  fontSize: AppTextSize.subtitle, fontWeight: FontWeight.w600),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),

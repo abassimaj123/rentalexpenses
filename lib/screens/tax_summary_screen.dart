@@ -1,4 +1,3 @@
-import '../core/ads/ad_footer.dart';
 import 'package:calcwise_core/calcwise_core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -79,8 +78,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
 
   double _totalIncome(Property p) {
     final raw = _incomeControllers[p.id]?.text ?? '';
-    return double.tryParse(raw.replaceAll(',', '.')) ??
-        (p.monthlyRent * 12);
+    return double.tryParse(raw.replaceAll(',', '.')) ?? (p.monthlyRent * 12);
   }
 
   double _totalExpensesForProperty(String propertyId) {
@@ -100,10 +98,10 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
     return map;
   }
 
-  Future<void> _addOrEditEntry(BuildContext ctx, bool isSpanish,
-      Property property, {ScheduleEEntry? existing}) async {
-    String selectedCategory =
-        existing?.category ?? IrsCategories.all.first;
+  Future<void> _addOrEditEntry(
+      BuildContext ctx, bool isSpanish, Property property,
+      {ScheduleEEntry? existing}) async {
+    String selectedCategory = existing?.category ?? IrsCategories.all.first;
     final amountCtrl = TextEditingController(
         text: existing != null && existing.amount > 0
             ? existing.amount.toStringAsFixed(2)
@@ -155,7 +153,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                 contentPadding: EdgeInsets.zero,
                 title: Text(
                   isSpanish ? 'Gasto recurrente' : 'Recurring expense',
-                  style: const TextStyle(fontSize: 14),
+                  style: const TextStyle(fontSize: AppTextSize.body),
                 ),
                 value: isRecurring,
                 activeThumbColor: AppTheme.primary,
@@ -201,9 +199,9 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(minimumSize: const Size(80, 40)),
               onPressed: () async {
-                final amount = double.tryParse(
-                        amountCtrl.text.replaceAll(',', '.')) ??
-                    0.0;
+                final amount =
+                    double.tryParse(amountCtrl.text.replaceAll(',', '.')) ??
+                        0.0;
                 if (amount <= 0) return;
                 final id = existing?.id ??
                     'sche_${property.id}_${_selectedYear}_${selectedCategory.hashCode}_${DateTime.now().millisecondsSinceEpoch}';
@@ -235,7 +233,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
   }
 
   Future<void> _exportPdf(BuildContext ctx, bool isSpanish) async {
-    if (!freemiumService.isPremium) {
+    if (!freemiumService.hasFullAccess) {
       await PaywallHard.show(ctx);
       return;
     }
@@ -261,30 +259,32 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                 pw.Text(
                   'Schedule E — Rental Income and Expenses $_selectedYear',
                   style: pw.TextStyle(
-                      fontSize: 16, fontWeight: pw.FontWeight.bold),
+                      fontSize: AppTextSize.bodyLg,
+                      fontWeight: pw.FontWeight.bold),
                 ),
                 pw.SizedBox(height: 4),
                 pw.Text(
                   'Property: ${property.name}',
                   style: pw.TextStyle(
-                      fontSize: 13, fontWeight: pw.FontWeight.bold),
+                      fontSize: AppTextSize.md, fontWeight: pw.FontWeight.bold),
                 ),
                 pw.Text(
                   'Address: ${property.address}',
-                  style: const pw.TextStyle(fontSize: 11),
+                  style: const pw.TextStyle(fontSize: AppTextSize.xs),
                 ),
                 pw.SizedBox(height: 14),
 
                 // Part I header
                 pw.Container(
-                  padding: const pw.EdgeInsets.all(8),
+                  padding: const pw.EdgeInsets.all(AppSpacing.sm),
                   decoration: const pw.BoxDecoration(
                     color: PdfColors.grey200,
                   ),
                   child: pw.Text(
                     'Part I — Income or Loss From Rental Real Estate and Royalties',
                     style: pw.TextStyle(
-                        fontSize: 11, fontWeight: pw.FontWeight.bold),
+                        fontSize: AppTextSize.xs,
+                        fontWeight: pw.FontWeight.bold),
                   ),
                 ),
                 pw.SizedBox(height: 6),
@@ -309,7 +309,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                 pw.Text(
                   'Expenses',
                   style: pw.TextStyle(
-                      fontSize: 11, fontWeight: pw.FontWeight.bold),
+                      fontSize: AppTextSize.xs, fontWeight: pw.FontWeight.bold),
                 ),
                 pw.SizedBox(height: 4),
                 pw.TableHelper.fromTextArray(
@@ -317,8 +317,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                   data: [
                     ...IrsCategories.all
                         .where((c) =>
-                            catTotals.containsKey(c) &&
-                            catTotals[c]! > 0)
+                            catTotals.containsKey(c) && catTotals[c]! > 0)
                         .map((c) => [c, '\$${_fmt.format(catTotals[c]!)}']),
                     ['Total Expenses', '\$${_fmt.format(totalExp)}'],
                   ],
@@ -334,24 +333,20 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
 
                 // Net result
                 pw.Container(
-                  padding: const pw.EdgeInsets.all(10),
+                  padding: const pw.EdgeInsets.all(AppSpacing.smPlus),
                   decoration: pw.BoxDecoration(
-                    color:
-                        net >= 0 ? PdfColors.green50 : PdfColors.red50,
+                    color: net >= 0 ? PdfColors.green50 : PdfColors.red50,
                     border: pw.Border.all(
-                        color: net >= 0
-                            ? PdfColors.green300
-                            : PdfColors.red300),
+                        color:
+                            net >= 0 ? PdfColors.green300 : PdfColors.red300),
                   ),
                   child: pw.Row(
                     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                     children: [
                       pw.Text(
-                        net >= 0
-                            ? 'Net Rental Income'
-                            : 'Net Rental Loss',
+                        net >= 0 ? 'Net Rental Income' : 'Net Rental Loss',
                         style: pw.TextStyle(
-                            fontSize: 12,
+                            fontSize: AppTextSize.sm,
                             fontWeight: pw.FontWeight.bold,
                             color: net >= 0
                                 ? PdfColors.green800
@@ -360,7 +355,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                       pw.Text(
                         '${net < 0 ? '-' : ''}\$${_fmt.format(net.abs())}',
                         style: pw.TextStyle(
-                            fontSize: 12,
+                            fontSize: AppTextSize.sm,
                             fontWeight: pw.FontWeight.bold,
                             color: net >= 0
                                 ? PdfColors.green800
@@ -379,13 +374,13 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
               pw.SizedBox(height: 6),
               pw.Text(
                 'Generated: $genDate',
-                style: const pw.TextStyle(
-                    fontSize: 9, color: PdfColors.grey600),
+                style:
+                    const pw.TextStyle(fontSize: 9, color: PdfColors.grey600),
               ),
               pw.Text(
                 'Generated by RentalExpenses app. Consult a tax professional before filing.',
-                style: const pw.TextStyle(
-                    fontSize: 9, color: PdfColors.grey600),
+                style:
+                    const pw.TextStyle(fontSize: 9, color: PdfColors.grey600),
               ),
             ]);
 
@@ -423,7 +418,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
             actions: [
               if (_exporting)
                 const Padding(
-                  padding: EdgeInsets.all(16),
+                  padding: EdgeInsets.all(AppSpacing.lg),
                   child: SizedBox(
                     width: 20,
                     height: 20,
@@ -433,7 +428,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                 )
               else
                 IconButton(
-                  icon: const Icon(Icons.picture_as_pdf_outlined),
+                  icon: const Icon(Icons.picture_as_pdf_rounded),
                   tooltip: isSpanish
                       ? 'Exportar Schedule E PDF'
                       : 'Export Schedule E PDF',
@@ -451,20 +446,19 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                 child: _loading
                     ? const Center(child: CircularProgressIndicator())
                     : ListView(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(AppSpacing.lg),
                         children: [
                           // Year selector
-                          _SectionLabel(
-                              isSpanish ? 'AÑO FISCAL' : 'TAX YEAR'),
+                          _SectionLabel(isSpanish ? 'AÑO FISCAL' : 'TAX YEAR'),
                           Card(
                             child: Padding(
-                              padding: const EdgeInsets.all(4),
+                              padding: const EdgeInsets.all(AppSpacing.xs),
                               child: DropdownButtonFormField<int>(
                                 initialValue: _selectedYear,
                                 decoration: InputDecoration(
                                   labelText: isSpanish ? 'Año' : 'Year',
-                                  prefixIcon: const Icon(
-                                      Icons.calendar_today_rounded),
+                                  prefixIcon:
+                                      const Icon(Icons.calendar_today_rounded),
                                 ),
                                 items: _years
                                     .map((y) => DropdownMenuItem(
@@ -489,15 +483,14 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                 : 'PORTFOLIO NET'),
                             Card(
                               child: Padding(
-                                padding: const EdgeInsets.all(16),
+                                padding: const EdgeInsets.all(AppSpacing.lg),
                                 child: Column(
                                   children: [
                                     _NetRow(
                                       label: isSpanish
                                           ? 'Total ingresos'
                                           : 'Total Rental Income',
-                                      value:
-                                          '\$${_fmt.format(grandIncome)}',
+                                      value: '\$${_fmt.format(grandIncome)}',
                                       color: AppTheme.success,
                                     ),
                                     const SizedBox(height: 8),
@@ -505,13 +498,13 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                       label: isSpanish
                                           ? 'Total gastos'
                                           : 'Total Expenses',
-                                      value:
-                                          '\$${_fmt.format(grandExpenses)}',
+                                      value: '\$${_fmt.format(grandExpenses)}',
                                       color: Colors.red,
                                     ),
                                     Divider(
                                         height: 20,
-                                        color: CalcwiseTheme.of(context).cardBorder),
+                                        color: CalcwiseTheme.of(context)
+                                            .cardBorder),
                                     Row(
                                       children: [
                                         Expanded(
@@ -525,27 +518,25 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                     : 'Net Rental Loss'),
                                             style: const TextStyle(
                                                 fontWeight: FontWeight.bold,
-                                                fontSize: 15),
+                                                fontSize: AppTextSize.bodyMd),
                                           ),
                                         ),
                                         Container(
-                                          padding:
-                                              const EdgeInsets.symmetric(
-                                                  horizontal: 10,
-                                                  vertical: 4),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 4),
                                           decoration: BoxDecoration(
                                             color: (grandNet >= 0
                                                     ? AppTheme.success
                                                     : Colors.red)
                                                 .withValues(alpha: 0.12),
-                                            borderRadius:
-                                                BorderRadius.circular(8),
+                                            borderRadius: BorderRadius.circular(
+                                                AppRadius.md),
                                           ),
                                           child: Text(
                                             '${grandNet < 0 ? '-' : ''}\$${_fmt.format(grandNet.abs())}',
                                             style: TextStyle(
                                               fontWeight: FontWeight.bold,
-                                              fontSize: 16,
+                                              fontSize: AppTextSize.bodyLg,
                                               color: grandNet >= 0
                                                   ? AppTheme.success
                                                   : Colors.red,
@@ -558,9 +549,8 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                     Align(
                                       alignment: Alignment.centerRight,
                                       child: Container(
-                                        padding:
-                                            const EdgeInsets.symmetric(
-                                                horizontal: 8, vertical: 3),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8, vertical: 3),
                                         decoration: BoxDecoration(
                                           color: (grandNet >= 0
                                                   ? AppTheme.success
@@ -600,42 +590,40 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                           else
                             ..._properties.map((p) {
                               final catTotals = _categoryTotals(p.id);
-                              final totalExp =
-                                  _totalExpensesForProperty(p.id);
+                              final totalExp = _totalExpensesForProperty(p.id);
                               final net = _netForProperty(p);
                               final incCtrl = _incomeControllers[p.id];
 
                               return Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   _SectionLabel(p.name.toUpperCase()),
                                   Card(
                                     child: Padding(
-                                      padding: const EdgeInsets.all(16),
+                                      padding:
+                                          const EdgeInsets.all(AppSpacing.lg),
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
                                           if (p.address.isNotEmpty)
                                             Padding(
-                                              padding:
-                                                  const EdgeInsets.only(
-                                                      bottom: 10),
+                                              padding: const EdgeInsets.only(
+                                                  bottom: 10),
                                               child: Row(
                                                 children: [
                                                   const Icon(
-                                                      Icons
-                                                          .location_on_rounded,
+                                                      Icons.location_on_rounded,
                                                       size: 14,
-                                                      color: AppTheme
-                                                          .labelGray),
+                                                      color:
+                                                          AppTheme.labelGray),
                                                   const SizedBox(width: 4),
                                                   Expanded(
                                                     child: Text(
                                                       p.address,
                                                       style: const TextStyle(
-                                                          fontSize: 12,
+                                                          fontSize:
+                                                              AppTextSize.sm,
                                                           color: AppTheme
                                                               .labelGray),
                                                     ),
@@ -647,12 +635,10 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                           // Rental income field
                                           TextField(
                                             controller: incCtrl,
-                                            keyboardType:
-                                                const TextInputType
-                                                    .numberWithOptions(
-                                                    decimal: true),
-                                            onChanged: (_) =>
-                                                setState(() {}),
+                                            keyboardType: const TextInputType
+                                                .numberWithOptions(
+                                                decimal: true),
+                                            onChanged: (_) => setState(() {}),
                                             decoration: InputDecoration(
                                               labelText: isSpanish
                                                   ? 'Ingreso anual por alquiler'
@@ -668,22 +654,21 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                           // Part I Schedule E label
                                           Container(
                                             width: double.infinity,
-                                            padding:
-                                                const EdgeInsets.symmetric(
-                                                    horizontal: 12,
-                                                    vertical: 8),
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 12, vertical: 8),
                                             decoration: BoxDecoration(
                                               color: AppTheme.primary
                                                   .withValues(alpha: 0.08),
                                               borderRadius:
-                                                  BorderRadius.circular(8),
+                                                  BorderRadius.circular(
+                                                      AppRadius.md),
                                             ),
                                             child: Text(
                                               isSpanish
                                                   ? 'Parte I — Gastos (Schedule E)'
                                                   : 'Part I — Expenses (Schedule E)',
                                               style: const TextStyle(
-                                                fontSize: 12,
+                                                fontSize: AppTextSize.sm,
                                                 fontWeight: FontWeight.bold,
                                                 color: AppTheme.primary,
                                               ),
@@ -702,16 +687,16 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                     ? 'Sin gastos registrados. Toca + para agregar.'
                                                     : 'No expenses yet. Tap + to add.',
                                                 style: TextStyle(
-                                                    color:
-                                                        CalcwiseTheme.of(context).textSecondary,
-                                                    fontSize: 13),
+                                                    color: CalcwiseTheme.of(
+                                                            context)
+                                                        .textSecondary,
+                                                    fontSize: AppTextSize.md),
                                               ),
                                             )
                                           else
                                             ...IrsCategories.all
                                                 .where((c) =>
-                                                    catTotals
-                                                        .containsKey(c) &&
+                                                    catTotals.containsKey(c) &&
                                                     catTotals[c]! > 0)
                                                 .map((c) {
                                               final entries =
@@ -721,8 +706,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                       .toList();
                                               return InkWell(
                                                 onTap: entries.isNotEmpty
-                                                    ? () =>
-                                                        _addOrEditEntry(
+                                                    ? () => _addOrEditEntry(
                                                           context,
                                                           isSpanish,
                                                           p,
@@ -731,38 +715,33 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                         )
                                                     : null,
                                                 borderRadius:
-                                                    BorderRadius.circular(
-                                                        8),
+                                                    BorderRadius.circular(8),
                                                 child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                          vertical: 8),
+                                                  padding: const EdgeInsets
+                                                      .symmetric(vertical: 8),
                                                   child: Row(
                                                     children: [
                                                       const Icon(
-                                                          Icons
-                                                              .receipt_rounded,
+                                                          Icons.receipt_rounded,
                                                           size: 15,
                                                           color: AppTheme
                                                               .labelGray),
-                                                      const SizedBox(
-                                                          width: 8),
+                                                      const SizedBox(width: 8),
                                                       Expanded(
                                                         child: Text(
                                                           IrsCategories
                                                               .translate(
-                                                                  c,
-                                                                  isSpanish),
+                                                                  c, isSpanish),
                                                           style:
                                                               const TextStyle(
-                                                                  fontSize:
-                                                                      13),
+                                                                  fontSize: 13),
                                                         ),
                                                       ),
                                                       Text(
                                                         '\$${_fmt.format(catTotals[c]!)}',
                                                         style: const TextStyle(
-                                                            fontSize: 13,
+                                                            fontSize:
+                                                                AppTextSize.md,
                                                             fontWeight:
                                                                 FontWeight
                                                                     .w600),
@@ -775,7 +754,8 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
 
                                           Divider(
                                               height: 16,
-                                              color: CalcwiseTheme.of(context).cardBorder),
+                                              color: CalcwiseTheme.of(context)
+                                                  .cardBorder),
                                           Row(
                                             children: [
                                               Expanded(
@@ -809,8 +789,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                           ? 'Pérdida neta'
                                                           : 'Net Loss'),
                                                   style: TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.bold,
+                                                    fontWeight: FontWeight.bold,
                                                     color: net >= 0
                                                         ? AppTheme.success
                                                         : Colors.red,
@@ -821,7 +800,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                 '${net < 0 ? '-' : ''}\$${_fmt.format(net.abs())}',
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.bold,
-                                                  fontSize: 15,
+                                                  fontSize: AppTextSize.bodyMd,
                                                   color: net >= 0
                                                       ? AppTheme.success
                                                       : Colors.red,
@@ -833,23 +812,19 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
 
                                           // Add expense button
                                           OutlinedButton.icon(
-                                            onPressed: () =>
-                                                _addOrEditEntry(
-                                                    context, isSpanish, p),
-                                            icon: const Icon(
-                                                Icons.add_rounded,
+                                            onPressed: () => _addOrEditEntry(
+                                                context, isSpanish, p),
+                                            icon: const Icon(Icons.add_rounded,
                                                 size: 18),
                                             label: Text(isSpanish
                                                 ? 'Agregar gasto IRS'
                                                 : 'Add IRS Expense'),
                                             style: OutlinedButton.styleFrom(
-                                              foregroundColor:
-                                                  AppTheme.primary,
+                                              foregroundColor: AppTheme.primary,
                                               side: const BorderSide(
                                                   color: AppTheme.primary),
-                                              minimumSize:
-                                                  const Size(double.infinity,
-                                                      44),
+                                              minimumSize: const Size(
+                                                  double.infinity, 44),
                                             ),
                                           ),
                                         ],
@@ -873,8 +848,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                       width: 20,
                                       height: 20,
                                       child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: Colors.white),
+                                          strokeWidth: 2, color: Colors.white),
                                     )
                                   : const Icon(Icons.picture_as_pdf_rounded),
                               label: Text(isSpanish
@@ -887,7 +861,9 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                   ? 'Consulta a un profesional fiscal antes de presentar tu declaración.'
                                   : 'Consult a tax professional before filing your return.',
                               style: TextStyle(
-                                  fontSize: 11, color: CalcwiseTheme.of(context).textSecondary),
+                                  fontSize: AppTextSize.xs,
+                                  color:
+                                      CalcwiseTheme.of(context).textSecondary),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 24),
@@ -895,7 +871,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                         ],
                       ),
               ),
-              const AdFooter(),
+              const CalcwiseAdFooter(),
             ],
           ),
         );
@@ -916,7 +892,7 @@ class _SectionLabel extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-              fontSize: 11,
+              fontSize: AppTextSize.xs,
               fontWeight: FontWeight.bold,
               color: CalcwiseTheme.of(context).textSecondary,
               letterSpacing: 0.8),
@@ -937,11 +913,13 @@ class _NetRow extends StatelessWidget {
       children: [
         Expanded(
           child: Text(label,
-              style: TextStyle(fontSize: 14, color: CalcwiseTheme.of(context).textSecondary)),
+              style: TextStyle(
+                  fontSize: AppTextSize.body,
+                  color: CalcwiseTheme.of(context).textSecondary)),
         ),
         Text(value,
             style: TextStyle(
-                fontSize: 14,
+                fontSize: AppTextSize.body,
                 fontWeight: FontWeight.w600,
                 color: color)),
       ],
@@ -963,12 +941,14 @@ class _EmptyState extends StatelessWidget {
           children: [
             Icon(Icons.receipt_long_rounded,
                 size: 72,
-                color: CalcwiseTheme.of(context).textSecondary.withValues(alpha: 0.35)),
+                color: CalcwiseTheme.of(context)
+                    .textSecondary
+                    .withValues(alpha: 0.35)),
             const SizedBox(height: 16),
             Text(
               isSpanish ? 'Sin propiedades' : 'No properties',
               style: const TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.w600),
+                  fontSize: AppTextSize.subtitle, fontWeight: FontWeight.w600),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),

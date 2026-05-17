@@ -1,4 +1,3 @@
-import '../core/ads/ad_footer.dart';
 import 'package:calcwise_core/calcwise_core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -35,16 +34,16 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
     if (_exporting) return;
     setState(() => _exporting = true);
     try {
-      final c      = widget.calc;
-      final fmt    = NumberFormat('#,##0.00', 'en_US');
-      final dateFmt= DateFormat('MMMM d, yyyy');
-      final cf     = c.monthlyCashFlow;
+      final c = widget.calc;
+      final fmt = NumberFormat('#,##0.00', 'en_US');
+      final dateFmt = DateFormat('MMMM d, yyyy');
+      final cf = c.monthlyCashFlow;
       final cfSign = cf >= 0 ? '+' : '-';
 
       final doc = pw.Document();
       const green = PdfColor.fromInt(0xFF16A34A);
-      const red   = PdfColor.fromInt(0xFFDC2626);
-      const gray  = PdfColor.fromInt(0xFF64748B);
+      const red = PdfColor.fromInt(0xFFDC2626);
+      const gray = PdfColor.fromInt(0xFF64748B);
       const light = PdfColor.fromInt(0xFFF1F5F9);
 
       doc.addPage(pw.Page(
@@ -56,8 +55,8 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
             // ── Header ───────────────────────────────────────────────────
             pw.Container(
               width: double.infinity,
-              padding: const pw.EdgeInsets.symmetric(
-                  horizontal: 20, vertical: 14),
+              padding:
+                  const pw.EdgeInsets.symmetric(horizontal: 20, vertical: 14),
               decoration: const pw.BoxDecoration(color: green),
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -67,7 +66,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                         ? c.propertyName
                         : (isSpanish ? 'Mi Propiedad' : 'My Property'),
                     style: pw.TextStyle(
-                      fontSize: 18,
+                      fontSize: AppTextSize.subtitle,
                       fontWeight: pw.FontWeight.bold,
                       color: PdfColors.white,
                     ),
@@ -76,7 +75,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                   pw.Text(
                     '${isSpanish ? "Guardado" : "Saved"}: ${dateFmt.format(c.savedAt)}',
                     style: const pw.TextStyle(
-                        fontSize: 11, color: PdfColors.white),
+                        fontSize: AppTextSize.xs, color: PdfColors.white),
                   ),
                 ],
               ),
@@ -100,8 +99,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
               pw.SizedBox(width: 12),
               _pdfMetric(
                 label: 'NOI',
-                value:
-                    '${c.noi >= 0 ? '+' : '-'}\$${fmt.format(c.noi.abs())}',
+                value: '${c.noi >= 0 ? '+' : '-'}\$${fmt.format(c.noi.abs())}',
                 color: c.noi >= 0 ? green : red,
               ),
             ]),
@@ -112,7 +110,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
               isSpanish ? 'Desglose' : 'Breakdown',
               style: pw.TextStyle(
                   fontWeight: pw.FontWeight.bold,
-                  fontSize: 13,
+                  fontSize: AppTextSize.md,
                   color: gray),
             ),
             pw.SizedBox(height: 6),
@@ -122,46 +120,67 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                 isSpanish ? 'Monto' : 'Amount',
               ],
               data: [
-                [isSpanish ? 'Alquiler mensual' : 'Monthly Rent',
-                  '\$${fmt.format(c.rentIncome)}'],
+                [
+                  isSpanish ? 'Alquiler mensual' : 'Monthly Rent',
+                  '\$${fmt.format(c.rentIncome)}'
+                ],
                 if (c.mortgage > 0)
-                  [isSpanish ? 'Hipoteca' : 'Mortgage',
-                    '\$${fmt.format(c.mortgage)}'],
+                  [
+                    isSpanish ? 'Hipoteca' : 'Mortgage',
+                    '\$${fmt.format(c.mortgage)}'
+                  ],
                 if (c.propertyTaxes > 0)
-                  [isSpanish ? 'Impuestos' : 'Property Taxes',
-                    '\$${fmt.format(c.propertyTaxes)}'],
+                  [
+                    isSpanish ? 'Impuestos' : 'Property Taxes',
+                    '\$${fmt.format(c.propertyTaxes)}'
+                  ],
                 if (c.insurance > 0)
-                  [isSpanish ? 'Seguro' : 'Insurance',
-                    '\$${fmt.format(c.insurance)}'],
-                if (c.hoaFees > 0)
-                  ['HOA', '\$${fmt.format(c.hoaFees)}'],
+                  [
+                    isSpanish ? 'Seguro' : 'Insurance',
+                    '\$${fmt.format(c.insurance)}'
+                  ],
+                if (c.hoaFees > 0) ['HOA', '\$${fmt.format(c.hoaFees)}'],
                 if (c.propertyMgmt > 0)
-                  [isSpanish ? 'Administración' : 'Property Mgmt',
-                    '\$${fmt.format(c.propertyMgmt)}'],
+                  [
+                    isSpanish ? 'Administración' : 'Property Mgmt',
+                    '\$${fmt.format(c.propertyMgmt)}'
+                  ],
                 if (c.maintenance > 0)
-                  [isSpanish ? 'Mantenimiento' : 'Maintenance',
-                    '\$${fmt.format(c.maintenance)}'],
+                  [
+                    isSpanish ? 'Mantenimiento' : 'Maintenance',
+                    '\$${fmt.format(c.maintenance)}'
+                  ],
                 if (c.vacancyLoss > 0)
-                  [isSpanish ? 'Vacancia' : 'Vacancy',
-                    '\$${fmt.format(c.vacancyLoss)}'],
+                  [
+                    isSpanish ? 'Vacancia' : 'Vacancy',
+                    '\$${fmt.format(c.vacancyLoss)}'
+                  ],
                 if (c.utilities > 0)
-                  [isSpanish ? 'Servicios' : 'Utilities',
-                    '\$${fmt.format(c.utilities)}'],
+                  [
+                    isSpanish ? 'Servicios' : 'Utilities',
+                    '\$${fmt.format(c.utilities)}'
+                  ],
                 if (c.landscaping > 0)
-                  [isSpanish ? 'Jardinería' : 'Landscaping',
-                    '\$${fmt.format(c.landscaping)}'],
+                  [
+                    isSpanish ? 'Jardinería' : 'Landscaping',
+                    '\$${fmt.format(c.landscaping)}'
+                  ],
                 if (c.otherExpenses > 0)
-                  [isSpanish ? 'Otros' : 'Other',
-                    '\$${fmt.format(c.otherExpenses)}'],
-                [isSpanish ? 'TOTAL GASTOS' : 'TOTAL EXPENSES',
-                  '\$${fmt.format(c.totalExpenses)}'],
+                  [
+                    isSpanish ? 'Otros' : 'Other',
+                    '\$${fmt.format(c.otherExpenses)}'
+                  ],
+                [
+                  isSpanish ? 'TOTAL GASTOS' : 'TOTAL EXPENSES',
+                  '\$${fmt.format(c.totalExpenses)}'
+                ],
               ],
               border: pw.TableBorder.all(color: PdfColors.grey300),
               headerStyle: pw.TextStyle(
-                  fontWeight: pw.FontWeight.bold, fontSize: 11),
-              cellStyle: const pw.TextStyle(fontSize: 11),
-              headerDecoration: const pw.BoxDecoration(
-                  color: PdfColor.fromInt(0xFFECFDF5)),
+                  fontWeight: pw.FontWeight.bold, fontSize: AppTextSize.xs),
+              cellStyle: const pw.TextStyle(fontSize: AppTextSize.xs),
+              headerDecoration:
+                  const pw.BoxDecoration(color: PdfColor.fromInt(0xFFECFDF5)),
               cellHeight: 22,
               oddRowDecoration: const pw.BoxDecoration(color: light),
             ),
@@ -173,7 +192,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                 isSpanish ? 'Métricas de Inversión' : 'Investment Metrics',
                 style: pw.TextStyle(
                     fontWeight: pw.FontWeight.bold,
-                    fontSize: 13,
+                    fontSize: AppTextSize.md,
                     color: gray),
               ),
               pw.SizedBox(height: 6),
@@ -209,8 +228,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
             pw.SizedBox(height: 4),
             pw.Text(
               'Rental Expenses Tracker — ${DateFormat('yyyy-MM-dd').format(DateTime.now())}',
-              style: const pw.TextStyle(
-                  fontSize: 9, color: PdfColors.grey600),
+              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600),
             ),
           ],
         ),
@@ -225,8 +243,9 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(
-              isSpanishNotifier.value ? 'Error al exportar PDF' : 'PDF export failed'),
+          content: Text(isSpanishNotifier.value
+              ? 'Error al exportar PDF'
+              : 'PDF export failed'),
         ));
       }
     } finally {
@@ -242,23 +261,22 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
   }) =>
       pw.Expanded(
         child: pw.Container(
-          padding: const pw.EdgeInsets.symmetric(
-              horizontal: 10, vertical: 8),
+          padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           decoration: pw.BoxDecoration(
             border: pw.Border.all(color: PdfColors.grey300),
-            borderRadius: pw.BorderRadius.circular(6),
+            borderRadius: pw.BorderRadius.circular(AppRadius.sm),
           ),
           child: pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.center,
             children: [
               pw.Text(label,
-                  style: const pw.TextStyle(
-                      fontSize: 9, color: PdfColors.grey600),
+                  style:
+                      const pw.TextStyle(fontSize: 9, color: PdfColors.grey600),
                   textAlign: pw.TextAlign.center),
               pw.SizedBox(height: 4),
               pw.Text(value,
                   style: pw.TextStyle(
-                      fontSize: 13,
+                      fontSize: AppTextSize.md,
                       fontWeight: pw.FontWeight.bold,
                       color: color),
                   textAlign: pw.TextAlign.center),
@@ -269,10 +287,11 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final fmt     = NumberFormat('#,##0.00', 'en_US');
+    final fmt = NumberFormat('#,##0.00', 'en_US');
     final dateFmt = DateFormat('MMM d, yyyy — h:mm a');
-    final c       = widget.calc;
-    final cfColor = c.monthlyCashFlow >= 0 ? AppTheme.success : AppTheme.dangerRed;
+    final c = widget.calc;
+    final cfColor =
+        c.monthlyCashFlow >= 0 ? AppTheme.success : AppTheme.dangerRed;
 
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
@@ -295,8 +314,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                           height: 18,
                           child: CircularProgressIndicator(
                               strokeWidth: 2, color: Colors.white))
-                      : Icon(
-                          Icons.picture_as_pdf_outlined,
+                      : Icon(Icons.picture_as_pdf_rounded,
                           color: isPremium
                               ? Colors.white
                               : Colors.white.withValues(alpha: 0.55)),
@@ -318,17 +336,15 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                     );
                   }
                   return IconButton(
-                    icon: const Icon(Icons.star_outline,
-                        color: Colors.amber),
-                    tooltip:
-                        isSpanish ? 'Obtener Premium' : 'Go Premium',
+                    icon: const Icon(Icons.star_outline, color: Colors.amber),
+                    tooltip: isSpanish ? 'Obtener Premium' : 'Go Premium',
                     onPressed: () => IAPService.instance.buy(),
                   );
                 },
               ),
               // Share
               IconButton(
-                icon: const Icon(Icons.share_outlined),
+                icon: const Icon(Icons.share_rounded),
                 tooltip: isSpanish ? 'Compartir' : 'Share',
                 onPressed: () => _share(context, isSpanish, fmt),
               ),
@@ -338,7 +354,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
             children: [
               Expanded(
                 child: ListView(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(AppSpacing.lg),
                   children: [
                     // ── Saved-at timestamp ──────────────────────────────
                     Padding(
@@ -346,12 +362,13 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                       child: Row(
                         children: [
                           Icon(Icons.access_time_rounded,
-                              size: 14, color: CalcwiseTheme.of(context).textSecondary),
+                              size: 14,
+                              color: CalcwiseTheme.of(context).textSecondary),
                           const SizedBox(width: 6),
                           Text(
                             dateFmt.format(c.savedAt),
                             style: TextStyle(
-                                fontSize: 13,
+                                fontSize: AppTextSize.md,
                                 color: CalcwiseTheme.of(context).textSecondary),
                           ),
                         ],
@@ -383,18 +400,15 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
 
                     // ── Expenses breakdown ──────────────────────────────
                     _SectionCard(
-                      title: isSpanish
-                          ? 'Gastos mensuales'
-                          : 'Monthly Expenses',
+                      title:
+                          isSpanish ? 'Gastos mensuales' : 'Monthly Expenses',
                       rows: [
                         if (c.mortgage > 0)
                           _Row(isSpanish ? 'Hipoteca' : 'Mortgage',
                               '\$${fmt.format(c.mortgage)}'),
                         if (c.propertyTaxes > 0)
                           _Row(
-                              isSpanish
-                                  ? 'Impuesto predial'
-                                  : 'Property Taxes',
+                              isSpanish ? 'Impuesto predial' : 'Property Taxes',
                               '\$${fmt.format(c.propertyTaxes)}'),
                         if (c.insurance > 0)
                           _Row(isSpanish ? 'Seguro' : 'Insurance',
@@ -402,16 +416,10 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                         if (c.hoaFees > 0)
                           _Row('HOA', '\$${fmt.format(c.hoaFees)}'),
                         if (c.propertyMgmt > 0)
-                          _Row(
-                              isSpanish
-                                  ? 'Administración'
-                                  : 'Property Mgmt',
+                          _Row(isSpanish ? 'Administración' : 'Property Mgmt',
                               '\$${fmt.format(c.propertyMgmt)}'),
                         if (c.maintenance > 0)
-                          _Row(
-                              isSpanish
-                                  ? 'Mantenimiento'
-                                  : 'Maintenance',
+                          _Row(isSpanish ? 'Mantenimiento' : 'Maintenance',
                               '\$${fmt.format(c.maintenance)}'),
                         if (c.vacancyLoss > 0)
                           _Row(isSpanish ? 'Vacancia' : 'Vacancy Loss',
@@ -445,9 +453,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                           valueColor: cfColor,
                         ),
                         _Row(
-                          isSpanish
-                              ? 'Ratio de gastos'
-                              : 'Expense Ratio',
+                          isSpanish ? 'Ratio de gastos' : 'Expense Ratio',
                           '${c.expenseRatio.toStringAsFixed(1)}%',
                           valueColor: c.expenseRatio < 70
                               ? AppTheme.success
@@ -462,7 +468,9 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                         _Row(
                           'NOI (anual)',
                           '${c.noi < 0 ? '-' : ''}\$${fmt.format(c.noi.abs())}',
-                          valueColor: c.noi >= 0 ? AppTheme.success : AppTheme.dangerRed,
+                          valueColor: c.noi >= 0
+                              ? AppTheme.success
+                              : AppTheme.dangerRed,
                         ),
                       ],
                     ),
@@ -504,8 +512,12 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                                       : AppTheme.dangerRed,
                             ),
                           _Row(
-                            isSpanish ? 'Cap Rate > 6% = bueno' : 'Cap Rate > 6% = good',
-                            isSpanish ? 'CoC ROI > 8% = excelente' : 'CoC ROI > 8% = excellent',
+                            isSpanish
+                                ? 'Cap Rate > 6% = bueno'
+                                : 'Cap Rate > 6% = good',
+                            isSpanish
+                                ? 'CoC ROI > 8% = excelente'
+                                : 'CoC ROI > 8% = excellent',
                             valueColor: CalcwiseTheme.of(context).textSecondary,
                           ),
                         ],
@@ -516,7 +528,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                   ],
                 ),
               ),
-              const AdFooter(),
+              const CalcwiseAdFooter(),
             ],
           ),
         );
@@ -525,7 +537,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
   }
 
   void _share(BuildContext context, bool isSpanish, NumberFormat fmt) {
-    final c    = widget.calc;
+    final c = widget.calc;
     final name = c.propertyName.isNotEmpty
         ? c.propertyName
         : (isSpanish ? 'Mi propiedad' : 'My Property');
@@ -569,23 +581,26 @@ class _HeroCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
       child: Column(
         children: [
           Text(label,
               style: TextStyle(
-                  fontSize: 14, color: CalcwiseTheme.of(context).textSecondary)),
+                  fontSize: AppTextSize.body,
+                  color: CalcwiseTheme.of(context).textSecondary)),
           const SizedBox(height: 8),
           Text(value,
               style: TextStyle(
-                  fontSize: 32,
+                  fontSize: AppTextSize.displayLg,
                   fontWeight: FontWeight.bold,
                   color: color)),
           const SizedBox(height: 4),
           Text('/mo',
-              style: TextStyle(fontSize: 13, color: CalcwiseTheme.of(context).textSecondary)),
+              style: TextStyle(
+                  fontSize: AppTextSize.md,
+                  color: CalcwiseTheme.of(context).textSecondary)),
         ],
       ),
     );
@@ -609,7 +624,7 @@ class _SectionCard extends StatelessWidget {
           children: [
             Text(title,
                 style: const TextStyle(
-                    fontSize: 13,
+                    fontSize: AppTextSize.md,
                     fontWeight: FontWeight.bold,
                     color: AppTheme.primary)),
             const SizedBox(height: 10),
@@ -644,15 +659,15 @@ class _RowWidget extends StatelessWidget {
           Flexible(
             child: Text(row.label,
                 style: TextStyle(
-                    fontSize: 14, color: CalcwiseTheme.of(context).textSecondary)),
+                    fontSize: AppTextSize.body,
+                    color: CalcwiseTheme.of(context).textSecondary)),
           ),
           const SizedBox(width: 12),
           Text(
             row.value,
             style: TextStyle(
-              fontSize: 14,
-              fontWeight:
-                  row.bold ? FontWeight.bold : FontWeight.w600,
+              fontSize: AppTextSize.body,
+              fontWeight: row.bold ? FontWeight.bold : FontWeight.w600,
               color: row.valueColor,
             ),
           ),

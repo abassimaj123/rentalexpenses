@@ -86,8 +86,8 @@ class PropertyDatabaseService {
       await _createScheduleETable(db);
     }
     if (oldVersion < 5) {
-      await db.execute(
-          'ALTER TABLE monthly_expenses ADD COLUMN receipt_path TEXT');
+      await db
+          .execute('ALTER TABLE monthly_expenses ADD COLUMN receipt_path TEXT');
     }
   }
 
@@ -144,9 +144,11 @@ class PropertyDatabaseService {
 
   Future<void> deleteProperty(String id) async {
     final db = await database;
-    await db.delete('monthly_expenses', where: 'propertyId = ?', whereArgs: [id]);
+    await db
+        .delete('monthly_expenses', where: 'propertyId = ?', whereArgs: [id]);
     await db.delete('tenants', where: 'property_id = ?', whereArgs: [id]);
-    await db.delete('schedule_e_entries', where: 'property_id = ?', whereArgs: [id]);
+    await db.delete('schedule_e_entries',
+        where: 'property_id = ?', whereArgs: [id]);
     await db.delete('properties', where: 'id = ?', whereArgs: [id]);
   }
 
@@ -209,7 +211,8 @@ class PropertyDatabaseService {
     return MonthlyExpense.fromMap(maps.first);
   }
 
-  Future<List<MonthlyExpense>> getAllExpensesForMonth(int year, int month) async {
+  Future<List<MonthlyExpense>> getAllExpensesForMonth(
+      int year, int month) async {
     final db = await database;
     final maps = await db.query(
       'monthly_expenses',
@@ -227,10 +230,10 @@ class PropertyDatabaseService {
     required int toYear,
     required int toMonth,
   }) async {
-    final db       = await database;
-    final fromKey  = fromYear * 12 + fromMonth;
-    final toKey    = toYear  * 12 + toMonth;
-    final maps     = await db.rawQuery('''
+    final db = await database;
+    final fromKey = fromYear * 12 + fromMonth;
+    final toKey = toYear * 12 + toMonth;
+    final maps = await db.rawQuery('''
       SELECT year, month,
         SUM(mortgage + propertyTaxes + insurance + hoaFees + propertyMgmt +
             maintenance + vacancyLoss + utilities + landscaping + otherExpenses)

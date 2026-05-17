@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_theme.dart';
 import '../main.dart';
+import 'package:calcwise_core/calcwise_core.dart';
 
 class PremiumCtaWidget extends StatelessWidget {
   final String feature;
@@ -12,10 +13,10 @@ class PremiumCtaWidget extends StatelessWidget {
       valueListenable: isSpanishNotifier,
       builder: (_, isSpanish, __) {
         return Container(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.all(AppSpacing.mdPlus),
           decoration: BoxDecoration(
             color: AppTheme.primary.withValues(alpha: 0.07),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
             border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
           ),
           child: Row(children: [
@@ -29,7 +30,7 @@ class PremiumCtaWidget extends StatelessWidget {
                 style: const TextStyle(
                     color: AppTheme.primary,
                     fontWeight: FontWeight.w600,
-                    fontSize: 13),
+                    fontSize: AppTextSize.md),
               ),
             ),
           ]),

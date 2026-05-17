@@ -1,4 +1,3 @@
-import '../core/ads/ad_footer.dart';
 import 'package:calcwise_core/calcwise_core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -45,7 +44,8 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
     final props = await PropertyDatabaseService.instance.getAllProperties();
     final Map<String, MonthlyExpense?> latest = {};
     for (final p in props) {
-      final expenses = await PropertyDatabaseService.instance.getExpensesForProperty(p.id);
+      final expenses =
+          await PropertyDatabaseService.instance.getExpensesForProperty(p.id);
       latest[p.id] = expenses.isEmpty ? null : expenses.first;
     }
     if (mounted) {
@@ -89,7 +89,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
   }
 
   Future<void> _addProperty(bool isSpanish) async {
-    final isPremium = freemiumService.isPremium;
+    final isPremium = freemiumService.hasFullAccess;
     if (!isPremium && _properties.length >= _freePropertyLimit) {
       await PaywallHard.show(context);
       return;
@@ -103,10 +103,12 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
     final addrCtrl = TextEditingController(text: existing?.address ?? '');
     final rentCtrl = TextEditingController(
         text: existing != null && existing.monthlyRent > 0
-            ? existing.monthlyRent.toStringAsFixed(2) : '');
+            ? existing.monthlyRent.toStringAsFixed(2)
+            : '');
     final sqftCtrl = TextEditingController(
         text: existing != null && existing.squareFootage > 0
-            ? existing.squareFootage.toStringAsFixed(0) : '');
+            ? existing.squareFootage.toStringAsFixed(0)
+            : '');
 
     await showDialog<void>(
       context: ctx,
@@ -122,20 +124,25 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                 controller: nameCtrl,
                 textCapitalization: TextCapitalization.words,
                 decoration: InputDecoration(
-                    labelText: isSpanish ? 'Nombre de la propiedad' : 'Property Name',
-                    hintText: isSpanish ? 'Ej: Casa Principal' : 'e.g. Main St Duplex'),
+                    labelText:
+                        isSpanish ? 'Nombre de la propiedad' : 'Property Name',
+                    hintText: isSpanish
+                        ? 'Ej: Casa Principal'
+                        : 'e.g. Main St Duplex'),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: addrCtrl,
                 decoration: InputDecoration(
                     labelText: isSpanish ? 'Dirección' : 'Address',
-                    hintText: isSpanish ? 'Ej: 123 Calle Principal' : '123 Main St'),
+                    hintText:
+                        isSpanish ? 'Ej: 123 Calle Principal' : '123 Main St'),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: rentCtrl,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                 decoration: InputDecoration(
                     labelText: isSpanish ? 'Alquiler mensual' : 'Monthly Rent',
                     prefixText: '\$',
@@ -144,9 +151,11 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
               const SizedBox(height: 12),
               TextField(
                 controller: sqftCtrl,
-                keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: false),
                 decoration: InputDecoration(
-                    labelText: isSpanish ? 'Superficie (ft²)' : 'Square Footage (ft²)',
+                    labelText:
+                        isSpanish ? 'Superficie (ft²)' : 'Square Footage (ft²)',
                     hintText: '0'),
               ),
             ],
@@ -166,8 +175,10 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                 final updated = existing.copyWith(
                   name: name,
                   address: addrCtrl.text.trim(),
-                  monthlyRent: double.tryParse(rentCtrl.text) ?? existing.monthlyRent,
-                  squareFootage: double.tryParse(sqftCtrl.text) ?? existing.squareFootage,
+                  monthlyRent:
+                      double.tryParse(rentCtrl.text) ?? existing.monthlyRent,
+                  squareFootage:
+                      double.tryParse(sqftCtrl.text) ?? existing.squareFootage,
                 );
                 await PropertyDatabaseService.instance.updateProperty(updated);
               } else {
@@ -248,12 +259,15 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                 },
               ),
               IconButton(
-                icon: const Icon(Icons.settings_outlined),
+                icon: const Icon(Icons.settings_rounded),
                 tooltip: isSpanish ? 'Ajustes' : 'Settings',
                 onPressed: () => Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => const SettingsScreen(),
+                  PageRouteBuilder(
+                    pageBuilder: (_, __, ___) => const SettingsScreen(),
+                    transitionsBuilder: (_, anim, __, child) =>
+                        FadeTransition(opacity: anim, child: child),
+                    transitionDuration: AppDuration.base,
                   ),
                 ),
               ),
@@ -266,9 +280,12 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                   PopupMenuItem(
                     value: _SortMode.profitability,
                     child: Row(children: [
-                      Icon(_sort == _SortMode.profitability
-                          ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                          size: 18, color: AppTheme.primary),
+                      Icon(
+                          _sort == _SortMode.profitability
+                              ? Icons.radio_button_checked
+                              : Icons.radio_button_unchecked,
+                          size: 18,
+                          color: AppTheme.primary),
                       const SizedBox(width: 8),
                       Text(isSpanish ? 'Por rentabilidad' : 'By profitability'),
                     ]),
@@ -276,9 +293,12 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                   PopupMenuItem(
                     value: _SortMode.name,
                     child: Row(children: [
-                      Icon(_sort == _SortMode.name
-                          ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                          size: 18, color: AppTheme.primary),
+                      Icon(
+                          _sort == _SortMode.name
+                              ? Icons.radio_button_checked
+                              : Icons.radio_button_unchecked,
+                          size: 18,
+                          color: AppTheme.primary),
                       const SizedBox(width: 8),
                       Text(isSpanish ? 'Por nombre' : 'By name'),
                     ]),
@@ -286,9 +306,12 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                   PopupMenuItem(
                     value: _SortMode.newest,
                     child: Row(children: [
-                      Icon(_sort == _SortMode.newest
-                          ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                          size: 18, color: AppTheme.primary),
+                      Icon(
+                          _sort == _SortMode.newest
+                              ? Icons.radio_button_checked
+                              : Icons.radio_button_unchecked,
+                          size: 18,
+                          color: AppTheme.primary),
                       const SizedBox(width: 8),
                       Text(isSpanish ? 'Más recientes' : 'Newest first'),
                     ]),
@@ -314,13 +337,16 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                         : RefreshIndicator(
                             onRefresh: _load,
                             child: ListView.builder(
-                              padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                              padding:
+                                  const EdgeInsets.fromLTRB(16, 16, 16, 100),
                               itemCount: _sorted.length,
                               itemBuilder: (ctx, i) {
                                 final p = _sorted[i];
-                                final cf    = _cashFlow(p);
+                                final cf = _cashFlow(p);
                                 final ratio = _expenseRatio(p);
-                                final cfColor = cf >= 0 ? AppTheme.success : AppTheme.dangerRed;
+                                final cfColor = cf >= 0
+                                    ? AppTheme.success
+                                    : AppTheme.dangerRed;
                                 final hasData = _latestExpense[p.id] != null;
 
                                 return Dismissible(
@@ -369,13 +395,12 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                   background: Container(
                                     alignment: Alignment.centerRight,
                                     padding: const EdgeInsets.only(right: 20),
-                                    margin:
-                                        const EdgeInsets.only(bottom: 12),
+                                    margin: const EdgeInsets.only(bottom: 12),
                                     decoration: BoxDecoration(
                                       color: AppTheme.dangerRed
                                           .withValues(alpha: 0.12),
                                       borderRadius:
-                                          BorderRadius.circular(16),
+                                          BorderRadius.circular(AppRadius.xl),
                                     ),
                                     child: const Icon(Icons.delete_rounded,
                                         color: AppTheme.dangerRed),
@@ -383,19 +408,30 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                   child: Card(
                                     margin: const EdgeInsets.only(bottom: 12),
                                     child: InkWell(
-                                      borderRadius: BorderRadius.circular(16),
-                                      onTap: () => Navigator.of(ctx).push(
-                                        PageRouteBuilder(
-                    pageBuilder: (_, __, ___) => PropertyDetailScreen(property: p),
-                    transitionsBuilder: (_, anim, __, child) =>
-                        FadeTransition(opacity: anim, child: child),
-                    transitionDuration: const Duration(milliseconds: 250),
-                  ),
-                                        ).then((_) => _load()),
+                                      borderRadius:
+                                          BorderRadius.circular(AppRadius.xl),
+                                      onTap: () => Navigator.of(ctx)
+                                          .push(
+                                            PageRouteBuilder(
+                                              pageBuilder: (_, __, ___) =>
+                                                  PropertyDetailScreen(
+                                                      property: p),
+                                              transitionsBuilder:
+                                                  (_, anim, __, child) =>
+                                                      FadeTransition(
+                                                          opacity: anim,
+                                                          child: child),
+                                              transitionDuration:
+                                                  AppDuration.base,
+                                            ),
+                                          )
+                                          .then((_) => _load()),
                                       child: Padding(
-                                        padding: const EdgeInsets.all(16),
+                                        padding:
+                                            const EdgeInsets.all(AppSpacing.lg),
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Row(
                                               children: [
@@ -403,64 +439,95 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                                   width: 46,
                                                   height: 46,
                                                   decoration: BoxDecoration(
-                                                    color: AppTheme.primary.withValues(alpha: 0.1),
-                                                    borderRadius: BorderRadius.circular(12),
+                                                    color: AppTheme.primary
+                                                        .withValues(alpha: 0.1),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            AppRadius.lg),
                                                   ),
-                                                  child: const Icon(Icons.home_rounded,
+                                                  child: const Icon(
+                                                      Icons.home_rounded,
                                                       color: AppTheme.primary),
                                                 ),
                                                 const SizedBox(width: 12),
                                                 Expanded(
                                                   child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
                                                     children: [
                                                       Text(
                                                         p.name,
                                                         style: const TextStyle(
-                                                          fontSize: 16,
-                                                          fontWeight: FontWeight.bold,
+                                                          fontSize: AppTextSize
+                                                              .bodyLg,
+                                                          fontWeight:
+                                                              FontWeight.bold,
                                                         ),
                                                       ),
                                                       if (p.address.isNotEmpty)
                                                         Text(
                                                           p.address,
                                                           style: TextStyle(
-                                                            fontSize: 12,
-                                                            color: CalcwiseTheme.of(context).textSecondary,
+                                                            fontSize:
+                                                                AppTextSize.sm,
+                                                            color: CalcwiseTheme
+                                                                    .of(context)
+                                                                .textSecondary,
                                                           ),
                                                           maxLines: 1,
-                                                          overflow: TextOverflow.ellipsis,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
                                                         ),
                                                     ],
                                                   ),
                                                 ),
-                                                Icon(Icons.chevron_right_rounded,
-                                                    color: CalcwiseTheme.of(context).textSecondary),
+                                                Icon(
+                                                    Icons.chevron_right_rounded,
+                                                    color: CalcwiseTheme.of(
+                                                            context)
+                                                        .textSecondary),
                                               ],
                                             ),
-                                            Divider(height: 20, color: CalcwiseTheme.of(context).cardBorder),
+                                            Divider(
+                                                height: 20,
+                                                color: CalcwiseTheme.of(context)
+                                                    .cardBorder),
                                             Row(
                                               children: [
                                                 Expanded(
                                                   child: _MiniStat(
-                                                    label: isSpanish ? 'Alquiler' : 'Rent',
-                                                    value: '\$${_fmt.format(p.monthlyRent)}',
-                                                    color: CalcwiseTheme.of(context).textSecondary,
+                                                    label: isSpanish
+                                                        ? 'Alquiler'
+                                                        : 'Rent',
+                                                    value:
+                                                        '\$${_fmt.format(p.monthlyRent)}',
+                                                    color: CalcwiseTheme.of(
+                                                            context)
+                                                        .textSecondary,
                                                   ),
                                                 ),
                                                 if (hasData) ...[
                                                   Expanded(
                                                     child: _MiniStat(
-                                                      label: isSpanish ? 'Flujo mensual' : 'Monthly CF',
-                                                      value: '${cf < 0 ? '-' : '+'}\$${_fmt.format(cf.abs())}',
+                                                      label: isSpanish
+                                                          ? 'Flujo mensual'
+                                                          : 'Monthly CF',
+                                                      value:
+                                                          '${cf < 0 ? '-' : '+'}\$${_fmt.format(cf.abs())}',
                                                       color: cfColor,
                                                     ),
                                                   ),
                                                   Expanded(
                                                     child: _MiniStat(
-                                                      label: isSpanish ? 'Ratio gastos' : 'Exp. Ratio',
-                                                      value: '${ratio.toStringAsFixed(1)}%',
-                                                      color: ratio < 80 ? AppTheme.success : Colors.orange,
+                                                      label: isSpanish
+                                                          ? 'Ratio gastos'
+                                                          : 'Exp. Ratio',
+                                                      value:
+                                                          '${ratio.toStringAsFixed(1)}%',
+                                                      color: ratio < 80
+                                                          ? AppTheme.success
+                                                          : Colors.orange,
                                                     ),
                                                   ),
                                                 ] else
@@ -471,8 +538,13 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                                           ? 'Sin datos de gastos aún'
                                                           : 'No expense data yet',
                                                       style: TextStyle(
-                                                          fontSize: 12, color: CalcwiseTheme.of(context).textSecondary),
-                                                      textAlign: TextAlign.center,
+                                                          fontSize:
+                                                              AppTextSize.sm,
+                                                          color: CalcwiseTheme
+                                                                  .of(context)
+                                                              .textSecondary),
+                                                      textAlign:
+                                                          TextAlign.center,
                                                     ),
                                                   ),
                                               ],
@@ -487,7 +559,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                             ),
                           ),
               ),
-              const AdFooter(),
+              const CalcwiseAdFooter(),
             ],
           ),
         );
@@ -510,12 +582,18 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.home_work_rounded, size: 80,
-                color: CalcwiseTheme.of(context).textSecondary.withValues(alpha: 0.35)),
+            Icon(Icons.home_work_rounded,
+                size: 80,
+                color: CalcwiseTheme.of(context)
+                    .textSecondary
+                    .withValues(alpha: 0.35)),
             const SizedBox(height: 20),
             Text(
-              isSpanish ? 'Agrega tu primera propiedad' : 'Add your first property',
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              isSpanish
+                  ? 'Agrega tu primera propiedad'
+                  : 'Add your first property',
+              style: const TextStyle(
+                  fontSize: AppTextSize.title, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 10),
@@ -523,11 +601,14 @@ class _EmptyState extends StatelessWidget {
               isSpanish
                   ? 'Registra tus propiedades y lleva el seguimiento de sus gastos e ingresos mes a mes.'
                   : 'Track your rental properties and monitor income vs. expenses month by month.',
-              style: TextStyle(color: CalcwiseTheme.of(context).textSecondary, fontSize: 14),
+              style: TextStyle(
+                  color: CalcwiseTheme.of(context).textSecondary,
+                  fontSize: AppTextSize.body),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 28),
-            const Icon(Icons.arrow_downward_rounded, color: AppTheme.primary, size: 32),
+            const Icon(Icons.arrow_downward_rounded,
+                color: AppTheme.primary, size: 32),
           ],
         ),
       ),
@@ -539,15 +620,23 @@ class _MiniStat extends StatelessWidget {
   final String label;
   final String value;
   final Color color;
-  const _MiniStat({required this.label, required this.value, required this.color});
+  const _MiniStat(
+      {required this.label, required this.value, required this.color});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(label, style: TextStyle(fontSize: 11, color: CalcwiseTheme.of(context).textSecondary)),
+        Text(label,
+            style: TextStyle(
+                fontSize: AppTextSize.xs,
+                color: CalcwiseTheme.of(context).textSecondary)),
         const SizedBox(height: 2),
-        Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: color)),
+        Text(value,
+            style: TextStyle(
+                fontSize: AppTextSize.body,
+                fontWeight: FontWeight.bold,
+                color: color)),
       ],
     );
   }

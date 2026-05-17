@@ -107,7 +107,12 @@ void main() {
     });
 
     test('RG-6: cash flow positif quand loyer > dépenses', () {
-      final c = makeCalc(rent: 3000, mortgage: 1200, tax: 200, insurance: 100, maintenance: 100);
+      final c = makeCalc(
+          rent: 3000,
+          mortgage: 1200,
+          tax: 200,
+          insurance: 100,
+          maintenance: 100);
       expect(c.monthlyCashFlow, greaterThan(0));
     });
 

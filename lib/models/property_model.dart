@@ -16,29 +16,34 @@ class Property {
   });
 
   Map<String, dynamic> toMap() => {
-    'id': id,
-    'name': name,
-    'address': address,
-    'monthlyRent': monthlyRent,
-    'squareFootage': squareFootage,
-    'createdDate': createdDate.toIso8601String(),
-  };
+        'id': id,
+        'name': name,
+        'address': address,
+        'monthlyRent': monthlyRent,
+        'squareFootage': squareFootage,
+        'createdDate': createdDate.toIso8601String(),
+      };
 
   factory Property.fromMap(Map<String, dynamic> m) => Property(
-    id: m['id'] as String,
-    name: m['name'] as String,
-    address: m['address'] as String,
-    monthlyRent: (m['monthlyRent'] as num).toDouble(),
-    squareFootage: (m['squareFootage'] as num).toDouble(),
-    createdDate: DateTime.parse(m['createdDate'] as String),
-  );
+        id: m['id'] as String,
+        name: m['name'] as String,
+        address: m['address'] as String,
+        monthlyRent: (m['monthlyRent'] as num).toDouble(),
+        squareFootage: (m['squareFootage'] as num).toDouble(),
+        createdDate: DateTime.parse(m['createdDate'] as String),
+      );
 
-  Property copyWith({String? name, String? address, double? monthlyRent, double? squareFootage}) => Property(
-    id: id,
-    name: name ?? this.name,
-    address: address ?? this.address,
-    monthlyRent: monthlyRent ?? this.monthlyRent,
-    squareFootage: squareFootage ?? this.squareFootage,
-    createdDate: createdDate,
-  );
+  Property copyWith(
+          {String? name,
+          String? address,
+          double? monthlyRent,
+          double? squareFootage}) =>
+      Property(
+        id: id,
+        name: name ?? this.name,
+        address: address ?? this.address,
+        monthlyRent: monthlyRent ?? this.monthlyRent,
+        squareFootage: squareFootage ?? this.squareFootage,
+        createdDate: createdDate,
+      );
 }

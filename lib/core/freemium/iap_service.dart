@@ -1,5 +1,5 @@
-/// IAP service — re-exports CalcwiseIAP from library.
-import 'package:calcwise_core/calcwise_core';
+import 'package:flutter/foundation.dart' show ValueNotifier;
+import 'package:calcwise_core/calcwise_core.dart';
 import '../firebase/analytics_service.dart';
 import '../services/review_service.dart';
 import 'freemium_service.dart';
@@ -17,8 +17,8 @@ class IAPService {
     _iap = CalcwiseIAP(
       productId: productId,
       freemium: freemiumService,
-      analytics: AnalyticsService.instance,
-      onPurchaseCompleted: () => ReviewService.instance.requestAfterPremium(),
+      analytics: CalcwiseAnalytics(appName: 'rentalexpenses'),
+      onPurchaseCompleted: () => ReviewService.instance.requestReview(),
     );
     await _iap.initialize();
   }

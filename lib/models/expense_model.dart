@@ -126,6 +126,7 @@ class MonthlyExpense {
         otherExpenses: otherExpenses ?? this.otherExpenses,
         isRecurring: isRecurring ?? this.isRecurring,
         recurrenceType: recurrenceType ?? this.recurrenceType,
-        receiptPath: clearReceiptPath ? null : (receiptPath ?? this.receiptPath),
+        receiptPath:
+            clearReceiptPath ? null : (receiptPath ?? this.receiptPath),
       );
 }

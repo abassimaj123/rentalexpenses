@@ -1,7 +1,8 @@
 // TODO: Replace with real google-services.json values before publishing.
 // Run: flutterfire configure --project=YOUR_FIREBASE_PROJECT
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
-import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, TargetPlatform;
 
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {

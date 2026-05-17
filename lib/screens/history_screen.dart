@@ -1,4 +1,3 @@
-import '../core/ads/ad_footer.dart';
 import 'package:calcwise_core/calcwise_core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -22,7 +21,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   bool _loading = true;
 
   final _dateFmt = DateFormat('MMM d, yyyy');
-  final _mFmt    = NumberFormat('#,##0.00', 'en_US');
+  final _mFmt = NumberFormat('#,##0.00', 'en_US');
 
   @override
   void initState() {
@@ -32,12 +31,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Future<void> _load() async {
     final entries = await loadHistory();
-    if (mounted) setState(() { _entries = entries; _loading = false; });
+    if (mounted)
+      setState(() {
+        _entries = entries;
+        _loading = false;
+      });
   }
 
   Future<void> _delete(int index, bool isSpanish) async {
     final prefs = await SharedPreferences.getInstance();
-    final raw   = prefs.getStringList('expense_history_v1') ?? [];
+    final raw = prefs.getStringList('expense_history_v1') ?? [];
     if (index < raw.length) raw.removeAt(index);
     await prefs.setStringList('expense_history_v1', raw);
     await _load();
@@ -51,13 +54,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   void _loadIntoCalculator(ExpenseCalc calc) {
     // Push a new calculator screen pre-loaded with this entry
-    Navigator.of(context).push(PageRouteBuilder(
-                    pageBuilder: (_, __, ___) => Scaffold(
-        body: CalculatorScreen(preload: calc)),
-                    transitionsBuilder: (_, anim, __, child) =>
-                        FadeTransition(opacity: anim, child: child),
-                    transitionDuration: const Duration(milliseconds: 250),
-                  ),
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (_, __, ___) =>
+            Scaffold(body: CalculatorScreen(preload: calc)),
+        transitionsBuilder: (_, anim, __, child) =>
+            FadeTransition(opacity: anim, child: child),
+        transitionDuration: AppDuration.base,
+      ),
     );
   }
 
@@ -87,7 +91,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         ? _EmptyState(isSpanish: isSpanish)
                         : _buildList(isSpanish),
               ),
-              const AdFooter(),
+              const CalcwiseAdFooter(),
             ],
           ),
         );
@@ -101,7 +105,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       builder: (_, isPremium, __) {
         final limit = MonetizationConfig.freeCalculationLimit;
         return ListView.builder(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           itemCount: _entries.length + (isPremium ? 0 : 1),
           itemBuilder: (_, i) {
             // Free upgrade CTA at bottom
@@ -119,10 +123,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 padding: const EdgeInsets.only(right: 20),
                 decoration: BoxDecoration(
                   color: AppTheme.dangerRed.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(AppRadius.xl),
                 ),
-                child: const Icon(Icons.delete_rounded,
-                    color: AppTheme.dangerRed),
+                child:
+                    const Icon(Icons.delete_rounded, color: AppTheme.dangerRed),
               ),
               onDismissed: (_) => _delete(i, isSpanish),
               child: Card(
@@ -135,7 +139,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     height: 44,
                     decoration: BoxDecoration(
                       color: cfColor.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(AppRadius.lg),
                     ),
                     child: Icon(
                       cf >= 0
@@ -148,7 +152,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   title: Text(
                     e.propertyName,
                     style: const TextStyle(
-                        fontWeight: FontWeight.w600, fontSize: 15),
+                        fontWeight: FontWeight.w600,
+                        fontSize: AppTextSize.bodyMd),
                   ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -164,7 +169,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       Text(
                         _dateFmt.format(e.savedAt),
                         style: TextStyle(
-                            fontSize: 12, color: CalcwiseTheme.of(context).textSecondary),
+                            fontSize: AppTextSize.sm,
+                            color: CalcwiseTheme.of(context).textSecondary),
                       ),
                     ],
                   ),
@@ -178,12 +184,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   ),
                   onTap: () => Navigator.of(context).push(
                     PageRouteBuilder(
-                    pageBuilder: (_, __, ___) => HistoryDetailScreen(calc: e),
-                    transitionsBuilder: (_, anim, __, child) =>
-                        FadeTransition(opacity: anim, child: child),
-                    transitionDuration: const Duration(milliseconds: 250),
-                  ),
+                      pageBuilder: (_, __, ___) => HistoryDetailScreen(calc: e),
+                      transitionsBuilder: (_, anim, __, child) =>
+                          FadeTransition(opacity: anim, child: child),
+                      transitionDuration: AppDuration.base,
                     ),
+                  ),
                 ),
               ),
             );
@@ -232,7 +238,7 @@ class _EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(AppSpacing.xxxl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -242,7 +248,7 @@ class _EmptyState extends StatelessWidget {
             Text(
               isSpanish ? 'Sin historial guardado' : 'No saved history',
               style: const TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.bold),
+                  fontSize: AppTextSize.subtitle, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
@@ -270,12 +276,12 @@ class _UpgradeCTA extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       color: AppTheme.primary.withValues(alpha: 0.05),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.xl),
         side: BorderSide(
             color: AppTheme.primary.withValues(alpha: 0.2), width: 1.5),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           children: [
             Icon(Icons.lock_open_rounded,
@@ -287,7 +293,7 @@ class _UpgradeCTA extends StatelessWidget {
                   : 'You\'ve saved $limit of $limit free properties',
               textAlign: TextAlign.center,
               style: const TextStyle(
-                  fontWeight: FontWeight.w600, fontSize: 14),
+                  fontWeight: FontWeight.w600, fontSize: AppTextSize.body),
             ),
             const SizedBox(height: 4),
             Text(
@@ -296,7 +302,8 @@ class _UpgradeCTA extends StatelessWidget {
                   : 'Unlock Premium for unlimited history',
               textAlign: TextAlign.center,
               style: TextStyle(
-                  color: CalcwiseTheme.of(context).textSecondary, fontSize: 13),
+                  color: CalcwiseTheme.of(context).textSecondary,
+                  fontSize: AppTextSize.md),
             ),
             const SizedBox(height: 12),
             SizedBox(
@@ -307,7 +314,9 @@ class _UpgradeCTA extends StatelessWidget {
                   minimumSize: const Size(double.infinity, 44),
                 ),
                 child: Text(
-                  isSpanish ? 'Desbloquear — \$2.99' : 'Unlock Premium — \$2.99',
+                  isSpanish
+                      ? 'Desbloquear — \$2.99'
+                      : 'Unlock Premium — \$2.99',
                 ),
               ),
             ),

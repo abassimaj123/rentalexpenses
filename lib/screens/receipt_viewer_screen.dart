@@ -36,23 +36,21 @@ class ReceiptViewerScreen extends StatelessWidget {
                     final confirmed = await showDialog<bool>(
                       context: context,
                       builder: (d) => AlertDialog(
-                        title: Text(
-                            isSpanish ? 'Eliminar foto' : 'Delete photo'),
+                        title:
+                            Text(isSpanish ? 'Eliminar foto' : 'Delete photo'),
                         content: Text(isSpanish
                             ? '¿Eliminar esta foto del recibo?'
                             : 'Delete this receipt photo?'),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(d, false),
-                            child:
-                                Text(isSpanish ? 'Cancelar' : 'Cancel'),
+                            child: Text(isSpanish ? 'Cancelar' : 'Cancel'),
                           ),
                           TextButton(
                             onPressed: () => Navigator.pop(d, true),
                             child: Text(
                               isSpanish ? 'Eliminar' : 'Delete',
-                              style: const TextStyle(
-                                  color: AppTheme.dangerRed),
+                              style: const TextStyle(color: AppTheme.dangerRed),
                             ),
                           ),
                         ],
@@ -76,7 +74,7 @@ class ReceiptViewerScreen extends StatelessWidget {
                 errorBuilder: (_, __, ___) => Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.broken_image_outlined,
+                    const Icon(Icons.broken_image_rounded,
                         color: Colors.white54, size: 64),
                     const SizedBox(height: 12),
                     Text(

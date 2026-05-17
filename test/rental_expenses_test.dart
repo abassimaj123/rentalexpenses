@@ -88,9 +88,9 @@ void main() {
         propertyTaxes: 180,
         insurance: 95,
         hoaFees: 0,
-        propertyMgmt: 144,  // 8% of 1800 = 144 (pre-converted by screen)
+        propertyMgmt: 144, // 8% of 1800 = 144 (pre-converted by screen)
         maintenance: 90,
-        vacancyLoss: 90,    // 5% of 1800 = 90 (pre-converted by screen)
+        vacancyLoss: 90, // 5% of 1800 = 90 (pre-converted by screen)
         utilities: 0,
         landscaping: 50,
         otherExpenses: 30,
@@ -443,7 +443,8 @@ void main() {
       );
       final restored = ExpenseCalc.fromJson(original.toJson());
       expect(restored.totalExpenses, closeTo(original.totalExpenses, 0.001));
-      expect(restored.monthlyCashFlow, closeTo(original.monthlyCashFlow, 0.001));
+      expect(
+          restored.monthlyCashFlow, closeTo(original.monthlyCashFlow, 0.001));
       expect(restored.annualCashFlow, closeTo(original.annualCashFlow, 0.001));
       expect(restored.expenseRatio, closeTo(original.expenseRatio, 0.001));
       expect(restored.noi, closeTo(original.noi, 0.001));
@@ -456,27 +457,34 @@ void main() {
   group('ExpenseCalc — breakdown map', () {
     test('breakdown contains all 10 categories', () {
       final calc = _calc(
-        mortgage: 950, propertyTaxes: 180, insurance: 95, hoaFees: 0,
-        propertyMgmt: 144, maintenance: 90, vacancyLoss: 90, utilities: 0,
-        landscaping: 50, otherExpenses: 30,
+        mortgage: 950,
+        propertyTaxes: 180,
+        insurance: 95,
+        hoaFees: 0,
+        propertyMgmt: 144,
+        maintenance: 90,
+        vacancyLoss: 90,
+        utilities: 0,
+        landscaping: 50,
+        otherExpenses: 30,
       );
       final bd = calc.breakdown;
-      expect(bd['Mortgage'],        closeTo(950,  0.001));
-      expect(bd['Property Taxes'],  closeTo(180,  0.001));
-      expect(bd['Insurance'],       closeTo(95,   0.001));
-      expect(bd['HOA Fees'],        closeTo(0,    0.001));
-      expect(bd['Property Mgmt'],   closeTo(144,  0.001));
-      expect(bd['Maintenance'],     closeTo(90,   0.001));
-      expect(bd['Vacancy Loss'],    closeTo(90,   0.001));
-      expect(bd['Utilities'],       closeTo(0,    0.001));
-      expect(bd['Landscaping'],     closeTo(50,   0.001));
-      expect(bd['Other'],           closeTo(30,   0.001));
+      expect(bd['Mortgage'], closeTo(950, 0.001));
+      expect(bd['Property Taxes'], closeTo(180, 0.001));
+      expect(bd['Insurance'], closeTo(95, 0.001));
+      expect(bd['HOA Fees'], closeTo(0, 0.001));
+      expect(bd['Property Mgmt'], closeTo(144, 0.001));
+      expect(bd['Maintenance'], closeTo(90, 0.001));
+      expect(bd['Vacancy Loss'], closeTo(90, 0.001));
+      expect(bd['Utilities'], closeTo(0, 0.001));
+      expect(bd['Landscaping'], closeTo(50, 0.001));
+      expect(bd['Other'], closeTo(30, 0.001));
     });
 
     test('breakdownES contains Spanish labels', () {
       final calc = _calc(mortgage: 950, insurance: 95);
       expect(calc.breakdownES.containsKey('Hipoteca'), isTrue);
-      expect(calc.breakdownES.containsKey('Seguro'),   isTrue);
+      expect(calc.breakdownES.containsKey('Seguro'), isTrue);
       expect(calc.breakdownES['Hipoteca'], closeTo(950, 0.001));
     });
   });
