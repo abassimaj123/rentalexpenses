@@ -132,8 +132,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
               child: Card(
                 margin: const EdgeInsets.only(bottom: AppSpacing.md),
                 child: ListTile(
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.smPlus),
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg, vertical: AppSpacing.smPlus),
                   leading: Container(
                     width: 44,
                     height: 44,

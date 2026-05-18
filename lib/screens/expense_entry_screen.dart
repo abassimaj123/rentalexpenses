@@ -309,7 +309,9 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
       builder: (_, isSpanish, __) {
         final monthLabel = DateFormat('MMMM yyyy', isSpanish ? 'es' : 'en')
             .format(_selectedMonth);
-        final cfColor = _monthlyCF >= 0 ? AppTheme.success : CalcwiseSemanticColors.errorDark;
+        final cfColor = _monthlyCF >= 0
+            ? AppTheme.success
+            : CalcwiseSemanticColors.errorDark;
 
         return Scaffold(
           appBar: AppBar(

@@ -252,7 +252,8 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                     );
                   }
                   return IconButton(
-                    icon: const Icon(Icons.star_outline, color: CalcwiseSemanticColors.warnIcon),
+                    icon: const Icon(Icons.star_outline,
+                        color: CalcwiseSemanticColors.warnIcon),
                     tooltip: isSpanish ? 'Obtener Premium' : 'Go Premium',
                     onPressed: () => IAPService.instance.buy(),
                   );
@@ -337,8 +338,8 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                         : RefreshIndicator(
                             onRefresh: _load,
                             child: ListView.builder(
-                              padding:
-                                  const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 100),
+                              padding: const EdgeInsets.fromLTRB(AppSpacing.lg,
+                                  AppSpacing.lg, AppSpacing.lg, 100),
                               itemCount: _sorted.length,
                               itemBuilder: (ctx, i) {
                                 final p = _sorted[i];
@@ -394,8 +395,10 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                   },
                                   background: Container(
                                     alignment: Alignment.centerRight,
-                                    padding: const EdgeInsets.only(right: AppSpacing.xl),
-                                    margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                                    padding: const EdgeInsets.only(
+                                        right: AppSpacing.xl),
+                                    margin: const EdgeInsets.only(
+                                        bottom: AppSpacing.md),
                                     decoration: BoxDecoration(
                                       color: AppTheme.dangerRed
                                           .withValues(alpha: 0.12),
@@ -406,7 +409,8 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                         color: AppTheme.dangerRed),
                                   ),
                                   child: Card(
-                                    margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                                    margin: const EdgeInsets.only(
+                                        bottom: AppSpacing.md),
                                     child: InkWell(
                                       borderRadius:
                                           BorderRadius.circular(AppRadius.xl),
@@ -449,7 +453,8 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                                       Icons.home_rounded,
                                                       color: AppTheme.primary),
                                                 ),
-                                                const SizedBox(width: AppSpacing.md),
+                                                const SizedBox(
+                                                    width: AppSpacing.md),
                                                 Expanded(
                                                   child: Column(
                                                     crossAxisAlignment:
@@ -527,7 +532,8 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                                           '${ratio.toStringAsFixed(1)}%',
                                                       color: ratio < 80
                                                           ? AppTheme.success
-                                                          : CalcwiseSemanticColors.warnIcon,
+                                                          : CalcwiseSemanticColors
+                                                              .warnIcon,
                                                     ),
                                                   ),
                                                 ] else

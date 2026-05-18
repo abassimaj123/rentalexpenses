@@ -124,7 +124,8 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                 direction: DismissDirection.endToStart,
                                 background: Container(
                                   alignment: Alignment.centerRight,
-                                  padding: const EdgeInsets.only(right: AppSpacing.xl),
+                                  padding: const EdgeInsets.only(
+                                      right: AppSpacing.xl),
                                   decoration: BoxDecoration(
                                     color: AppTheme.dangerRed
                                         .withValues(alpha: 0.12),
@@ -170,7 +171,8 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                 },
                                 onDismissed: (_) => _delete(e, isSpanish),
                                 child: Card(
-                                  margin: const EdgeInsets.only(bottom: AppSpacing.smPlus),
+                                  margin: const EdgeInsets.only(
+                                      bottom: AppSpacing.smPlus),
                                   child: InkWell(
                                     borderRadius:
                                         BorderRadius.circular(AppRadius.xl),
@@ -197,7 +199,8 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                               color: cfColor,
                                             ),
                                           ),
-                                          const SizedBox(width: AppSpacing.mdPlus),
+                                          const SizedBox(
+                                              width: AppSpacing.mdPlus),
                                           Expanded(
                                             child: Column(
                                               crossAxisAlignment:
@@ -211,7 +214,8 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                                         AppTextSize.bodyMd,
                                                   ),
                                                 ),
-                                                const SizedBox(height: AppSpacing.xs),
+                                                const SizedBox(
+                                                    height: AppSpacing.xs),
                                                 Text(
                                                   '${isSpanish ? 'Gastos' : 'Expenses'}: \$${_fmt.format(e.totalExpenses)}  •  ${ratio.toStringAsFixed(1)}%',
                                                   style: TextStyle(
@@ -226,7 +230,8 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                           ),
                                           // Receipt icon badge
                                           if (e.receiptPath != null) ...[
-                                            const SizedBox(width: AppSpacing.sm),
+                                            const SizedBox(
+                                                width: AppSpacing.sm),
                                             GestureDetector(
                                               onTap: () {
                                                 Navigator.of(ctx).push(
@@ -262,7 +267,8 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                                 ),
                                               ),
                                             ),
-                                            const SizedBox(width: AppSpacing.sm),
+                                            const SizedBox(
+                                                width: AppSpacing.sm),
                                           ],
                                           Column(
                                             crossAxisAlignment:
@@ -276,7 +282,8 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                                   color: cfColor,
                                                 ),
                                               ),
-                                              const SizedBox(height: AppSpacing.xxs),
+                                              const SizedBox(
+                                                  height: AppSpacing.xxs),
                                               Text(
                                                 isSpanish
                                                     ? 'flujo mensual'

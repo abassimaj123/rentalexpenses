@@ -43,7 +43,8 @@ class SettingsScreen extends StatelessWidget {
                     );
                   }
                   return IconButton(
-                    icon: const Icon(Icons.star_outline, color: CalcwiseSemanticColors.warnIcon),
+                    icon: const Icon(Icons.star_outline,
+                        color: CalcwiseSemanticColors.warnIcon),
                     tooltip: isSpanish ? 'Obtener Premium' : 'Go Premium',
                     onPressed: () => IAPService.instance.buy(),
                   );
@@ -341,7 +342,8 @@ class SettingsScreen extends StatelessWidget {
 
                     // ── Disclaimer ─────────────────────────────────────
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(AppSpacing.xs, 0, AppSpacing.xs, 0),
+                      padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.xs, 0, AppSpacing.xs, 0),
                       child: Text(
                         isSpanish
                             ? 'Solo con fines informativos. No es asesoramiento financiero. Consulte a un profesional antes de tomar decisiones financieras.'
