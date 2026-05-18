@@ -21,7 +21,7 @@ class PremiumCtaWidget extends StatelessWidget {
           ),
           child: Row(children: [
             const Icon(Icons.lock_outline, color: AppTheme.primary, size: 20),
-            const SizedBox(width: 10),
+            const SizedBox(width: AppSpacing.smPlus),
             Expanded(
               child: Text(
                 isSpanish

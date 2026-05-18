@@ -59,7 +59,7 @@ class _CrossPromoCardState extends State<CrossPromoCard> {
     if (!_checked || _dismissed || widget.isPremium)
       return const SizedBox.shrink();
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: 6),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: _accentColor.withValues(alpha: 0.06),
@@ -76,13 +76,13 @@ class _CrossPromoCardState extends State<CrossPromoCard> {
           ),
           child: Icon(Icons.apartment_rounded, color: _accentColor, size: 22),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: AppSpacing.smPlus),
         Expanded(
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: AppSpacing.xxs),
               decoration: BoxDecoration(
                 color: _accentColor,
                 borderRadius: BorderRadius.circular(AppRadius.xs),
@@ -99,7 +99,7 @@ class _CrossPromoCardState extends State<CrossPromoCard> {
                     fontSize: 10,
                     color: CalcwiseTheme.of(context).textSecondary)),
           ]),
-          const SizedBox(height: 2),
+          const SizedBox(height: AppSpacing.xxs),
           Text(_targetName,
               style: TextStyle(
                   fontSize: AppTextSize.md,
@@ -110,18 +110,18 @@ class _CrossPromoCardState extends State<CrossPromoCard> {
                   fontSize: AppTextSize.xs,
                   color: CalcwiseTheme.of(context).textSecondary)),
         ])),
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.sm),
         Column(children: [
           GestureDetector(
             onTap: _dismiss,
             child: const Icon(Icons.close_rounded,
                 size: 16, color: AppTheme.labelGray),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           GestureDetector(
             onTap: _open,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.smPlus, vertical: 5),
               decoration: BoxDecoration(
                 color: _accentColor,
                 borderRadius: BorderRadius.circular(AppRadius.md),

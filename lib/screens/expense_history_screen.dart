@@ -124,7 +124,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                 direction: DismissDirection.endToStart,
                                 background: Container(
                                   alignment: Alignment.centerRight,
-                                  padding: const EdgeInsets.only(right: 20),
+                                  padding: const EdgeInsets.only(right: AppSpacing.xl),
                                   decoration: BoxDecoration(
                                     color: AppTheme.dangerRed
                                         .withValues(alpha: 0.12),
@@ -170,7 +170,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                 },
                                 onDismissed: (_) => _delete(e, isSpanish),
                                 child: Card(
-                                  margin: const EdgeInsets.only(bottom: 10),
+                                  margin: const EdgeInsets.only(bottom: AppSpacing.smPlus),
                                   child: InkWell(
                                     borderRadius:
                                         BorderRadius.circular(AppRadius.xl),
@@ -197,7 +197,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                               color: cfColor,
                                             ),
                                           ),
-                                          const SizedBox(width: 14),
+                                          const SizedBox(width: AppSpacing.mdPlus),
                                           Expanded(
                                             child: Column(
                                               crossAxisAlignment:
@@ -211,7 +211,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                                         AppTextSize.bodyMd,
                                                   ),
                                                 ),
-                                                const SizedBox(height: 4),
+                                                const SizedBox(height: AppSpacing.xs),
                                                 Text(
                                                   '${isSpanish ? 'Gastos' : 'Expenses'}: \$${_fmt.format(e.totalExpenses)}  •  ${ratio.toStringAsFixed(1)}%',
                                                   style: TextStyle(
@@ -226,7 +226,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                           ),
                                           // Receipt icon badge
                                           if (e.receiptPath != null) ...[
-                                            const SizedBox(width: 8),
+                                            const SizedBox(width: AppSpacing.sm),
                                             GestureDetector(
                                               onTap: () {
                                                 Navigator.of(ctx).push(
@@ -262,7 +262,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                                 ),
                                               ),
                                             ),
-                                            const SizedBox(width: 8),
+                                            const SizedBox(width: AppSpacing.sm),
                                           ],
                                           Column(
                                             crossAxisAlignment:
@@ -276,7 +276,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                                   color: cfColor,
                                                 ),
                                               ),
-                                              const SizedBox(height: 2),
+                                              const SizedBox(height: AppSpacing.xxs),
                                               Text(
                                                 isSpanish
                                                     ? 'flujo mensual'
@@ -325,14 +325,14 @@ class _EmptyState extends StatelessWidget {
                 color: CalcwiseTheme.of(context)
                     .textSecondary
                     .withValues(alpha: 0.4)),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
             Text(
               isSpanish ? 'Sin entradas de gastos' : 'No expense entries yet',
               style: const TextStyle(
                   fontSize: AppTextSize.subtitle, fontWeight: FontWeight.w600),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               isSpanish
                   ? 'Agrega gastos mensuales con el botón + en la pantalla anterior.'
@@ -355,7 +355,7 @@ class _LockedRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 10),
+      margin: const EdgeInsets.only(bottom: AppSpacing.smPlus),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppRadius.xl),
         onTap: onUnlock,
@@ -375,7 +375,7 @@ class _LockedRow extends StatelessWidget {
                 child: Icon(Icons.lock_rounded,
                     color: CalcwiseTheme.of(context).textSecondary),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: AppSpacing.mdPlus),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

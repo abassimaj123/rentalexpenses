@@ -170,7 +170,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
       ),
       builder: (ctx) => SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -337,7 +337,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                         children: [
                           const Icon(Icons.home_rounded,
                               color: AppTheme.primary, size: 18),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: AppSpacing.sm),
                           Expanded(
                             child: Text(
                               widget.property.name,
@@ -350,7 +350,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.lg),
 
                     // Month picker
                     _SectionLabel(isSpanish ? 'PERÍODO' : 'PERIOD'),
@@ -368,7 +368,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                         onTap: () => _pickMonth(isSpanish),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppSpacing.xl),
 
                     // Expense fields
                     _SectionLabel(
@@ -381,17 +381,17 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                             _NumField(
                                 ctrl: _mortCtrl,
                                 label: isSpanish ? 'Hipoteca' : 'Mortgage'),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: AppSpacing.md),
                             _NumField(
                                 ctrl: _taxCtrl,
                                 label: isSpanish
                                     ? 'Impuestos de propiedad'
                                     : 'Property Taxes'),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: AppSpacing.md),
                             _NumField(
                                 ctrl: _insCtrl,
                                 label: isSpanish ? 'Seguro' : 'Insurance'),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: AppSpacing.md),
                             _NumField(
                                 ctrl: _hoaCtrl,
                                 label: isSpanish ? 'Cuotas HOA' : 'HOA Fees'),
@@ -399,7 +399,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
 
                     // Property management toggle
                     Card(
@@ -432,7 +432,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: AppSpacing.sm),
                             _NumField(
                               ctrl: _mgmtCtrl,
                               label: _mgmtIsPercent
@@ -447,7 +447,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
 
                     Card(
                       child: Padding(
@@ -460,7 +460,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                                 label: isSpanish
                                     ? 'Mantenimiento / Reparaciones'
                                     : 'Maintenance / Repairs'),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: AppSpacing.md),
 
                             // Vacancy toggle
                             Row(
@@ -487,7 +487,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: AppSpacing.sm),
                             _NumField(
                               ctrl: _vacCtrl,
                               label: _vacIsPercent
@@ -498,18 +498,18 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                               prefix: _vacIsPercent ? null : '\$',
                               suffix: _vacIsPercent ? '%' : null,
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: AppSpacing.md),
                             _NumField(
                                 ctrl: _utilCtrl,
                                 label: isSpanish
                                     ? 'Servicios públicos'
                                     : 'Utilities'),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: AppSpacing.md),
                             _NumField(
                                 ctrl: _landCtrl,
                                 label:
                                     isSpanish ? 'Jardinería' : 'Landscaping'),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: AppSpacing.md),
                             _NumField(
                                 ctrl: _otherCtrl,
                                 label: isSpanish
@@ -519,7 +519,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppSpacing.xl),
 
                     // Feature 2 — Recurring expense toggle
                     _SectionLabel(isSpanish ? 'RECURRENCIA' : 'RECURRENCE'),
@@ -557,7 +557,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                               Divider(
                                   height: 1,
                                   color: CalcwiseTheme.of(context).cardBorder),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: AppSpacing.sm),
                               DropdownButtonFormField<String>(
                                 initialValue: _recurrenceType,
                                 decoration: InputDecoration(
@@ -578,13 +578,13 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                                 onChanged: (v) => setState(
                                     () => _recurrenceType = v ?? 'monthly'),
                               ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: AppSpacing.sm),
                             ],
                           ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppSpacing.xl),
 
                     // Feature 3 — Receipt photo attachment
                     _SectionLabel(
@@ -611,7 +611,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                       },
                       onPremiumTap: () => PaywallHard.show(context),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppSpacing.xl),
 
                     // Live results
                     _SectionLabel(
@@ -639,14 +639,14 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                               valueColor: cfColor,
                               bold: true,
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: AppSpacing.sm),
                             _ResultRow(
                               label: isSpanish
                                   ? 'Ratio de gastos'
                                   : 'Expense Ratio',
                               value: '${_expenseRatio.toStringAsFixed(1)}%',
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: AppSpacing.sm),
                             _ResultRow(
                               label: isSpanish
                                   ? 'Alquiler mínimo'
@@ -657,7 +657,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppSpacing.xl),
 
                     ElevatedButton.icon(
                       onPressed: _isSaving ? null : () => _save(isSpanish),
@@ -672,7 +672,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
                       label:
                           Text(isSpanish ? 'Guardar Gastos' : 'Save Expenses'),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.xxl),
                   ],
                 ),
               ),
@@ -769,7 +769,7 @@ class _MonthPickerDialogState extends State<_MonthPickerDialog> {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -779,7 +779,7 @@ class _MonthPickerDialogState extends State<_MonthPickerDialog> {
                 onTap: () => setState(() => _month = i + 1),
                 child: Container(
                   width: 72,
-                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
                   decoration: BoxDecoration(
                     color: selected
                         ? AppTheme.primary
@@ -864,7 +864,7 @@ class _ReceiptSection extends StatelessWidget {
             children: [
               const Icon(Icons.lock_outline_rounded,
                   color: AppTheme.primary, size: 20),
-              const SizedBox(width: 10),
+              const SizedBox(width: AppSpacing.smPlus),
               Expanded(
                 child: Text(
                   isSpanish
@@ -927,7 +927,7 @@ class _ReceiptSection extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 14),
+            const SizedBox(width: AppSpacing.mdPlus),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -963,7 +963,7 @@ class _ReceiptSection extends StatelessWidget {
                           minimumSize: Size.zero,
                         ),
                       ),
-                      const SizedBox(width: 14),
+                      const SizedBox(width: AppSpacing.mdPlus),
                       TextButton.icon(
                         onPressed: onAdd,
                         icon: const Icon(Icons.swap_horiz_rounded, size: 16),
@@ -979,7 +979,7 @@ class _ReceiptSection extends StatelessWidget {
                           minimumSize: Size.zero,
                         ),
                       ),
-                      const SizedBox(width: 14),
+                      const SizedBox(width: AppSpacing.mdPlus),
                       TextButton.icon(
                         onPressed: onDelete,
                         icon:
@@ -1015,7 +1015,7 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
         child: Text(
           label,
           style: TextStyle(

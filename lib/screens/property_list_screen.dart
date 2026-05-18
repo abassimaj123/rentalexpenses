@@ -130,7 +130,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                         ? 'Ej: Casa Principal'
                         : 'e.g. Main St Duplex'),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: addrCtrl,
                 decoration: InputDecoration(
@@ -138,7 +138,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                     hintText:
                         isSpanish ? 'Ej: 123 Calle Principal' : '123 Main St'),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: rentCtrl,
                 keyboardType:
@@ -148,7 +148,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                     prefixText: '\$',
                     hintText: '0.00'),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: sqftCtrl,
                 keyboardType:
@@ -246,13 +246,13 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                 builder: (_, isPremium, __) {
                   if (isPremium) {
                     return const Padding(
-                      padding: EdgeInsets.only(right: 4),
+                      padding: EdgeInsets.only(right: AppSpacing.xs),
                       child: Icon(Icons.verified_rounded,
-                          color: Colors.amber, size: 22),
+                          color: CalcwiseSemanticColors.warnIcon, size: 22),
                     );
                   }
                   return IconButton(
-                    icon: const Icon(Icons.star_outline, color: Colors.amber),
+                    icon: const Icon(Icons.star_outline, color: CalcwiseSemanticColors.warnIcon),
                     tooltip: isSpanish ? 'Obtener Premium' : 'Go Premium',
                     onPressed: () => IAPService.instance.buy(),
                   );
@@ -286,7 +286,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                               : Icons.radio_button_unchecked,
                           size: 18,
                           color: AppTheme.primary),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.sm),
                       Text(isSpanish ? 'Por rentabilidad' : 'By profitability'),
                     ]),
                   ),
@@ -299,7 +299,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                               : Icons.radio_button_unchecked,
                           size: 18,
                           color: AppTheme.primary),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.sm),
                       Text(isSpanish ? 'Por nombre' : 'By name'),
                     ]),
                   ),
@@ -312,7 +312,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                               : Icons.radio_button_unchecked,
                           size: 18,
                           color: AppTheme.primary),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.sm),
                       Text(isSpanish ? 'Más recientes' : 'Newest first'),
                     ]),
                   ),
@@ -338,7 +338,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                             onRefresh: _load,
                             child: ListView.builder(
                               padding:
-                                  const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                                  const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 100),
                               itemCount: _sorted.length,
                               itemBuilder: (ctx, i) {
                                 final p = _sorted[i];
@@ -394,8 +394,8 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                   },
                                   background: Container(
                                     alignment: Alignment.centerRight,
-                                    padding: const EdgeInsets.only(right: 20),
-                                    margin: const EdgeInsets.only(bottom: 12),
+                                    padding: const EdgeInsets.only(right: AppSpacing.xl),
+                                    margin: const EdgeInsets.only(bottom: AppSpacing.md),
                                     decoration: BoxDecoration(
                                       color: AppTheme.dangerRed
                                           .withValues(alpha: 0.12),
@@ -406,7 +406,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                         color: AppTheme.dangerRed),
                                   ),
                                   child: Card(
-                                    margin: const EdgeInsets.only(bottom: 12),
+                                    margin: const EdgeInsets.only(bottom: AppSpacing.md),
                                     child: InkWell(
                                       borderRadius:
                                           BorderRadius.circular(AppRadius.xl),
@@ -449,7 +449,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                                       Icons.home_rounded,
                                                       color: AppTheme.primary),
                                                 ),
-                                                const SizedBox(width: 12),
+                                                const SizedBox(width: AppSpacing.md),
                                                 Expanded(
                                                   child: Column(
                                                     crossAxisAlignment:
@@ -587,7 +587,7 @@ class _EmptyState extends StatelessWidget {
                 color: CalcwiseTheme.of(context)
                     .textSecondary
                     .withValues(alpha: 0.35)),
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.xl),
             Text(
               isSpanish
                   ? 'Agrega tu primera propiedad'
@@ -596,7 +596,7 @@ class _EmptyState extends StatelessWidget {
                   fontSize: AppTextSize.title, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: AppSpacing.smPlus),
             Text(
               isSpanish
                   ? 'Registra tus propiedades y lleva el seguimiento de sus gastos e ingresos mes a mes.'
@@ -606,7 +606,7 @@ class _EmptyState extends StatelessWidget {
                   fontSize: AppTextSize.body),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 28),
+            const SizedBox(height: AppSpacing.xxlPlus),
             const Icon(Icons.arrow_downward_rounded,
                 color: AppTheme.primary, size: 32),
           ],
@@ -631,7 +631,7 @@ class _MiniStat extends StatelessWidget {
             style: TextStyle(
                 fontSize: AppTextSize.xs,
                 color: CalcwiseTheme.of(context).textSecondary)),
-        const SizedBox(height: 2),
+        const SizedBox(height: AppSpacing.xxs),
         Text(value,
             style: TextStyle(
                 fontSize: AppTextSize.body,
