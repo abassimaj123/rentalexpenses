@@ -302,10 +302,31 @@ class _ReportsScreenState extends State<ReportsScreen> {
       return;
     }
 
+    final isSpanish = isSpanishNotifier.value;
     final doc = pw.Document();
-    final dateFmt = DateFormat('MMMM yyyy', 'en');
+    final dateFmt = DateFormat('MMMM yyyy', isSpanish ? 'es' : 'en');
     final monthLabel = dateFmt.format(_selectedMonth);
     final now = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+    // Localised strings for PDF
+    final pdfTitle =
+        isSpanish ? 'Informe de Gastos de Alquiler' : 'Rental Expenses Report';
+    final pdfPeriod =
+        isSpanish ? 'Período: $monthLabel' : 'Period: $monthLabel';
+    final pdfCategory = isSpanish ? 'Categoría' : 'Category';
+    final pdfAmount = isSpanish ? 'Monto' : 'Amount';
+    final pdfMonthlyRent = isSpanish ? 'Alquiler mensual' : 'Monthly Rent';
+    final pdfTotalExpenses = isSpanish ? 'Total de gastos' : 'Total Expenses';
+    final pdfCashFlow = isSpanish ? 'Flujo de caja' : 'Cash Flow';
+    final pdfPortfolioTotals =
+        isSpanish ? 'Totales del portafolio' : 'Portfolio Totals';
+    final pdfMetric = isSpanish ? 'Métrica' : 'Metric';
+    final pdfProperties = isSpanish ? 'Propiedades' : 'Properties';
+    final pdfTotalRent = isSpanish ? 'Alquiler total' : 'Total Rent';
+    final pdfMonthlyFlow = isSpanish ? 'Flujo mensual' : 'Monthly Cash Flow';
+    final pdfAnnualFlow = isSpanish ? 'Flujo anual' : 'Annual Cash Flow';
+    final pdfGenerated = isSpanish ? 'Generado: $now' : 'Generated: $now';
+    final catKeys = isSpanish ? _catKeysEs : _catKeysEn;
 
     doc.addPage(
       pw.MultiPage(
@@ -313,12 +334,12 @@ class _ReportsScreenState extends State<ReportsScreen> {
         margin: const pw.EdgeInsets.all(AppSpacing.xxxl),
         build: (ctx) {
           final rows = <pw.Widget>[
-            pw.Text('Rental Expenses Report',
+            pw.Text(pdfTitle,
                 style: pw.TextStyle(
                     fontSize: AppTextSize.titleMd,
                     fontWeight: pw.FontWeight.bold)),
             pw.SizedBox(height: 4),
-            pw.Text('Period: $monthLabel',
+            pw.Text(pdfPeriod,
                 style: const pw.TextStyle(fontSize: AppTextSize.md)),
             pw.SizedBox(height: 16),
           ];
@@ -336,15 +357,15 @@ class _ReportsScreenState extends State<ReportsScreen> {
             rows.add(pw.SizedBox(height: 4));
 
             final tableData = <List<String>>[
-              ['Category', 'Amount'],
-              ['Monthly Rent', '\$${_fmt.format(p.monthlyRent)}'],
-              ..._catKeysEn
+              [pdfCategory, pdfAmount],
+              [pdfMonthlyRent, '\$${_fmt.format(p.monthlyRent)}'],
+              ...catKeys
                   .asMap()
                   .entries
                   .where((en) => vals[en.key] > 0)
                   .map((en) => [en.value, '\$${_fmt.format(vals[en.key])}']),
-              ['Total Expenses', '\$${_fmt.format(e?.totalExpenses ?? 0)}'],
-              ['Cash Flow', '${cf < 0 ? '-' : '+'}\$${_fmt.format(cf.abs())}'],
+              [pdfTotalExpenses, '\$${_fmt.format(e?.totalExpenses ?? 0)}'],
+              [pdfCashFlow, '${cf < 0 ? '-' : '+'}\$${_fmt.format(cf.abs())}'],
             ];
 
             rows.add(
@@ -374,23 +395,23 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
           rows.addAll([
             pw.Divider(),
-            pw.Text('Portfolio Totals',
+            pw.Text(pdfPortfolioTotals,
                 style: pw.TextStyle(
                     fontSize: AppTextSize.body,
                     fontWeight: pw.FontWeight.bold)),
             pw.SizedBox(height: 6),
             pw.TableHelper.fromTextArray(
-              headers: ['Metric', 'Amount'],
+              headers: [pdfMetric, pdfAmount],
               data: [
-                ['Properties', '${_properties.length}'],
-                ['Total Rent', '\$${_fmt.format(totalRent)}'],
-                ['Total Expenses', '\$${_fmt.format(totalExp)}'],
+                [pdfProperties, '${_properties.length}'],
+                [pdfTotalRent, '\$${_fmt.format(totalRent)}'],
+                [pdfTotalExpenses, '\$${_fmt.format(totalExp)}'],
                 [
-                  'Monthly Cash Flow',
+                  pdfMonthlyFlow,
                   '${totalCF < 0 ? '-' : '+'}\$${_fmt.format(totalCF.abs())}'
                 ],
                 [
-                  'Annual Cash Flow',
+                  pdfAnnualFlow,
                   '${(totalCF * 12) < 0 ? '-' : '+'}\$${_fmt.format((totalCF * 12).abs())}'
                 ],
               ],
@@ -403,7 +424,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
               cellHeight: 22,
             ),
             pw.SizedBox(height: 20),
-            pw.Text('Generated: $now',
+            pw.Text(pdfGenerated,
                 style:
                     const pw.TextStyle(fontSize: 10, color: PdfColors.grey600)),
           ]);
