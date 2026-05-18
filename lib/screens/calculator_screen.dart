@@ -512,7 +512,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 isNumeric: false,
                                 prefix: null,
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: AppSpacing.md),
                               _TextField(
                                 ctrl: _rentCtrl,
                                 label: isSpanish
@@ -536,11 +536,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                   return null;
                                 },
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: AppSpacing.md),
                               Divider(
                                   height: 1,
                                   color: CalcwiseTheme.of(context).cardBorder),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: AppSpacing.md),
                               // ── Investor Metrics inputs (optional) ──────────
                               Row(children: [
                                 const Icon(Icons.analytics_rounded,
@@ -556,7 +556,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                       fontWeight: FontWeight.w600),
                                 ),
                               ]),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: AppSpacing.sm),
                               _TextField(
                                 ctrl: _valueCtrl,
                                 label: isSpanish
@@ -569,7 +569,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 isCurrency: true,
                                 prefix: '\$',
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: AppSpacing.md),
                               _TextField(
                                 ctrl: _investCtrl,
                                 label: isSpanish
@@ -583,7 +583,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 prefix: '\$',
                               ),
                             ]),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: AppSpacing.xxl),
 
                             // ── Expense Categories ──────────────────────────────
                             _SectionLabel(isSpanish
@@ -600,7 +600,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 isCurrency: true,
                                 prefix: '\$',
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: AppSpacing.md),
                               _TextField(
                                 ctrl: _taxCtrl,
                                 label: isSpanish
@@ -611,7 +611,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 isCurrency: true,
                                 prefix: '\$',
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: AppSpacing.md),
                               _TextField(
                                 ctrl: _insCtrl,
                                 label: isSpanish
@@ -622,7 +622,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 isCurrency: true,
                                 prefix: '\$',
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: AppSpacing.md),
                               _TextField(
                                 ctrl: _hoaCtrl,
                                 label: isSpanish ? 'Cuotas HOA' : 'HOA Fees',
@@ -632,7 +632,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 prefix: '\$',
                               ),
                             ]),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: AppSpacing.md),
 
                             // Property Mgmt toggle card
                             _buildCard([
@@ -658,7 +658,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: AppSpacing.sm),
                               _TextField(
                                 ctrl: _mgmtCtrl,
                                 label: _mgmtIsPercent
@@ -675,7 +675,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 suffix: _mgmtIsPercent ? '%' : null,
                               ),
                             ]),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: AppSpacing.md),
 
                             _buildCard([
                               _TextField(
@@ -688,7 +688,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 isCurrency: true,
                                 prefix: '\$',
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: AppSpacing.md),
                               // Vacancy toggle
                               Row(
                                 children: [
@@ -712,7 +712,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: AppSpacing.sm),
                               _TextField(
                                 ctrl: _vacCtrl,
                                 label: _vacIsPercent
@@ -728,7 +728,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 prefix: _vacIsPercent ? null : '\$',
                                 suffix: _vacIsPercent ? '%' : null,
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: AppSpacing.md),
                               _TextField(
                                 ctrl: _utilCtrl,
                                 label: isSpanish
@@ -739,7 +739,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 isCurrency: true,
                                 prefix: '\$',
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: AppSpacing.md),
                               _TextField(
                                 ctrl: _landCtrl,
                                 label: isSpanish
@@ -750,7 +750,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 isCurrency: true,
                                 prefix: '\$',
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: AppSpacing.md),
                               _TextField(
                                 ctrl: _otherCtrl,
                                 label: isSpanish
@@ -762,7 +762,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 prefix: '\$',
                               ),
                             ]),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: AppSpacing.xxl),
 
                             // ── Optional recalculate (non-blocking) ─────────────
                             if (_result != null)
@@ -773,13 +773,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 label: Text(
                                     isSpanish ? 'Recalcular' : 'Recalculate'),
                               ),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: AppSpacing.xxl),
 
                             // ── Empty state ─────────────────────────────────────
                             if (_result == null)
                               Padding(
                                 padding:
-                                    const EdgeInsets.symmetric(vertical: 24),
+                                    const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
                                 child: Column(
                                   children: [
                                     Icon(Icons.home_work_rounded,
@@ -787,7 +787,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                         color: CalcwiseTheme.of(context)
                                             .textSecondary
                                             .withValues(alpha: 0.4)),
-                                    const SizedBox(height: 12),
+                                    const SizedBox(height: AppSpacing.md),
                                     Text(
                                       isSpanish
                                           ? 'Ingresa tus gastos arriba para ver los resultados'
@@ -829,7 +829,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                             fmt: _fmt,
                                             isSpanish: isSpanish,
                                           ),
-                                          const SizedBox(height: 12),
+                                          const SizedBox(height: AppSpacing.md),
                                           InsightCard(
                                             insights: InsightEngine.generate(
                                               monthlyRent: _result!.rentIncome,
@@ -845,7 +845,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                             ),
                                             isSpanish: isSpanish,
                                           ),
-                                          const SizedBox(height: 16),
+                                          const SizedBox(height: AppSpacing.lg),
                                           Row(
                                             children: [
                                               Expanded(
@@ -874,7 +874,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                                   ),
                                                 ),
                                               ),
-                                              const SizedBox(width: 8),
+                                              const SizedBox(width: AppSpacing.sm),
                                               OutlinedButton.icon(
                                                 onPressed: () =>
                                                     _share(isSpanish),
@@ -889,7 +889,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                               ),
                                             ],
                                           ),
-                                          const SizedBox(height: 24),
+                                          const SizedBox(height: AppSpacing.xxl),
                                         ],
                                       ),
                                     )
@@ -971,7 +971,7 @@ class _ResultsSection extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         // Details card
         Card(
           child: Padding(
@@ -987,19 +987,19 @@ class _ResultsSection extends StatelessWidget {
                 ),
                 Divider(
                     height: 24, color: CalcwiseTheme.of(context).cardBorder),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 _ResultRow(
                   label: isSpanish ? 'Ratio de gastos' : 'Expense Ratio',
                   value: '${calc.expenseRatio.toStringAsFixed(1)}%',
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 _ResultRow(
                   label: isSpanish
                       ? 'Alquiler mínimo necesario'
                       : 'Break-Even Rent',
                   value: '\$${fmt.format(calc.breakEvenRent)}',
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 _ResultRow(
                   label: isSpanish
                       ? 'Ingreso operativo neto (NOI anual)'
@@ -1012,11 +1012,11 @@ class _ResultsSection extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.lg),
 
         // ── Investor Metrics card (Cap Rate, Yield, CoC ROI) ─────────
         if (calc.capRate != null || calc.cocRoi != null) ...[
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           _SectionLabel(
               isSpanish ? 'Métricas de Inversión' : 'Investment Metrics'),
           Card(
@@ -1036,7 +1036,7 @@ class _ResultsSection extends StatelessWidget {
                             ? AppTheme.warning
                             : AppTheme.dangerRed,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.md),
                 ],
                 if (calc.grossYield != null) ...[
                   _InvestorMetricRow(
@@ -1049,7 +1049,7 @@ class _ResultsSection extends StatelessWidget {
                         ? AppTheme.success
                         : AppTheme.warning,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.md),
                 ],
                 if (calc.cocRoi != null) ...[
                   _InvestorMetricRow(
@@ -1065,7 +1065,7 @@ class _ResultsSection extends StatelessWidget {
                             : AppTheme.dangerRed,
                   ),
                 ],
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 Divider(
                     height: 12, color: CalcwiseTheme.of(context).cardBorder),
                 Text(
@@ -1081,12 +1081,12 @@ class _ResultsSection extends StatelessWidget {
             ),
           ),
         ],
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.lg),
 
         // Cash flow indicator banner
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.mdPlus, horizontal: AppSpacing.lg),
           decoration: BoxDecoration(
             color: cfColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(AppRadius.xl),
@@ -1102,7 +1102,7 @@ class _ResultsSection extends StatelessWidget {
                 color: cfColor,
                 size: 22,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               Text(
                 cf >= 0
                     ? (isSpanish
@@ -1119,7 +1119,7 @@ class _ResultsSection extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.lg),
 
         // Expense breakdown
         _SectionLabel(isSpanish ? 'Desglose de Gastos' : 'Expense Breakdown'),
@@ -1166,7 +1166,7 @@ class _BreakdownList extends StatelessWidget {
     return Column(
       children: [
         for (var i = 0; i < entries.length; i++) ...[
-          if (i > 0) const SizedBox(height: 8),
+          if (i > 0) const SizedBox(height: AppSpacing.sm),
           _BreakdownRow(
             label: entries[i].key,
             amount: entries[i].value,
@@ -1207,7 +1207,7 @@ class _BreakdownRow extends StatelessWidget {
               height: 10,
               decoration: BoxDecoration(color: color, shape: BoxShape.circle),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child:
                   Text(label, style: const TextStyle(fontSize: AppTextSize.md)),
@@ -1217,7 +1217,7 @@ class _BreakdownRow extends StatelessWidget {
               style: const TextStyle(
                   fontSize: AppTextSize.md, fontWeight: FontWeight.w600),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
             SizedBox(
               width: 44,
               child: Text(
@@ -1230,7 +1230,7 @@ class _BreakdownRow extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: AppSpacing.xs),
         ClipRRect(
           borderRadius: BorderRadius.circular(AppRadius.xs),
           child: LinearProgressIndicator(
@@ -1253,7 +1253,7 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
         child: Text(
           label.toUpperCase(),
           style: TextStyle(
@@ -1422,7 +1422,7 @@ class _InvestorMetricRow extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppRadius.xs),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

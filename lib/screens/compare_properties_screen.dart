@@ -115,7 +115,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
@@ -125,7 +125,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                         onTap: () => setLocal(() => pickedMonth = i + 1),
                         child: Container(
                           width: 62,
-                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
                           decoration: BoxDecoration(
                             color: sel
                                 ? AppTheme.primary
@@ -254,14 +254,14 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                             child: const Icon(Icons.lock_rounded,
                                 size: 48, color: AppTheme.primary),
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: AppSpacing.xl),
                           Text(
                             isSpanish ? 'Función Premium' : 'Premium Feature',
                             style: const TextStyle(
                                 fontSize: AppTextSize.titleMd,
                                 fontWeight: FontWeight.bold),
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: AppSpacing.smPlus),
                           Text(
                             isSpanish
                                 ? 'La comparación de propiedades está disponible para usuarios Premium. Desbloquea para ver análisis lado a lado.'
@@ -270,7 +270,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                                 color: CalcwiseTheme.of(context).textSecondary),
                             textAlign: TextAlign.center,
                           ),
-                          const SizedBox(height: 28),
+                          const SizedBox(height: AppSpacing.xxlPlus),
                           ElevatedButton.icon(
                             onPressed: () => PaywallHard.show(context),
                             icon: const Icon(Icons.star_rounded),
@@ -341,7 +341,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                                     children: [
                                       const Icon(Icons.calendar_month_rounded,
                                           color: AppTheme.primary, size: 18),
-                                      const SizedBox(width: 8),
+                                      const SizedBox(width: AppSpacing.sm),
                                       Text(
                                         dateFmt.format(_selectedMonth),
                                         style: const TextStyle(
@@ -352,7 +352,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 16),
+                              const SizedBox(height: AppSpacing.lg),
 
                               // Property chips
                               _SectionLabel(isSpanish
@@ -381,7 +381,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                                   );
                                 }).toList(),
                               ),
-                              const SizedBox(height: 20),
+                              const SizedBox(height: AppSpacing.xl),
 
                               // Comparison table
                               if (selected.length >= 2) ...[
@@ -643,7 +643,7 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
         child: Text(label,
             style: TextStyle(
                 fontSize: AppTextSize.xs,

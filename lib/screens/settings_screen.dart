@@ -37,13 +37,13 @@ class SettingsScreen extends StatelessWidget {
                 builder: (_, isPremium, __) {
                   if (isPremium) {
                     return const Padding(
-                      padding: EdgeInsets.only(right: 12),
+                      padding: EdgeInsets.only(right: AppSpacing.md),
                       child: Icon(Icons.verified_rounded,
-                          color: Colors.amber, size: 22),
+                          color: CalcwiseSemanticColors.warnIcon, size: 22),
                     );
                   }
                   return IconButton(
-                    icon: const Icon(Icons.star_outline, color: Colors.amber),
+                    icon: const Icon(Icons.star_outline, color: CalcwiseSemanticColors.warnIcon),
                     tooltip: isSpanish ? 'Obtener Premium' : 'Go Premium',
                     onPressed: () => IAPService.instance.buy(),
                   );
@@ -67,7 +67,7 @@ class SettingsScreen extends StatelessWidget {
                           children: [
                             const Icon(Icons.language_rounded,
                                 color: AppTheme.primary),
-                            const SizedBox(width: 12),
+                            const SizedBox(width: AppSpacing.md),
                             Expanded(
                               child: Text(
                                 isSpanish
@@ -122,7 +122,7 @@ class SettingsScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppSpacing.xl),
 
                     // ── Premium ───────────────────────────────────────
                     _SectionHeader(label: isSpanish ? 'Premium' : 'Premium'),
@@ -133,7 +133,7 @@ class SettingsScreen extends StatelessWidget {
                           return Card(
                             child: ListTile(
                               leading: const Icon(Icons.star_rounded,
-                                  color: Colors.amber),
+                                  color: CalcwiseSemanticColors.warnIcon),
                               title: Text(isSpanish
                                   ? '¡Eres Premium!'
                                   : 'You\'re Premium!'),
@@ -209,7 +209,7 @@ class SettingsScreen extends StatelessWidget {
                         );
                       },
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppSpacing.xl),
 
                     // ── Support ───────────────────────────────────────
                     _SectionHeader(label: isSpanish ? 'Soporte' : 'Support'),
@@ -238,7 +238,7 @@ class SettingsScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppSpacing.xl),
 
                     // ── Legal ─────────────────────────────────────────
                     _SectionHeader(label: isSpanish ? 'Legal' : 'Legal'),
@@ -255,7 +255,7 @@ class SettingsScreen extends StatelessWidget {
                         onTap: () => _launchUrl('https://calqwise.com/privacy'),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppSpacing.xl),
 
                     // ── Privacy ───────────────────────────────────────
                     _SectionHeader(label: isSpanish ? 'Privacidad' : 'Privacy'),
@@ -272,7 +272,7 @@ class SettingsScreen extends StatelessWidget {
                         dense: false,
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppSpacing.xl),
 
                     // ── Discover CalqWise ──────────────────────────────
                     _SectionHeader(
@@ -337,11 +337,11 @@ class SettingsScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.xxl),
 
                     // ── Disclaimer ─────────────────────────────────────
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(4, 0, 4, 0),
+                      padding: const EdgeInsets.fromLTRB(AppSpacing.xs, 0, AppSpacing.xs, 0),
                       child: Text(
                         isSpanish
                             ? 'Solo con fines informativos. No es asesoramiento financiero. Consulte a un profesional antes de tomar decisiones financieras.'
@@ -354,7 +354,7 @@ class SettingsScreen extends StatelessWidget {
                         textAlign: TextAlign.center,
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.lg),
 
                     // ── App version ────────────────────────────────────
                     Center(
@@ -366,7 +366,7 @@ class SettingsScreen extends StatelessWidget {
                             color: CalcwiseTheme.of(context).textSecondary),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.lg),
                   ],
                 ),
               ),
@@ -386,7 +386,7 @@ class _SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Text(label,
           style: TextStyle(
               fontSize: AppTextSize.md,

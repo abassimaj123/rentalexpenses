@@ -90,7 +90,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                   prefixIcon: const Icon(Icons.person_rounded),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: emailCtrl,
                 keyboardType: TextInputType.emailAddress,
@@ -100,7 +100,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                   prefixIcon: const Icon(Icons.email_rounded),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: phoneCtrl,
                 keyboardType: TextInputType.phone,
@@ -110,7 +110,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                   prefixIcon: const Icon(Icons.phone_rounded),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: rentCtrl,
                 keyboardType:
@@ -124,7 +124,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                   prefixText: '\$',
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
               _DateRow(
                 label: isSpanish ? 'Inicio del bail' : 'Lease Start',
                 date: leaseStart,
@@ -139,7 +139,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                   if (picked != null) setLocal(() => leaseStart = picked);
                 },
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               _DateRow(
                 label: isSpanish ? 'Fin del bail' : 'Lease End',
                 date: leaseEnd,
@@ -154,7 +154,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                   if (picked != null) setLocal(() => leaseEnd = picked);
                 },
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: notesCtrl,
                 maxLines: 2,
@@ -266,10 +266,10 @@ class _TenantsScreenState extends State<TenantsScreen> {
                     : _tenants.isEmpty
                         ? _EmptyTenantsState(isSpanish: isSpanish)
                         : ListView.separated(
-                            padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 100),
                             itemCount: _tenants.length,
                             separatorBuilder: (_, __) =>
-                                const SizedBox(height: 8),
+                                const SizedBox(height: AppSpacing.sm),
                             itemBuilder: (ctx, i) {
                               final t = _tenants[i];
                               final daysLeft = t.daysRemaining;
@@ -308,7 +308,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                                 size: 22,
                                               ),
                                             ),
-                                            const SizedBox(width: 12),
+                                            const SizedBox(width: AppSpacing.md),
                                             Expanded(
                                               child: Column(
                                                 crossAxisAlignment:
@@ -361,12 +361,12 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                             ),
                                           ],
                                         ),
-                                        const SizedBox(height: 10),
+                                        const SizedBox(height: AppSpacing.smPlus),
                                         Divider(
                                             height: 1,
                                             color: CalcwiseTheme.of(context)
                                                 .cardBorder),
-                                        const SizedBox(height: 10),
+                                        const SizedBox(height: AppSpacing.smPlus),
                                         Row(
                                           children: [
                                             Expanded(
@@ -395,7 +395,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                         ),
                                         if (t.status ==
                                             LeaseStatus.expiringSoon) ...[
-                                          const SizedBox(height: 8),
+                                          const SizedBox(height: AppSpacing.sm),
                                           Container(
                                             padding: const EdgeInsets.symmetric(
                                                 horizontal: 10, vertical: 6),
@@ -433,12 +433,12 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                         ],
                                         if (t.status ==
                                             LeaseStatus.expired) ...[
-                                          const SizedBox(height: 8),
+                                          const SizedBox(height: AppSpacing.sm),
                                           Container(
                                             padding: const EdgeInsets.symmetric(
                                                 horizontal: 10, vertical: 6),
                                             decoration: BoxDecoration(
-                                              color: Colors.red
+                                              color: CalcwiseSemanticColors.errorDark
                                                   .withValues(alpha: 0.08),
                                               borderRadius:
                                                   BorderRadius.circular(
@@ -468,7 +468,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                         ],
                                         if (t.email.isNotEmpty ||
                                             t.phone.isNotEmpty) ...[
-                                          const SizedBox(height: 8),
+                                          const SizedBox(height: AppSpacing.sm),
                                           Wrap(
                                             spacing: 12,
                                             children: [
@@ -482,7 +482,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                                         color: CalcwiseTheme.of(
                                                                 context)
                                                             .textSecondary),
-                                                    const SizedBox(width: 4),
+                                                    const SizedBox(width: AppSpacing.xs),
                                                     Text(t.email,
                                                         style: const TextStyle(
                                                             fontSize:
@@ -501,7 +501,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                                         color: CalcwiseTheme.of(
                                                                 context)
                                                             .textSecondary),
-                                                    const SizedBox(width: 4),
+                                                    const SizedBox(width: AppSpacing.xs),
                                                     Text(t.phone,
                                                         style: const TextStyle(
                                                             fontSize:
@@ -513,7 +513,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                             ],
                                           ),
                                         ],
-                                        const SizedBox(height: 4),
+                                        const SizedBox(height: AppSpacing.xs),
                                         Align(
                                           alignment: Alignment.centerRight,
                                           child: IconButton(
@@ -595,7 +595,7 @@ class _DateRow extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppRadius.lg),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
         decoration: BoxDecoration(
           color: const Color(0xFFF1F5F9),
           borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -604,7 +604,7 @@ class _DateRow extends StatelessWidget {
           children: [
             Icon(Icons.calendar_today_rounded,
                 size: 16, color: CalcwiseTheme.of(context).textSecondary),
-            const SizedBox(width: 10),
+            const SizedBox(width: AppSpacing.smPlus),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -645,14 +645,14 @@ class _EmptyTenantsState extends StatelessWidget {
                 color: CalcwiseTheme.of(context)
                     .textSecondary
                     .withValues(alpha: 0.35)),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
             Text(
               isSpanish ? 'Sin locatarios' : 'No tenants yet',
               style: const TextStyle(
                   fontSize: AppTextSize.subtitle, fontWeight: FontWeight.w600),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               isSpanish
                   ? 'Toca el botón + para agregar un locatario a esta propiedad.'

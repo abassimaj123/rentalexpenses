@@ -74,13 +74,13 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                 decoration:
                     InputDecoration(labelText: isSpanish ? 'Nombre' : 'Name'),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: addrCtrl,
                 decoration: InputDecoration(
                     labelText: isSpanish ? 'Dirección' : 'Address'),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: rentCtrl,
                 keyboardType:
@@ -91,7 +91,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                         : 'Monthly Rent (\$)',
                     prefixText: '\$'),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: sqftCtrl,
                 keyboardType:
@@ -245,7 +245,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                 child: _loading
                     ? const Center(child: CircularProgressIndicator())
                     : ListView(
-                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                        padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 100),
                         children: [
                           // Property info card
                           Card(
@@ -268,7 +268,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                         child: const Icon(Icons.home_rounded,
                                             color: AppTheme.primary),
                                       ),
-                                      const SizedBox(width: 12),
+                                      const SizedBox(width: AppSpacing.md),
                                       Expanded(
                                         child: Column(
                                           crossAxisAlignment:
@@ -328,7 +328,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: AppSpacing.lg),
 
                           // Quick stats
                           _SectionLabel(isSpanish
@@ -366,7 +366,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                         : Icons.trending_down_rounded,
                                   ),
                                 ),
-                                const SizedBox(width: 10),
+                                const SizedBox(width: AppSpacing.smPlus),
                                 Expanded(
                                   child: _StatCard(
                                     label: isSpanish
@@ -381,7 +381,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 10),
+                            const SizedBox(height: AppSpacing.smPlus),
                             Row(
                               children: [
                                 Expanded(
@@ -396,7 +396,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                     icon: Icons.calendar_today_rounded,
                                   ),
                                 ),
-                                const SizedBox(width: 10),
+                                const SizedBox(width: AppSpacing.smPlus),
                                 Expanded(
                                   child: _StatCard(
                                     label: 'NOI',
@@ -411,7 +411,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                               ],
                             ),
                           ],
-                          const SizedBox(height: 20),
+                          const SizedBox(height: AppSpacing.xl),
 
                           // Recent months
                           _SectionLabel(isSpanish
@@ -440,7 +440,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                               final cfColor =
                                   cf >= 0 ? AppTheme.success : CalcwiseSemanticColors.errorDark;
                               return Card(
-                                margin: const EdgeInsets.only(bottom: 8),
+                                margin: const EdgeInsets.only(bottom: AppSpacing.sm),
                                 child: InkWell(
                                   borderRadius:
                                       BorderRadius.circular(AppRadius.xl),
@@ -454,7 +454,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                             color: CalcwiseTheme.of(context)
                                                 .textSecondary,
                                             size: 22),
-                                        const SizedBox(width: 12),
+                                        const SizedBox(width: AppSpacing.md),
                                         Expanded(
                                           child: Column(
                                             crossAxisAlignment:
@@ -484,7 +484,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                             color: cfColor,
                                           ),
                                         ),
-                                        const SizedBox(width: 4),
+                                        const SizedBox(width: AppSpacing.xs),
                                         Icon(Icons.chevron_right_rounded,
                                             color: CalcwiseTheme.of(context)
                                                 .textSecondary,
@@ -515,7 +515,7 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
         child: Text(
           label,
           style: TextStyle(

@@ -120,7 +120,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               direction: DismissDirection.endToStart,
               background: Container(
                 alignment: Alignment.centerRight,
-                padding: const EdgeInsets.only(right: 20),
+                padding: const EdgeInsets.only(right: AppSpacing.xl),
                 decoration: BoxDecoration(
                   color: AppTheme.dangerRed.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(AppRadius.xl),
@@ -130,10 +130,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ),
               onDismissed: (_) => _delete(i, isSpanish),
               child: Card(
-                margin: const EdgeInsets.only(bottom: 12),
+                margin: const EdgeInsets.only(bottom: AppSpacing.md),
                 child: ListTile(
                   contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.smPlus),
                   leading: Container(
                     width: 44,
                     height: 44,
@@ -158,7 +158,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 2),
+                      const SizedBox(height: AppSpacing.xxs),
                       Text(
                         isSpanish
                             ? 'Flujo mensual: ${cf < 0 ? '-' : ''}\$${_mFmt.format(cf.abs())}'
@@ -244,13 +244,13 @@ class _EmptyState extends StatelessWidget {
           children: [
             Icon(Icons.history_rounded,
                 size: 72, color: AppTheme.primary.withValues(alpha: 0.3)),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
             Text(
               isSpanish ? 'Sin historial guardado' : 'No saved history',
               style: const TextStyle(
                   fontSize: AppTextSize.subtitle, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               isSpanish
                   ? 'Calcula los gastos de una propiedad y guarda el resultado.'
@@ -273,7 +273,7 @@ class _UpgradeCTA extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
       color: AppTheme.primary.withValues(alpha: 0.05),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.xl),
@@ -286,7 +286,7 @@ class _UpgradeCTA extends StatelessWidget {
           children: [
             Icon(Icons.lock_open_rounded,
                 color: AppTheme.primary.withValues(alpha: 0.6), size: 32),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               isSpanish
                   ? 'Guardaste $limit de $limit propiedades gratis'
@@ -295,7 +295,7 @@ class _UpgradeCTA extends StatelessWidget {
               style: const TextStyle(
                   fontWeight: FontWeight.w600, fontSize: AppTextSize.body),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpacing.xs),
             Text(
               isSpanish
                   ? 'Desbloquea Premium para historial ilimitado'
@@ -305,7 +305,7 @@ class _UpgradeCTA extends StatelessWidget {
                   color: CalcwiseTheme.of(context).textSecondary,
                   fontSize: AppTextSize.md),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:calcwise_core/calcwise_core.dart';
 import '../core/theme/app_theme.dart';
 import '../main.dart';
 
@@ -30,7 +31,7 @@ class ReceiptViewerScreen extends StatelessWidget {
               if (onDelete != null)
                 IconButton(
                   icon: const Icon(Icons.delete_outline_rounded,
-                      color: Colors.redAccent),
+                      color: CalcwiseSemanticColors.errorDark),
                   tooltip: isSpanish ? 'Eliminar foto' : 'Delete photo',
                   onPressed: () async {
                     final confirmed = await showDialog<bool>(
@@ -76,7 +77,7 @@ class ReceiptViewerScreen extends StatelessWidget {
                   children: [
                     const Icon(Icons.broken_image_rounded,
                         color: Colors.white54, size: 64),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
                     Text(
                       isSpanish
                           ? 'No se pudo cargar la imagen'
