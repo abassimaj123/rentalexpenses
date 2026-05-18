@@ -138,7 +138,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                 onChanged: (v) =>
                     setLocal(() => selectedCategory = v ?? selectedCategory),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: amountCtrl,
                 keyboardType:
@@ -148,7 +148,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                   prefixText: '\$',
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(
@@ -474,7 +474,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: AppSpacing.xl),
 
                           // Portfolio net summary
                           if (_properties.isNotEmpty) ...[
@@ -493,7 +493,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                       value: '\$${_fmt.format(grandIncome)}',
                                       color: AppTheme.success,
                                     ),
-                                    const SizedBox(height: 8),
+                                    const SizedBox(height: AppSpacing.sm),
                                     _NetRow(
                                       label: isSpanish
                                           ? 'Total gastos'
@@ -545,7 +545,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(height: 4),
+                                    const SizedBox(height: AppSpacing.xs),
                                     Align(
                                       alignment: Alignment.centerRight,
                                       child: Container(
@@ -557,7 +557,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                   : CalcwiseSemanticColors.errorDark)
                                               .withValues(alpha: 0.1),
                                           borderRadius:
-                                              BorderRadius.circular(20),
+                                              BorderRadius.circular(AppRadius.xxl),
                                         ),
                                         child: Text(
                                           grandNet >= 0
@@ -581,7 +581,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 20),
+                            const SizedBox(height: AppSpacing.xl),
                           ],
 
                           // Per-property Schedule E breakdown
@@ -617,7 +617,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                       size: 14,
                                                       color:
                                                           AppTheme.labelGray),
-                                                  const SizedBox(width: 4),
+                                                  const SizedBox(width: AppSpacing.xs),
                                                   Expanded(
                                                     child: Text(
                                                       p.address,
@@ -649,7 +649,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                   : 'Pre-filled from monthly rent × 12',
                                             ),
                                           ),
-                                          const SizedBox(height: 16),
+                                          const SizedBox(height: AppSpacing.lg),
 
                                           // Part I Schedule E label
                                           Container(
@@ -674,7 +674,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                               ),
                                             ),
                                           ),
-                                          const SizedBox(height: 12),
+                                          const SizedBox(height: AppSpacing.md),
 
                                           // Category rows
                                           if (catTotals.isEmpty)
@@ -715,10 +715,10 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                         )
                                                     : null,
                                                 borderRadius:
-                                                    BorderRadius.circular(8),
+                                                    BorderRadius.circular(AppRadius.md),
                                                 child: Padding(
                                                   padding: const EdgeInsets
-                                                      .symmetric(vertical: 8),
+                                                      .symmetric(vertical: AppSpacing.sm),
                                                   child: Row(
                                                     children: [
                                                       const Icon(
@@ -726,7 +726,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                           size: 15,
                                                           color: AppTheme
                                                               .labelGray),
-                                                      const SizedBox(width: 8),
+                                                      const SizedBox(width: AppSpacing.sm),
                                                       Expanded(
                                                         child: Text(
                                                           IrsCategories
@@ -734,7 +734,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                                   c, isSpanish),
                                                           style:
                                                               const TextStyle(
-                                                                  fontSize: 13),
+                                                                  fontSize: AppTextSize.md),
                                                         ),
                                                       ),
                                                       Text(
@@ -776,7 +776,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                               ),
                                             ],
                                           ),
-                                          const SizedBox(height: 4),
+                                          const SizedBox(height: AppSpacing.xs),
                                           Row(
                                             children: [
                                               Expanded(
@@ -808,7 +808,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                               ),
                                             ],
                                           ),
-                                          const SizedBox(height: 12),
+                                          const SizedBox(height: AppSpacing.md),
 
                                           // Add expense button
                                           OutlinedButton.icon(
@@ -831,14 +831,14 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(height: 16),
+                                  const SizedBox(height: AppSpacing.lg),
                                 ],
                               );
                             }),
 
                           // Export PDF button
                           if (_properties.isNotEmpty) ...[
-                            const SizedBox(height: 8),
+                            const SizedBox(height: AppSpacing.sm),
                             ElevatedButton.icon(
                               onPressed: _exporting
                                   ? null
@@ -855,7 +855,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                   ? 'Exportar Schedule E PDF'
                                   : 'Export Schedule E PDF'),
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: AppSpacing.sm),
                             Text(
                               isSpanish
                                   ? 'Consulta a un profesional fiscal antes de presentar tu declaración.'
@@ -866,7 +866,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                       CalcwiseTheme.of(context).textSecondary),
                               textAlign: TextAlign.center,
                             ),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: AppSpacing.xxl),
                           ],
                         ],
                       ),
@@ -935,7 +935,7 @@ class _EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(40),
+        padding: const EdgeInsets.all(AppSpacing.xxxl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -944,14 +944,14 @@ class _EmptyState extends StatelessWidget {
                 color: CalcwiseTheme.of(context)
                     .textSecondary
                     .withValues(alpha: 0.35)),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
             Text(
               isSpanish ? 'Sin propiedades' : 'No properties',
               style: const TextStyle(
                   fontSize: AppTextSize.subtitle, fontWeight: FontWeight.w600),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               isSpanish
                   ? 'Agrega propiedades en la pestaña Propiedades.'
