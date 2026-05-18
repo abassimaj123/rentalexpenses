@@ -492,7 +492,7 @@ class _ComparisonTable extends StatelessWidget {
         }).toList(),
         colors: properties.map((p) {
           final cf = cfFn(p);
-          return cf >= 0 ? AppTheme.success : Colors.red;
+          return cf >= 0 ? AppTheme.success : CalcwiseSemanticColors.errorDark;
         }).toList(),
         higherIsBetter: true,
         rawValues: properties.map(cfFn).toList(),
@@ -505,7 +505,7 @@ class _ComparisonTable extends StatelessWidget {
         }).toList(),
         colors: properties.map((p) {
           final cf = cfFn(p);
-          return cf >= 0 ? AppTheme.success : Colors.red;
+          return cf >= 0 ? AppTheme.success : CalcwiseSemanticColors.errorDark;
         }).toList(),
         higherIsBetter: true,
         rawValues: properties.map((p) => cfFn(p) * 12).toList(),
@@ -516,7 +516,7 @@ class _ComparisonTable extends StatelessWidget {
             properties.map((p) => '${ratioFn(p).toStringAsFixed(1)}%').toList(),
         colors: properties.map((p) {
           final r = ratioFn(p);
-          return r < 80 ? AppTheme.success : Colors.orange;
+          return r < 80 ? AppTheme.success : CalcwiseSemanticColors.warnIcon;
         }).toList(),
         higherIsBetter: false,
         rawValues: properties.map(ratioFn).toList(),
@@ -529,7 +529,7 @@ class _ComparisonTable extends StatelessWidget {
         }).toList(),
         colors: properties.map((p) {
           final n = noiFn(p);
-          return n >= 0 ? AppTheme.success : Colors.red;
+          return n >= 0 ? AppTheme.success : CalcwiseSemanticColors.errorDark;
         }).toList(),
         higherIsBetter: true,
         rawValues: properties.map(noiFn).toList(),

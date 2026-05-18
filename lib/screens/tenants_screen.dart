@@ -223,7 +223,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red, minimumSize: const Size(80, 40)),
+                backgroundColor: CalcwiseSemanticColors.errorDark, minimumSize: const Size(80, 40)),
             onPressed: () => Navigator.pop(d, true),
             child: Text(isSpanish ? 'Eliminar' : 'Delete'),
           ),
@@ -449,7 +449,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                                 const Icon(
                                                   Icons.info_outline_rounded,
                                                   size: 14,
-                                                  color: Colors.red,
+                                                  color: CalcwiseSemanticColors.errorDark,
                                                 ),
                                                 const SizedBox(width: 6),
                                                 Text(
@@ -458,7 +458,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                                       : 'Lease expired ${(-daysLeft)} days ago',
                                                   style: const TextStyle(
                                                     fontSize: AppTextSize.sm,
-                                                    color: Colors.red,
+                                                    color: CalcwiseSemanticColors.errorDark,
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                                 ),
@@ -519,7 +519,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                           child: IconButton(
                                             icon: const Icon(
                                                 Icons.delete_outline_rounded,
-                                                color: Colors.red,
+                                                color: CalcwiseSemanticColors.errorDark,
                                                 size: 20),
                                             onPressed: () => _confirmDelete(
                                                 ctx, isSpanish, t),

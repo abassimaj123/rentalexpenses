@@ -189,7 +189,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                   if (d.mounted) Navigator.pop(d);
                   _load();
                 },
-                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                style: TextButton.styleFrom(foregroundColor: CalcwiseSemanticColors.errorDark),
                 child: Text(isSpanish ? 'Eliminar' : 'Delete'),
               ),
             TextButton(
@@ -499,7 +499,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                           ? 'Total gastos'
                                           : 'Total Expenses',
                                       value: '\$${_fmt.format(grandExpenses)}',
-                                      color: Colors.red,
+                                      color: CalcwiseSemanticColors.errorDark,
                                     ),
                                     Divider(
                                         height: 20,
@@ -527,7 +527,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                           decoration: BoxDecoration(
                                             color: (grandNet >= 0
                                                     ? AppTheme.success
-                                                    : Colors.red)
+                                                    : CalcwiseSemanticColors.errorDark)
                                                 .withValues(alpha: 0.12),
                                             borderRadius: BorderRadius.circular(
                                                 AppRadius.md),
@@ -539,7 +539,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                               fontSize: AppTextSize.bodyLg,
                                               color: grandNet >= 0
                                                   ? AppTheme.success
-                                                  : Colors.red,
+                                                  : CalcwiseSemanticColors.errorDark,
                                             ),
                                           ),
                                         ),
@@ -554,7 +554,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                         decoration: BoxDecoration(
                                           color: (grandNet >= 0
                                                   ? AppTheme.success
-                                                  : Colors.red)
+                                                  : CalcwiseSemanticColors.errorDark)
                                               .withValues(alpha: 0.1),
                                           borderRadius:
                                               BorderRadius.circular(20),
@@ -572,7 +572,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                             fontWeight: FontWeight.bold,
                                             color: grandNet >= 0
                                                 ? AppTheme.success
-                                                : Colors.red,
+                                                : CalcwiseSemanticColors.errorDark,
                                           ),
                                         ),
                                       ),
@@ -792,7 +792,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                     fontWeight: FontWeight.bold,
                                                     color: net >= 0
                                                         ? AppTheme.success
-                                                        : Colors.red,
+                                                        : CalcwiseSemanticColors.errorDark,
                                                   ),
                                                 ),
                                               ),
@@ -803,7 +803,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                   fontSize: AppTextSize.bodyMd,
                                                   color: net >= 0
                                                       ? AppTheme.success
-                                                      : Colors.red,
+                                                      : CalcwiseSemanticColors.errorDark,
                                                 ),
                                               ),
                                             ],

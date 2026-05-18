@@ -360,7 +360,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                         '${curCF < 0 ? '-' : '+'}\$${_fmt.format(curCF.abs())}',
                                     color: curCF >= 0
                                         ? AppTheme.success
-                                        : Colors.red,
+                                        : CalcwiseSemanticColors.errorDark,
                                     icon: curCF >= 0
                                         ? Icons.trending_up_rounded
                                         : Icons.trending_down_rounded,
@@ -375,7 +375,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                     value: '${curRatio.toStringAsFixed(1)}%',
                                     color: curRatio < 80
                                         ? AppTheme.success
-                                        : Colors.orange,
+                                        : CalcwiseSemanticColors.warnIcon,
                                     icon: Icons.pie_chart_rounded,
                                   ),
                                 ),
@@ -392,7 +392,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                         '${annualCF < 0 ? '-' : '+'}\$${_fmt.format(annualCF.abs())}',
                                     color: annualCF >= 0
                                         ? AppTheme.success
-                                        : Colors.red,
+                                        : CalcwiseSemanticColors.errorDark,
                                     icon: Icons.calendar_today_rounded,
                                   ),
                                 ),
@@ -404,7 +404,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                         '${noi < 0 ? '-' : ''}\$${_fmt.format(noi.abs())}',
                                     color: noi >= 0
                                         ? AppTheme.success
-                                        : Colors.red,
+                                        : CalcwiseSemanticColors.errorDark,
                                     icon: Icons.account_balance_rounded,
                                   ),
                                 ),
@@ -438,7 +438,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                   ? (e.totalExpenses / rent * 100)
                                   : 0.0;
                               final cfColor =
-                                  cf >= 0 ? AppTheme.success : Colors.red;
+                                  cf >= 0 ? AppTheme.success : CalcwiseSemanticColors.errorDark;
                               return Card(
                                 margin: const EdgeInsets.only(bottom: 8),
                                 child: InkWell(

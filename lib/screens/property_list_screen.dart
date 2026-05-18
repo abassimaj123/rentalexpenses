@@ -527,7 +527,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                                           '${ratio.toStringAsFixed(1)}%',
                                                       color: ratio < 80
                                                           ? AppTheme.success
-                                                          : Colors.orange,
+                                                          : CalcwiseSemanticColors.warnIcon,
                                                     ),
                                                   ),
                                                 ] else
