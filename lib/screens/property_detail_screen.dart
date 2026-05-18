@@ -245,7 +245,8 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                 child: _loading
                     ? const Center(child: CircularProgressIndicator())
                     : ListView(
-                        padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 100),
+                        padding: const EdgeInsets.fromLTRB(
+                            AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 100),
                         children: [
                           // Property info card
                           Card(
@@ -437,10 +438,12 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                               final ratio = rent > 0
                                   ? (e.totalExpenses / rent * 100)
                                   : 0.0;
-                              final cfColor =
-                                  cf >= 0 ? AppTheme.success : CalcwiseSemanticColors.errorDark;
+                              final cfColor = cf >= 0
+                                  ? AppTheme.success
+                                  : CalcwiseSemanticColors.errorDark;
                               return Card(
-                                margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+                                margin: const EdgeInsets.only(
+                                    bottom: AppSpacing.sm),
                                 child: InkWell(
                                   borderRadius:
                                       BorderRadius.circular(AppRadius.xl),

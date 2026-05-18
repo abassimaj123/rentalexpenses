@@ -223,7 +223,8 @@ class _TenantsScreenState extends State<TenantsScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-                backgroundColor: CalcwiseSemanticColors.errorDark, minimumSize: const Size(80, 40)),
+                backgroundColor: CalcwiseSemanticColors.errorDark,
+                minimumSize: const Size(80, 40)),
             onPressed: () => Navigator.pop(d, true),
             child: Text(isSpanish ? 'Eliminar' : 'Delete'),
           ),
@@ -266,7 +267,8 @@ class _TenantsScreenState extends State<TenantsScreen> {
                     : _tenants.isEmpty
                         ? _EmptyTenantsState(isSpanish: isSpanish)
                         : ListView.separated(
-                            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 100),
+                            padding: const EdgeInsets.fromLTRB(AppSpacing.lg,
+                                AppSpacing.lg, AppSpacing.lg, 100),
                             itemCount: _tenants.length,
                             separatorBuilder: (_, __) =>
                                 const SizedBox(height: AppSpacing.sm),
@@ -308,7 +310,8 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                                 size: 22,
                                               ),
                                             ),
-                                            const SizedBox(width: AppSpacing.md),
+                                            const SizedBox(
+                                                width: AppSpacing.md),
                                             Expanded(
                                               child: Column(
                                                 crossAxisAlignment:
@@ -361,12 +364,14 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                             ),
                                           ],
                                         ),
-                                        const SizedBox(height: AppSpacing.smPlus),
+                                        const SizedBox(
+                                            height: AppSpacing.smPlus),
                                         Divider(
                                             height: 1,
                                             color: CalcwiseTheme.of(context)
                                                 .cardBorder),
-                                        const SizedBox(height: AppSpacing.smPlus),
+                                        const SizedBox(
+                                            height: AppSpacing.smPlus),
                                         Row(
                                           children: [
                                             Expanded(
@@ -438,7 +443,8 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                             padding: const EdgeInsets.symmetric(
                                                 horizontal: 10, vertical: 6),
                                             decoration: BoxDecoration(
-                                              color: CalcwiseSemanticColors.errorDark
+                                              color: CalcwiseSemanticColors
+                                                  .errorDark
                                                   .withValues(alpha: 0.08),
                                               borderRadius:
                                                   BorderRadius.circular(
@@ -449,7 +455,8 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                                 const Icon(
                                                   Icons.info_outline_rounded,
                                                   size: 14,
-                                                  color: CalcwiseSemanticColors.errorDark,
+                                                  color: CalcwiseSemanticColors
+                                                      .errorDark,
                                                 ),
                                                 const SizedBox(width: 6),
                                                 Text(
@@ -458,7 +465,9 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                                       : 'Lease expired ${(-daysLeft)} days ago',
                                                   style: const TextStyle(
                                                     fontSize: AppTextSize.sm,
-                                                    color: CalcwiseSemanticColors.errorDark,
+                                                    color:
+                                                        CalcwiseSemanticColors
+                                                            .errorDark,
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                                 ),
@@ -482,7 +491,8 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                                         color: CalcwiseTheme.of(
                                                                 context)
                                                             .textSecondary),
-                                                    const SizedBox(width: AppSpacing.xs),
+                                                    const SizedBox(
+                                                        width: AppSpacing.xs),
                                                     Text(t.email,
                                                         style: const TextStyle(
                                                             fontSize:
@@ -501,7 +511,8 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                                         color: CalcwiseTheme.of(
                                                                 context)
                                                             .textSecondary),
-                                                    const SizedBox(width: AppSpacing.xs),
+                                                    const SizedBox(
+                                                        width: AppSpacing.xs),
                                                     Text(t.phone,
                                                         style: const TextStyle(
                                                             fontSize:
@@ -519,7 +530,8 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                           child: IconButton(
                                             icon: const Icon(
                                                 Icons.delete_outline_rounded,
-                                                color: CalcwiseSemanticColors.errorDark,
+                                                color: CalcwiseSemanticColors
+                                                    .errorDark,
                                                 size: 20),
                                             onPressed: () => _confirmDelete(
                                                 ctx, isSpanish, t),
@@ -595,7 +607,8 @@ class _DateRow extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppRadius.lg),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg, vertical: AppSpacing.md),
         decoration: BoxDecoration(
           color: const Color(0xFFF1F5F9),
           borderRadius: BorderRadius.circular(AppRadius.lg),

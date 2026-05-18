@@ -189,7 +189,8 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                   if (d.mounted) Navigator.pop(d);
                   _load();
                 },
-                style: TextButton.styleFrom(foregroundColor: CalcwiseSemanticColors.errorDark),
+                style: TextButton.styleFrom(
+                    foregroundColor: CalcwiseSemanticColors.errorDark),
                 child: Text(isSpanish ? 'Eliminar' : 'Delete'),
               ),
             TextButton(
@@ -527,7 +528,8 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                           decoration: BoxDecoration(
                                             color: (grandNet >= 0
                                                     ? AppTheme.success
-                                                    : CalcwiseSemanticColors.errorDark)
+                                                    : CalcwiseSemanticColors
+                                                        .errorDark)
                                                 .withValues(alpha: 0.12),
                                             borderRadius: BorderRadius.circular(
                                                 AppRadius.md),
@@ -539,7 +541,8 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                               fontSize: AppTextSize.bodyLg,
                                               color: grandNet >= 0
                                                   ? AppTheme.success
-                                                  : CalcwiseSemanticColors.errorDark,
+                                                  : CalcwiseSemanticColors
+                                                      .errorDark,
                                             ),
                                           ),
                                         ),
@@ -554,10 +557,11 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                         decoration: BoxDecoration(
                                           color: (grandNet >= 0
                                                   ? AppTheme.success
-                                                  : CalcwiseSemanticColors.errorDark)
+                                                  : CalcwiseSemanticColors
+                                                      .errorDark)
                                               .withValues(alpha: 0.1),
-                                          borderRadius:
-                                              BorderRadius.circular(AppRadius.xxl),
+                                          borderRadius: BorderRadius.circular(
+                                              AppRadius.xxl),
                                         ),
                                         child: Text(
                                           grandNet >= 0
@@ -572,7 +576,8 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                             fontWeight: FontWeight.bold,
                                             color: grandNet >= 0
                                                 ? AppTheme.success
-                                                : CalcwiseSemanticColors.errorDark,
+                                                : CalcwiseSemanticColors
+                                                    .errorDark,
                                           ),
                                         ),
                                       ),
@@ -617,7 +622,8 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                       size: 14,
                                                       color:
                                                           AppTheme.labelGray),
-                                                  const SizedBox(width: AppSpacing.xs),
+                                                  const SizedBox(
+                                                      width: AppSpacing.xs),
                                                   Expanded(
                                                     child: Text(
                                                       p.address,
@@ -715,10 +721,12 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                         )
                                                     : null,
                                                 borderRadius:
-                                                    BorderRadius.circular(AppRadius.md),
+                                                    BorderRadius.circular(
+                                                        AppRadius.md),
                                                 child: Padding(
                                                   padding: const EdgeInsets
-                                                      .symmetric(vertical: AppSpacing.sm),
+                                                      .symmetric(
+                                                      vertical: AppSpacing.sm),
                                                   child: Row(
                                                     children: [
                                                       const Icon(
@@ -726,15 +734,17 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                           size: 15,
                                                           color: AppTheme
                                                               .labelGray),
-                                                      const SizedBox(width: AppSpacing.sm),
+                                                      const SizedBox(
+                                                          width: AppSpacing.sm),
                                                       Expanded(
                                                         child: Text(
                                                           IrsCategories
                                                               .translate(
                                                                   c, isSpanish),
-                                                          style:
-                                                              const TextStyle(
-                                                                  fontSize: AppTextSize.md),
+                                                          style: const TextStyle(
+                                                              fontSize:
+                                                                  AppTextSize
+                                                                      .md),
                                                         ),
                                                       ),
                                                       Text(
@@ -792,7 +802,8 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                     fontWeight: FontWeight.bold,
                                                     color: net >= 0
                                                         ? AppTheme.success
-                                                        : CalcwiseSemanticColors.errorDark,
+                                                        : CalcwiseSemanticColors
+                                                            .errorDark,
                                                   ),
                                                 ),
                                               ),
@@ -803,7 +814,8 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                   fontSize: AppTextSize.bodyMd,
                                                   color: net >= 0
                                                       ? AppTheme.success
-                                                      : CalcwiseSemanticColors.errorDark,
+                                                      : CalcwiseSemanticColors
+                                                          .errorDark,
                                                 ),
                                               ),
                                             ],

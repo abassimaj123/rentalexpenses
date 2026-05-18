@@ -778,8 +778,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                             // ── Empty state ─────────────────────────────────────
                             if (_result == null)
                               Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: AppSpacing.xxl),
                                 child: Column(
                                   children: [
                                     Icon(Icons.home_work_rounded,
@@ -874,7 +874,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                                   ),
                                                 ),
                                               ),
-                                              const SizedBox(width: AppSpacing.sm),
+                                              const SizedBox(
+                                                  width: AppSpacing.sm),
                                               OutlinedButton.icon(
                                                 onPressed: () =>
                                                     _share(isSpanish),
@@ -889,7 +890,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                               ),
                                             ],
                                           ),
-                                          const SizedBox(height: AppSpacing.xxl),
+                                          const SizedBox(
+                                              height: AppSpacing.xxl),
                                         ],
                                       ),
                                     )
@@ -1086,7 +1088,8 @@ class _ResultsSection extends StatelessWidget {
         // Cash flow indicator banner
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.mdPlus, horizontal: AppSpacing.lg),
+          padding: const EdgeInsets.symmetric(
+              vertical: AppSpacing.mdPlus, horizontal: AppSpacing.lg),
           decoration: BoxDecoration(
             color: cfColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(AppRadius.xl),

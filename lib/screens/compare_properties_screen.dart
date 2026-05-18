@@ -125,7 +125,8 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                         onTap: () => setLocal(() => pickedMonth = i + 1),
                         child: Container(
                           width: 62,
-                          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: AppSpacing.sm),
                           decoration: BoxDecoration(
                             color: sel
                                 ? AppTheme.primary
