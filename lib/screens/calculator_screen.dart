@@ -947,7 +947,32 @@ class _ResultsSection extends StatelessWidget {
       children: [
         _SectionLabel(isSpanish ? 'Resultados' : 'Results'),
 
-        // Summary cards
+        // Hero KPI — monthly cash flow
+        Semantics(
+          label: isSpanish
+              ? 'Flujo de caja mensual: ${cf < 0 ? 'menos' : ''} ${fmt.format(cf.abs())} dólares'
+              : 'Monthly cash flow: ${cf < 0 ? 'negative' : ''} \$${fmt.format(cf.abs())}',
+          child: CalcwiseHeroCard(
+            label: isSpanish ? 'Flujo de Caja Mensual' : 'Monthly Cash Flow',
+            value: '${cf < 0 ? '-' : ''}\$${fmt.format(cf.abs())}',
+            secondary: isSpanish
+                ? 'Alquiler − Gastos Totales'
+                : 'Rent − Total Expenses',
+            stats: [
+              (
+                label: isSpanish ? 'Flujo Anual' : 'Annual CF',
+                value:
+                    '${calc.annualCashFlow < 0 ? '-' : ''}\$${fmt.format(calc.annualCashFlow.abs())}',
+              ),
+              (
+                label: isSpanish ? 'NOI Anual' : 'Annual NOI',
+                value: '\$${fmt.format(calc.noi)}',
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        // Details card
         Card(
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.lg),
@@ -962,32 +987,6 @@ class _ResultsSection extends StatelessWidget {
                 ),
                 Divider(
                     height: 24, color: CalcwiseTheme.of(context).cardBorder),
-                // Hero number — monthly cash flow
-                Text(
-                  isSpanish ? 'Flujo de caja mensual' : 'Monthly Cash Flow',
-                  style: TextStyle(
-                    fontSize: AppTextSize.sm,
-                    color: CalcwiseTheme.of(context).textSecondary,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${cf < 0 ? '-' : ''}\$${fmt.format(cf.abs())}',
-                  style: TextStyle(
-                    fontSize: AppTextSize.hero,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -1.5,
-                    color: cfColor,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                _ResultRow(
-                  label: isSpanish ? 'Flujo de caja anual' : 'Annual Cash Flow',
-                  value:
-                      '${calc.annualCashFlow < 0 ? '-' : ''}\$${fmt.format(calc.annualCashFlow.abs())}',
-                  valueColor: cfColor,
-                ),
                 const SizedBox(height: 8),
                 _ResultRow(
                   label: isSpanish ? 'Ratio de gastos' : 'Expense Ratio',
