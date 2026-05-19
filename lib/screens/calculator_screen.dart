@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../core/firebase/analytics_service.dart';
 import '../core/freemium/freemium_service.dart';
 import '../core/freemium/iap_service.dart';
 import '../core/theme/app_theme.dart';
@@ -234,6 +235,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView('calculator');
     if (widget.preload != null) _populateFrom(widget.preload!);
     for (final c in _allControllers) {
       c.addListener(_clearSaved);
