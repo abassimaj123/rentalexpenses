@@ -4,17 +4,7 @@ import 'tax_summary_screen.dart';
 import 'compare_properties_screen.dart';
 import 'settings_screen.dart';
 import 'history_screen.dart';
-import 'package:calcwise_core/calcwise_core.dart'
-    show CalcwiseAdFooter, AppDuration;
-
-// Local spacing/typography constants — mirrors calcwise_core tokens (to be imported
-// from calcwise_core once updated on GitHub)
-const double _spMd = 12.0;
-const double _spLg = 16.0;
-const double _spSm = 8.0;
-const double _radLg = 12.0;
-const double _textBody = 14.0;
-const double _textSm = 12.0;
+import 'package:calcwise_core/calcwise_core.dart';
 
 /// Tools hub screen — provides access to utility calculators and features
 class ToolsScreen extends StatelessWidget {
@@ -34,7 +24,7 @@ class ToolsScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: ListView(
-                  padding: const EdgeInsets.all(_spLg),
+                  padding: const EdgeInsets.all(AppSpacing.lg),
                   children: [
                     _ToolCard(
                       icon: Icons.receipt_rounded,
@@ -52,7 +42,7 @@ class ToolsScreen extends StatelessWidget {
                             transitionDuration: AppDuration.base,
                           )),
                     ),
-                    const SizedBox(height: _spMd),
+                    const SizedBox(height: AppSpacing.md),
                     _ToolCard(
                       icon: Icons.compare_rounded,
                       title: isSpanish
@@ -71,7 +61,7 @@ class ToolsScreen extends StatelessWidget {
                             transitionDuration: AppDuration.base,
                           )),
                     ),
-                    const SizedBox(height: _spMd),
+                    const SizedBox(height: AppSpacing.md),
                     _ToolCard(
                       icon: Icons.history_rounded,
                       title:
@@ -88,7 +78,7 @@ class ToolsScreen extends StatelessWidget {
                             transitionDuration: AppDuration.base,
                           )),
                     ),
-                    const SizedBox(height: _spMd),
+                    const SizedBox(height: AppSpacing.md),
                     _ToolCard(
                       icon: Icons.settings_rounded,
                       title: isSpanish ? 'Configuración' : 'Settings',
@@ -133,20 +123,20 @@ class _ToolCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(_radLg)),
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
       child: ListTile(
         leading: Icon(icon, size: 28),
         title: Text(title,
             style: const TextStyle(
-                fontWeight: FontWeight.w600, fontSize: _textBody)),
+                fontWeight: FontWeight.w600, fontSize: AppTextSize.body)),
         subtitle: Text(subtitle,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: _textSm)),
+            style: const TextStyle(fontSize: AppTextSize.sm)),
         trailing: const Icon(Icons.chevron_right_rounded),
         onTap: onTap,
         contentPadding:
-            const EdgeInsets.symmetric(horizontal: _spLg, vertical: _spSm),
+            const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
       ),
     );
   }
