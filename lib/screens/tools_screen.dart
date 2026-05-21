@@ -24,6 +24,7 @@ class ToolsScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: ListView(
+                  key: const PageStorageKey('tools_hub'),
                   padding: const EdgeInsets.all(AppSpacing.lg),
                   children: [
                     _ToolCard(

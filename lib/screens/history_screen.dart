@@ -88,7 +88,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 child: _loading
                     ? const Center(child: CircularProgressIndicator())
                     : _entries.isEmpty
-                        ? _EmptyState(isSpanish: isSpanish)
+                        ? CalcwiseEmptyState(
+                            icon: Icons.history_rounded,
+                            title: isSpanish
+                                ? 'Sin historial guardado'
+                                : 'No saved history',
+                            body: isSpanish
+                                ? 'Calcula los gastos de una propiedad y guarda el resultado.'
+                                : 'Calculate expenses for a property and save the result.',
+                          )
                         : _buildList(isSpanish),
               ),
               const CalcwiseAdFooter(),
@@ -229,41 +237,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
 }
 
 // ── Widgets ───────────────────────────────────────────────────────────────────
-
-class _EmptyState extends StatelessWidget {
-  final bool isSpanish;
-  const _EmptyState({required this.isSpanish});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xxxl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.history_rounded,
-                size: 72, color: AppTheme.primary.withValues(alpha: 0.3)),
-            const SizedBox(height: AppSpacing.lg),
-            Text(
-              isSpanish ? 'Sin historial guardado' : 'No saved history',
-              style: const TextStyle(
-                  fontSize: AppTextSize.subtitle, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              isSpanish
-                  ? 'Calcula los gastos de una propiedad y guarda el resultado.'
-                  : 'Calculate expenses for a property and save the result.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: CalcwiseTheme.of(context).textSecondary),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 class _UpgradeCTA extends StatelessWidget {
   final bool isSpanish;

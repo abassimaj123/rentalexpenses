@@ -58,73 +58,6 @@ class SettingsScreen extends StatelessWidget {
                 child: ListView(
                   padding: const EdgeInsets.all(AppSpacing.lg),
                   children: [
-                    // ── Language ──────────────────────────────────────
-                    _SectionHeader(label: isSpanish ? 'Idioma' : 'Language'),
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.language_rounded,
-                                color: AppTheme.primary),
-                            const SizedBox(width: AppSpacing.md),
-                            Expanded(
-                              child: Text(
-                                isSpanish
-                                    ? 'Idioma actual'
-                                    : 'Current language',
-                                style: const TextStyle(
-                                    fontSize: AppTextSize.bodyMd),
-                              ),
-                            ),
-                            SegmentedButton<bool>(
-                              segments: const [
-                                ButtonSegment(value: false, label: Text('EN')),
-                                ButtonSegment(value: true, label: Text('ES')),
-                              ],
-                              selected: {isSpanish},
-                              onSelectionChanged: (s) => _setLanguage(s.first),
-                              style: ButtonStyle(
-                                backgroundColor:
-                                    WidgetStateProperty.resolveWith((states) {
-                                  if (states.contains(WidgetState.selected)) {
-                                    return AppTheme.primary;
-                                  }
-                                  return null;
-                                }),
-                                foregroundColor:
-                                    WidgetStateProperty.resolveWith((states) {
-                                  if (states.contains(WidgetState.selected)) {
-                                    return Colors.white;
-                                  }
-                                  return null;
-                                }),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    // ── Theme ────────────────────────────────────────
-                    _SectionHeader(label: isSpanish ? 'Tema' : 'Theme'),
-                    Card(
-                      child: ValueListenableBuilder<ThemeMode>(
-                        valueListenable: themeModeService.notifier,
-                        builder: (_, mode, __) => ListTile(
-                          leading: Icon(themeModeService.icon,
-                              color: AppTheme.primary),
-                          title: Text(
-                              themeModeService.label(isSpanish: isSpanish)),
-                          trailing: Icon(Icons.chevron_right_rounded,
-                              size: 18,
-                              color: CalcwiseTheme.of(context).textSecondary),
-                          onTap: () => themeModeService.toggle(),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xl),
-
                     // ── Premium ───────────────────────────────────────
                     _SectionHeader(label: isSpanish ? 'Premium' : 'Premium'),
                     ValueListenableBuilder<bool>(
@@ -209,6 +142,73 @@ class SettingsScreen extends StatelessWidget {
                           ),
                         );
                       },
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
+
+                    // ── Language ──────────────────────────────────────
+                    _SectionHeader(label: isSpanish ? 'Idioma' : 'Language'),
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.language_rounded,
+                                color: AppTheme.primary),
+                            const SizedBox(width: AppSpacing.md),
+                            Expanded(
+                              child: Text(
+                                isSpanish
+                                    ? 'Idioma actual'
+                                    : 'Current language',
+                                style: const TextStyle(
+                                    fontSize: AppTextSize.bodyMd),
+                              ),
+                            ),
+                            SegmentedButton<bool>(
+                              segments: const [
+                                ButtonSegment(value: false, label: Text('EN')),
+                                ButtonSegment(value: true, label: Text('ES')),
+                              ],
+                              selected: {isSpanish},
+                              onSelectionChanged: (s) => _setLanguage(s.first),
+                              style: ButtonStyle(
+                                backgroundColor:
+                                    WidgetStateProperty.resolveWith((states) {
+                                  if (states.contains(WidgetState.selected)) {
+                                    return AppTheme.primary;
+                                  }
+                                  return null;
+                                }),
+                                foregroundColor:
+                                    WidgetStateProperty.resolveWith((states) {
+                                  if (states.contains(WidgetState.selected)) {
+                                    return Colors.white;
+                                  }
+                                  return null;
+                                }),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    // ── Theme ────────────────────────────────────────
+                    _SectionHeader(label: isSpanish ? 'Tema' : 'Theme'),
+                    Card(
+                      child: ValueListenableBuilder<ThemeMode>(
+                        valueListenable: themeModeService.notifier,
+                        builder: (_, mode, __) => ListTile(
+                          leading: Icon(themeModeService.icon,
+                              color: AppTheme.primary),
+                          title: Text(
+                              themeModeService.label(isSpanish: isSpanish)),
+                          trailing: Icon(Icons.chevron_right_rounded,
+                              size: 18,
+                              color: CalcwiseTheme.of(context).textSecondary),
+                          onTap: () => themeModeService.toggle(),
+                        ),
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.xl),
 
