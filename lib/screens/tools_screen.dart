@@ -134,7 +134,7 @@ class _ToolCard extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontSize: AppTextSize.sm)),
-        trailing: const Icon(Icons.chevron_right_rounded),
+        trailing: const ExcludeSemantics(child: Icon(Icons.chevron_right_rounded)),
         onTap: onTap,
         contentPadding:
             const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
