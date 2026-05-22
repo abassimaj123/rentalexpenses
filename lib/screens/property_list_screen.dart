@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../core/firebase/analytics_service.dart';
 import '../core/freemium/freemium_service.dart';
-import '../core/freemium/iap_service.dart';
 import '../core/theme/app_theme.dart';
 import '../main.dart';
 import '../models/expense_model.dart';
@@ -11,7 +10,6 @@ import '../models/property_model.dart';
 import '../services/property_database_service.dart';
 import '../widgets/paywall_hard.dart';
 import 'property_detail_screen.dart';
-import 'settings_screen.dart';
 
 enum _SortMode { profitability, name, newest }
 
@@ -240,38 +238,6 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
           appBar: AppBar(
             title: Text(isSpanish ? 'Mis Propiedades' : 'My Properties'),
             actions: [
-              // Premium badge — always visible in AppBar
-              ValueListenableBuilder<bool>(
-                valueListenable: freemiumService.isPremiumNotifier,
-                builder: (_, isPremium, __) {
-                  if (isPremium) {
-                    return const Padding(
-                      padding: EdgeInsets.only(right: AppSpacing.xs),
-                      child: Icon(Icons.verified_rounded,
-                          color: CalcwiseSemanticColors.warnIcon, size: 22),
-                    );
-                  }
-                  return IconButton(
-                    icon: const Icon(Icons.star_outline,
-                        color: CalcwiseSemanticColors.warnIcon),
-                    tooltip: isSpanish ? 'Obtener Premium' : 'Go Premium',
-                    onPressed: () => IAPService.instance.buy(),
-                  );
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.settings_rounded),
-                tooltip: isSpanish ? 'Ajustes' : 'Settings',
-                onPressed: () => Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (_, __, ___) => const SettingsScreen(),
-                    transitionsBuilder: (_, anim, __, child) =>
-                        FadeTransition(opacity: anim, child: child),
-                    transitionDuration: AppDuration.base,
-                  ),
-                ),
-              ),
               PopupMenuButton<_SortMode>(
                 icon: const Icon(Icons.sort_rounded),
                 tooltip: isSpanish ? 'Ordenar' : 'Sort',

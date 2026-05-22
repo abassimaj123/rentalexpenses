@@ -14,7 +14,6 @@ import '../main.dart';
 import '../widgets/insight_card.dart';
 import '../widgets/paywall_hard.dart';
 import '../widgets/paywall_soft.dart';
-import 'settings_screen.dart';
 import '../core/insight_engine.dart';
 
 // ── Data model ────────────────────────────────────────────────────────────────
@@ -210,10 +209,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   final _mortCtrl = TextEditingController(text: '1200');
   final _taxCtrl = TextEditingController(text: '200');
   final _insCtrl = TextEditingController(text: '150');
-  final _hoaCtrl = TextEditingController();
-  final _mgmtCtrl = TextEditingController();
-  final _maintCtrl = TextEditingController();
-  final _vacCtrl = TextEditingController();
+  final _hoaCtrl = TextEditingController(text: '0');
+  final _mgmtCtrl = TextEditingController(text: '8');
+  final _maintCtrl = TextEditingController(text: '100');
+  final _vacCtrl = TextEditingController(text: '5');
   final _utilCtrl = TextEditingController();
   final _landCtrl = TextEditingController();
   final _otherCtrl = TextEditingController();
@@ -467,20 +466,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 icon: const Icon(Icons.refresh_rounded),
                 tooltip: isSpanish ? 'Reiniciar' : 'Reset',
                 onPressed: _reset,
-              ),
-              CalcwiseAppBarActions(
-                freemium: freemiumService,
-                session: paywallSession,
-                onSettings: () => Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (_, __, ___) => const SettingsScreen(),
-                    transitionsBuilder: (_, anim, __, child) =>
-                        FadeTransition(opacity: anim, child: child),
-                    transitionDuration: AppDuration.base,
-                  ),
-                ),
-                onRewardAd: () => CalcwiseRewardAdSheet.show(context),
               ),
             ],
           ),

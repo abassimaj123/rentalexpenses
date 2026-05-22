@@ -19,7 +19,6 @@ import '../widgets/paywall_hard.dart';
 import '../widgets/paywall_soft.dart';
 import '../widgets/premium_cta_widget.dart';
 import 'tax_summary_screen.dart';
-import 'settings_screen.dart';
 
 // ── Palette cycling for bar chart ─────────────────────────────────────────────
 const _chartColors = [
@@ -470,24 +469,6 @@ class _ReportsScreenState extends State<ReportsScreen> {
           appBar: AppBar(
             title: Text(isSpanish ? 'Reportes' : 'Reports'),
             actions: [
-              // Premium badge
-              ValueListenableBuilder<bool>(
-                valueListenable: freemiumService.isPremiumNotifier,
-                builder: (_, isPremium, __) {
-                  if (isPremium) {
-                    return const Padding(
-                      padding: EdgeInsets.only(right: 4),
-                      child: Icon(Icons.verified_rounded,
-                          color: Colors.amber, size: 22),
-                    );
-                  }
-                  return IconButton(
-                    icon: const Icon(Icons.star_outline, color: Colors.amber),
-                    tooltip: isSpanish ? 'Obtener Premium' : 'Go Premium',
-                    onPressed: () => PaywallSoft.show(context),
-                  );
-                },
-              ),
               IconButton(
                 icon: const Icon(Icons.account_balance_rounded),
                 tooltip:
@@ -515,18 +496,6 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 icon: const Icon(Icons.refresh_rounded),
                 tooltip: isSpanish ? 'Actualizar' : 'Refresh',
                 onPressed: _load,
-              ),
-              IconButton(
-                icon: const Icon(Icons.settings_rounded),
-                onPressed: () => Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (_, __, ___) => const SettingsScreen(),
-                    transitionsBuilder: (_, anim, __, child) =>
-                        FadeTransition(opacity: anim, child: child),
-                    transitionDuration: AppDuration.base,
-                  ),
-                ),
               ),
             ],
           ),

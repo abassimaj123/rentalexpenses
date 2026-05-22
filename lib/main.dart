@@ -18,6 +18,7 @@ import 'screens/calculator_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/property_list_screen.dart';
 import 'screens/reports_screen.dart';
+import 'screens/settings_screen.dart';
 import 'screens/tools_screen.dart';
 import 'screens/history_screen.dart';
 import 'widgets/paywall_hard.dart';
@@ -220,6 +221,41 @@ class _MainShellState extends State<MainShell> {
       valueListenable: isSpanishNotifier,
       builder: (_, isSpanish, __) {
         return Scaffold(
+          appBar: AppBar(
+            flexibleSpace: Container(
+              decoration: BoxDecoration(gradient: AppTheme.primaryGradient),
+            ),
+            title: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.home_work_rounded,
+                    color: Colors.white, size: 22),
+                const SizedBox(width: 8),
+                Text(
+                  isSpanish ? 'Gastos de Alquiler' : 'Rental Expenses',
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ],
+            ),
+            iconTheme: const IconThemeData(color: Colors.white),
+            actions: [
+              CalcwiseAppBarActions(
+                freemium: freemiumService,
+                session: paywallSession,
+                onSettings: () => Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (_, __, ___) => const SettingsScreen(),
+                    transitionsBuilder: (_, anim, __, child) =>
+                        FadeTransition(opacity: anim, child: child),
+                    transitionDuration: AppDuration.base,
+                  ),
+                ),
+                onRewardAd: () => CalcwiseRewardAdSheet.show(context),
+                onPremium: () => PaywallHard.show(context),
+              ),
+            ],
+          ),
           body: IndexedStack(index: _index, children: _screens),
           bottomNavigationBar: NavigationBar(
             selectedIndex: _index,
