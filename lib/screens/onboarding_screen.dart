@@ -22,6 +22,17 @@ class OnboardingScreen extends StatelessWidget {
                 'Cap rate, gross yield, net yield — see the full picture of your investment.',
             pills: ['Cap Rate', 'Gross Yield', 'Net Yield'],
           ),
+          OnboardingPage(
+            icon: Icons.history_rounded,
+            title: 'Track Every\nProperty Over Time',
+            subtitle:
+                'Save your calculations and build a history of your rental portfolio.',
+            pills: ['History', 'PDF Export', 'Multi-Property'],
+            titleEs: 'Sigue cada\npropiedad con el tiempo',
+            subtitleEs:
+                'Guarda tus cálculos y construye un historial de tu cartera de alquileres.',
+            pillsEs: ['Historial', 'Exportar PDF', 'Multi-Propiedad'],
+          ),
         ],
       );
 }
