@@ -2,6 +2,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as path_pkg;
 import '../models/property_model.dart';
 import '../models/expense_model.dart';
+import '../models/payment_log_model.dart';
 import '../models/tenant_model.dart';
 import '../models/schedule_e_entry_model.dart';
 
@@ -14,7 +15,8 @@ class PropertyDatabaseService {
   // v2 → v3: added tenants table
   // v3 → v4: added schedule_e_entries table
   // v4 → v5: added receipt_path to monthly_expenses
-  static const _dbVersion = 5;
+  // v5 → v6: added payment_logs table
+  static const _dbVersion = 6;
 
   Database? _db;
 
@@ -70,6 +72,7 @@ class PropertyDatabaseService {
     ''');
     await _createTenantsTable(db);
     await _createScheduleETable(db);
+    await _createPaymentLogsTable(db);
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -89,6 +92,9 @@ class PropertyDatabaseService {
       await db
           .execute('ALTER TABLE monthly_expenses ADD COLUMN receipt_path TEXT');
     }
+    if (oldVersion < 6) {
+      await _createPaymentLogsTable(db);
+    }
   }
 
   Future<void> _createTenantsTable(Database db) async {
@@ -105,6 +111,21 @@ class PropertyDatabaseService {
         notes TEXT NOT NULL DEFAULT '',
         created_at TEXT NOT NULL,
         FOREIGN KEY (property_id) REFERENCES properties (id) ON DELETE CASCADE
+      )
+    ''');
+  }
+
+  Future<void> _createPaymentLogsTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS payment_logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        tenant_id TEXT NOT NULL,
+        amount REAL NOT NULL,
+        payment_date TEXT NOT NULL,
+        is_paid INTEGER NOT NULL DEFAULT 1,
+        note TEXT,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
       )
     ''');
   }
@@ -298,6 +319,75 @@ class PropertyDatabaseService {
     final db = await database;
     final maps = await db.query('tenants', orderBy: 'lease_end ASC');
     return maps.map(Tenant.fromMap).toList();
+  }
+
+  // ── Payment Logs CRUD ────────────────────────────────────────────────────────
+
+  Future<List<PaymentLog>> getPaymentLogsForTenant(String tenantId) async {
+    final db = await database;
+    final maps = await db.query(
+      'payment_logs',
+      where: 'tenant_id = ?',
+      whereArgs: [tenantId],
+      orderBy: 'payment_date DESC',
+    );
+    return maps.map(PaymentLog.fromMap).toList();
+  }
+
+  Future<int> insertPaymentLog(PaymentLog log) async {
+    final db = await database;
+    return db.insert('payment_logs', log.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<void> updatePaymentLog(PaymentLog log) async {
+    final db = await database;
+    await db.update(
+      'payment_logs',
+      log.toMap(),
+      where: 'id = ?',
+      whereArgs: [log.id],
+    );
+  }
+
+  Future<void> deletePaymentLog(int id) async {
+    final db = await database;
+    await db.delete('payment_logs', where: 'id = ?', whereArgs: [id]);
+  }
+
+  /// Returns the sum of paid amounts for a tenant in a specific year/month.
+  Future<double> getTotalPaidForTenant(
+      String tenantId, int year, int month) async {
+    final db = await database;
+    final start = DateTime(year, month).toIso8601String();
+    final end = DateTime(year, month + 1).toIso8601String();
+    final result = await db.rawQuery('''
+      SELECT COALESCE(SUM(amount), 0) AS total
+      FROM payment_logs
+      WHERE tenant_id = ? AND payment_date >= ? AND payment_date < ? AND is_paid = 1
+    ''', [tenantId, start, end]);
+    return (result.first['total'] as num).toDouble();
+  }
+
+  /// Returns a map of `year * 12 + month` → total paid for a tenant.
+  Future<Map<int, double>> getMonthlyPaidTotals(String tenantId) async {
+    final db = await database;
+    final maps = await db.rawQuery('''
+      SELECT
+        CAST(strftime('%Y', payment_date) AS INTEGER) AS yr,
+        CAST(strftime('%m', payment_date) AS INTEGER) AS mo,
+        SUM(amount) AS total
+      FROM payment_logs
+      WHERE tenant_id = ? AND is_paid = 1
+      GROUP BY yr, mo
+      ORDER BY yr DESC, mo DESC
+    ''', [tenantId]);
+    final result = <int, double>{};
+    for (final row in maps) {
+      final key = (row['yr'] as int) * 12 + (row['mo'] as int);
+      result[key] = (row['total'] as num).toDouble();
+    }
+    return result;
   }
 
   // ── Schedule E Entries CRUD ──────────────────────────────────────────────────

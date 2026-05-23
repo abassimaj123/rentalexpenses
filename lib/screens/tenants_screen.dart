@@ -7,6 +7,7 @@ import '../core/theme/app_theme.dart';
 import '../main.dart';
 import '../models/property_model.dart';
 import '../models/tenant_model.dart';
+import '../screens/payment_log_screen.dart';
 import '../services/property_database_service.dart';
 
 class TenantsScreen extends StatefulWidget {
@@ -283,8 +284,22 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                 child: InkWell(
                                   borderRadius:
                                       BorderRadius.circular(AppRadius.xl),
-                                  onTap: () => _showTenantDialog(ctx, isSpanish,
-                                      existing: t),
+                                  onTap: () => Navigator.push(
+                                    ctx,
+                                    PageRouteBuilder(
+                                      pageBuilder: (_, __, ___) =>
+                                          PaymentLogScreen(
+                                        tenant: t,
+                                        isSpanish: isSpanish,
+                                      ),
+                                      transitionsBuilder:
+                                          (_, anim, __, child) =>
+                                              FadeTransition(
+                                                  opacity: anim,
+                                                  child: child),
+                                      transitionDuration: AppDuration.base,
+                                    ),
+                                  ).then((_) => _load()),
                                   child: Padding(
                                     padding:
                                         const EdgeInsets.all(AppSpacing.mdPlus),
@@ -337,30 +352,103 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                                 ],
                                               ),
                                             ),
-                                            // Status badge
-                                            Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 10,
-                                                      vertical: 4),
-                                              decoration: BoxDecoration(
-                                                color: t.statusColor
-                                                    .withValues(alpha: 0.12),
-                                                borderRadius:
-                                                    BorderRadius.circular(20),
-                                                border: Border.all(
-                                                    color: t.statusColor
+                                            // Payment status chip (async)
+                                            FutureBuilder<double>(
+                                              future: PropertyDatabaseService
+                                                  .instance
+                                                  .getTotalPaidForTenant(
+                                                t.id,
+                                                DateTime.now().year,
+                                                DateTime.now().month,
+                                              ),
+                                              builder: (_, snap) {
+                                                final paid =
+                                                    snap.data ?? 0.0;
+                                                final Color chipColor;
+                                                final String chipLabel;
+                                                if (paid >=
+                                                        t.monthlyRent &&
+                                                    t.monthlyRent > 0) {
+                                                  chipColor =
+                                                      AppTheme.success;
+                                                  chipLabel = isSpanish
+                                                      ? 'Pagado'
+                                                      : 'Paid';
+                                                } else if (paid > 0) {
+                                                  chipColor =
+                                                      AppTheme.warning;
+                                                  chipLabel = isSpanish
+                                                      ? 'Parcial'
+                                                      : 'Partial';
+                                                } else {
+                                                  chipColor =
+                                                      AppTheme.dangerRed;
+                                                  chipLabel = isSpanish
+                                                      ? 'Sin pago'
+                                                      : 'Unpaid';
+                                                }
+                                                return Container(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 8,
+                                                      vertical: 3),
+                                                  decoration: BoxDecoration(
+                                                    color: chipColor
                                                         .withValues(
-                                                            alpha: 0.4)),
-                                              ),
-                                              child: Text(
-                                                statusLabel,
-                                                style: TextStyle(
-                                                  fontSize: AppTextSize.xs,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: t.statusColor,
+                                                            alpha: 0.12),
+                                                    borderRadius:
+                                                        BorderRadius
+                                                            .circular(20),
+                                                    border: Border.all(
+                                                        color: chipColor
+                                                            .withValues(
+                                                                alpha:
+                                                                    0.4)),
+                                                  ),
+                                                  child: Text(
+                                                    chipLabel,
+                                                    style: TextStyle(
+                                                      fontSize:
+                                                          AppTextSize.xs,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: chipColor,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                            const SizedBox(width: 4),
+                                            // ⋮ menu for lease-status badge + edit
+                                            PopupMenuButton<String>(
+                                              icon: const Icon(
+                                                  Icons.more_vert_rounded,
+                                                  size: 20),
+                                              onSelected: (v) {
+                                                if (v == 'edit') {
+                                                  _showTenantDialog(
+                                                      ctx, isSpanish,
+                                                      existing: t);
+                                                }
+                                              },
+                                              itemBuilder: (_) => [
+                                                PopupMenuItem(
+                                                  value: 'edit',
+                                                  child: Row(
+                                                    children: [
+                                                      const Icon(
+                                                          Icons.edit_rounded,
+                                                          size: 18),
+                                                      const SizedBox(
+                                                          width:
+                                                              AppSpacing.sm),
+                                                      Text(isSpanish
+                                                          ? 'Editar'
+                                                          : 'Edit'),
+                                                    ],
+                                                  ),
                                                 ),
-                                              ),
+                                              ],
                                             ),
                                           ],
                                         ),
