@@ -171,8 +171,7 @@ class _PaymentLogScreenState extends State<PaymentLogScreen> {
                 controller: noteCtrl,
                 maxLines: 2,
                 decoration: InputDecoration(
-                  labelText:
-                      isSpanish ? 'Nota (opcional)' : 'Note (optional)',
+                  labelText: isSpanish ? 'Nota (opcional)' : 'Note (optional)',
                   prefixIcon: const Icon(Icons.notes_rounded),
                 ),
               ),
@@ -295,7 +294,8 @@ class _PaymentLogScreenState extends State<PaymentLogScreen> {
 
   Widget _buildLogList(bool isSpanish, bool isPremium) {
     final grouped = _groupedLogs(isPremium);
-    final hasHistoryLocked = !isPremium && _logs.length != grouped.values.fold(0, (s, l) => s + l.length);
+    final hasHistoryLocked = !isPremium &&
+        _logs.length != grouped.values.fold(0, (s, l) => s + l.length);
 
     final sections = grouped.entries.toList();
 
@@ -412,8 +412,7 @@ class _BalanceCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: balanceColor.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(AppRadius.xl),
-          border:
-              Border.all(color: balanceColor.withValues(alpha: 0.3)),
+          border: Border.all(color: balanceColor.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
@@ -425,9 +424,7 @@ class _BalanceCard extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                fullyPaid
-                    ? Icons.check_circle_rounded
-                    : Icons.pending_rounded,
+                fullyPaid ? Icons.check_circle_rounded : Icons.pending_rounded,
                 color: balanceColor,
                 size: 24,
               ),
@@ -438,7 +435,9 @@ class _BalanceCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    isSpanish ? 'Este Mes — $monthName' : 'This Month — $monthName',
+                    isSpanish
+                        ? 'Este Mes — $monthName'
+                        : 'This Month — $monthName',
                     style: TextStyle(
                       fontSize: AppTextSize.sm,
                       color: CalcwiseTheme.of(context).textSecondary,
@@ -569,8 +568,8 @@ class _PaymentLogTile extends StatelessWidget {
           color: AppTheme.dangerRed.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(AppRadius.xl),
         ),
-        child: const Icon(Icons.delete_outline_rounded,
-            color: AppTheme.dangerRed),
+        child:
+            const Icon(Icons.delete_outline_rounded, color: AppTheme.dangerRed),
       ),
       confirmDismiss: (_) async {
         onDelete();
@@ -637,8 +636,8 @@ class _PaymentLogTile extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: chipColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                        color: chipColor.withValues(alpha: 0.35)),
+                    border:
+                        Border.all(color: chipColor.withValues(alpha: 0.35)),
                   ),
                   child: Text(
                     chipLabel,
@@ -681,12 +680,9 @@ class _EmptyState extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(
-              isSpanish
-                  ? 'Sin pagos registrados'
-                  : 'No payments recorded yet',
+              isSpanish ? 'Sin pagos registrados' : 'No payments recorded yet',
               style: const TextStyle(
-                  fontSize: AppTextSize.subtitle,
-                  fontWeight: FontWeight.w600),
+                  fontSize: AppTextSize.subtitle, fontWeight: FontWeight.w600),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -694,8 +690,7 @@ class _EmptyState extends StatelessWidget {
               isSpanish
                   ? 'Registra tu primer pago'
                   : 'Tap + to record your first payment',
-              style: TextStyle(
-                  color: CalcwiseTheme.of(context).textSecondary),
+              style: TextStyle(color: CalcwiseTheme.of(context).textSecondary),
               textAlign: TextAlign.center,
             ),
           ],
@@ -729,8 +724,7 @@ class _PremiumHistoryBanner extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppTheme.primary.withValues(alpha: 0.07),
             borderRadius: BorderRadius.circular(AppRadius.lg),
-            border:
-                Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
+            border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
           ),
           child: Row(
             children: [

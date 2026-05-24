@@ -295,8 +295,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                       transitionsBuilder:
                                           (_, anim, __, child) =>
                                               FadeTransition(
-                                                  opacity: anim,
-                                                  child: child),
+                                                  opacity: anim, child: child),
                                       transitionDuration: AppDuration.base,
                                     ),
                                   ).then((_) => _load()),
@@ -362,21 +361,17 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                                 DateTime.now().month,
                                               ),
                                               builder: (_, snap) {
-                                                final paid =
-                                                    snap.data ?? 0.0;
+                                                final paid = snap.data ?? 0.0;
                                                 final Color chipColor;
                                                 final String chipLabel;
-                                                if (paid >=
-                                                        t.monthlyRent &&
+                                                if (paid >= t.monthlyRent &&
                                                     t.monthlyRent > 0) {
-                                                  chipColor =
-                                                      AppTheme.success;
+                                                  chipColor = AppTheme.success;
                                                   chipLabel = isSpanish
                                                       ? 'Pagado'
                                                       : 'Paid';
                                                 } else if (paid > 0) {
-                                                  chipColor =
-                                                      AppTheme.warning;
+                                                  chipColor = AppTheme.warning;
                                                   chipLabel = isSpanish
                                                       ? 'Parcial'
                                                       : 'Partial';
@@ -393,23 +388,20 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                                       horizontal: 8,
                                                       vertical: 3),
                                                   decoration: BoxDecoration(
-                                                    color: chipColor
-                                                        .withValues(
-                                                            alpha: 0.12),
+                                                    color: chipColor.withValues(
+                                                        alpha: 0.12),
                                                     borderRadius:
-                                                        BorderRadius
-                                                            .circular(20),
+                                                        BorderRadius.circular(
+                                                            20),
                                                     border: Border.all(
                                                         color: chipColor
                                                             .withValues(
-                                                                alpha:
-                                                                    0.4)),
+                                                                alpha: 0.4)),
                                                   ),
                                                   child: Text(
                                                     chipLabel,
                                                     style: TextStyle(
-                                                      fontSize:
-                                                          AppTextSize.xs,
+                                                      fontSize: AppTextSize.xs,
                                                       fontWeight:
                                                           FontWeight.bold,
                                                       color: chipColor,
@@ -440,8 +432,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                                           Icons.edit_rounded,
                                                           size: 18),
                                                       const SizedBox(
-                                                          width:
-                                                              AppSpacing.sm),
+                                                          width: AppSpacing.sm),
                                                       Text(isSpanish
                                                           ? 'Editar'
                                                           : 'Edit'),

@@ -123,8 +123,8 @@ class _ToolCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.lg)),
       child: ListTile(
         leading: Icon(icon, size: 28),
         title: Text(title,
@@ -134,10 +134,11 @@ class _ToolCard extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontSize: AppTextSize.sm)),
-        trailing: const ExcludeSemantics(child: Icon(Icons.chevron_right_rounded)),
+        trailing:
+            const ExcludeSemantics(child: Icon(Icons.chevron_right_rounded)),
         onTap: onTap,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+        contentPadding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
       ),
     );
   }

@@ -512,7 +512,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
                               // Month selector chip
                               InkWell(
                                 onTap: () => _pickMonth(isSpanish),
-                                borderRadius: BorderRadius.circular(AppRadius.lg),
+                                borderRadius:
+                                    BorderRadius.circular(AppRadius.lg),
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(
                                       vertical: 10, horizontal: 16),
