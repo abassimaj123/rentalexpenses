@@ -409,6 +409,10 @@ class _CalculatorScreenState extends State<CalculatorScreen>
       isSpanish
           ? 'Calculado con Rental Expenses Tracker'
           : 'Calculated with Rental Expenses Tracker',
+      '',
+      isSpanish
+          ? '📄 Exporta el reporte completo en PDF →'
+          : '📄 Export the full PDF report in the app →',
     ];
     try {
       await Share.share(lines.join('\n'));

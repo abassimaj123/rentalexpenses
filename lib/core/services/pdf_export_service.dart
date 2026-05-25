@@ -28,6 +28,10 @@ class PdfExportService {
     required double netMonthlyIncome,
     required double netAnnualIncome,
     required double expenseRatio,
+    double? noi,
+    double? capRate,
+    double? cashOnCashRoi,
+    bool isSpanish = false,
   }) async {
     final pdf = pw.Document();
     pdf.addPage(pw.Page(
@@ -42,6 +46,10 @@ class PdfExportService {
         netMonthlyIncome: netMonthlyIncome,
         netAnnualIncome: netAnnualIncome,
         expenseRatio: expenseRatio,
+        noi: noi,
+        capRate: capRate,
+        cashOnCashRoi: cashOnCashRoi,
+        isSpanish: isSpanish,
       ),
     ));
     await Printing.sharePdf(
@@ -59,6 +67,10 @@ class PdfExportService {
     required double netMonthlyIncome,
     required double netAnnualIncome,
     required double expenseRatio,
+    double? noi,
+    double? capRate,
+    double? cashOnCashRoi,
+    bool isSpanish = false,
   }) {
     final now = DateTime.now();
     return pw
@@ -70,7 +82,10 @@ class PdfExportService {
             pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
-                  pw.Text('Rental Expenses Calculator',
+                  pw.Text(
+                      isSpanish
+                          ? 'Calculadora de Gastos de Alquiler'
+                          : 'Rental Expenses Calculator',
                       style: pw.TextStyle(
                           fontSize: AppTextSize.title,
                           fontWeight: pw.FontWeight.bold,
@@ -78,7 +93,9 @@ class PdfExportService {
                   pw.Text(
                       propertyName.isNotEmpty
                           ? propertyName
-                          : 'Property Expense Report',
+                          : (isSpanish
+                              ? 'Informe de Gastos de Propiedad'
+                              : 'Property Expense Report'),
                       style: const pw.TextStyle(
                           fontSize: AppTextSize.xs, color: PdfColors.grey700)),
                 ]),
@@ -93,31 +110,57 @@ class PdfExportService {
       pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
         pw.Expanded(
             child: pw.Column(children: [
-          _sectionBox('INCOME', [
-            _row2('Monthly Rent', _cur0.format(monthlyRent)),
-            _row2('Annual Rent', _cur0.format(annualRent),
+          _sectionBox(isSpanish ? 'INGRESOS' : 'INCOME', [
+            _row2(isSpanish ? 'Alquiler mensual' : 'Monthly Rent',
+                _cur0.format(monthlyRent)),
+            _row2(isSpanish ? 'Alquiler anual' : 'Annual Rent',
+                _cur0.format(annualRent),
                 bold: true, color: _navy),
           ]),
           pw.SizedBox(height: 10),
-          _sectionBox('NET INCOME', [
-            _row2('Monthly Net', _cur0.format(netMonthlyIncome),
+          _sectionBox(isSpanish ? 'INGRESOS NETOS' : 'NET INCOME', [
+            _row2(isSpanish ? 'Neto mensual' : 'Monthly Net',
+                _cur0.format(netMonthlyIncome),
                 bold: true,
                 color: netMonthlyIncome >= 0 ? _navy : PdfColors.red700),
-            _row2('Annual Net', _cur0.format(netAnnualIncome),
+            _row2(isSpanish ? 'Neto anual' : 'Annual Net',
+                _cur0.format(netAnnualIncome),
                 bold: true,
                 color: netAnnualIncome >= 0 ? _navy : PdfColors.red700),
-            _row2(
-                'Expense Ratio', '${(expenseRatio * 100).toStringAsFixed(1)}%'),
+            _row2(isSpanish ? 'Ratio de gastos' : 'Expense Ratio',
+                '${(expenseRatio * 100).toStringAsFixed(1)}%'),
+            if (noi != null)
+              _row2('NOI', _cur0.format(noi),
+                  bold: true,
+                  color: noi >= 0 ? _navy : PdfColors.red700),
           ]),
+          if (capRate != null || cashOnCashRoi != null) ...[
+            pw.SizedBox(height: 10),
+            _sectionBox(
+                isSpanish ? 'MÉTRICAS DE INVERSIÓN' : 'INVESTMENT METRICS', [
+              if (capRate != null)
+                _row2('Cap Rate', '${capRate.toStringAsFixed(2)}%',
+                    bold: true,
+                    color: capRate >= 6 ? _navy : PdfColors.red700),
+              if (cashOnCashRoi != null)
+                _row2(
+                    isSpanish ? 'ROI (Cash-on-Cash)' : 'Cash-on-Cash ROI',
+                    '${cashOnCashRoi.toStringAsFixed(2)}%',
+                    bold: true,
+                    color: cashOnCashRoi >= 8 ? _navy : PdfColors.red700),
+            ]),
+          ],
         ])),
         pw.SizedBox(width: 14),
         pw.Expanded(
             child: pw.Column(children: [
-          _sectionBox('MONTHLY EXPENSES', [
+          _sectionBox(
+              isSpanish ? 'GASTOS MENSUALES' : 'MONTHLY EXPENSES', [
             ...expenses.map(
                 (e) => _row2(e['name'] as String, _cur2.format(e['monthly']))),
             pw.Divider(color: PdfColors.grey300, height: 6),
-            _row2('Total Expenses', _cur0.format(totalMonthlyExpenses),
+            _row2(isSpanish ? 'Total de gastos' : 'Total Expenses',
+                _cur0.format(totalMonthlyExpenses),
                 bold: true, color: _orange),
           ]),
         ])),
@@ -126,7 +169,9 @@ class PdfExportService {
       pw.Column(children: [
         pw.Divider(color: PdfColors.grey300, height: 12),
         pw.Text(
-            'Generated by Rental Expenses Calculator · For illustration purposes only. Not financial advice.',
+            isSpanish
+                ? 'Generado por Rental Expenses Calculator · Solo para ilustración. No es consejo financiero.'
+                : 'Generated by Rental Expenses Calculator · For illustration purposes only. Not financial advice.',
             style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey500)),
       ]),
     ]);

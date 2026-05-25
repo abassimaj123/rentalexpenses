@@ -550,14 +550,16 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
             'Flujo mensual: $cf\n'
             'Flujo anual: \$${fmt.format(c.annualCashFlow)}\n'
             'Ratio de gastos: ${c.expenseRatio.toStringAsFixed(1)}%\n'
-            '\nRental Expenses Tracker'
+            '\nRental Expenses Tracker\n\n'
+            '📄 Exporta el reporte completo en PDF →'
         : '$name\n'
             'Rent: \$${fmt.format(c.rentIncome)}/mo\n'
             'Expenses: \$${fmt.format(c.totalExpenses)}/mo\n'
             'Monthly CF: $cf\n'
             'Annual CF: \$${fmt.format(c.annualCashFlow)}\n'
             'Expense Ratio: ${c.expenseRatio.toStringAsFixed(1)}%\n'
-            '\nRental Expenses Tracker';
+            '\nRental Expenses Tracker\n\n'
+            '📄 Export the full PDF report in the app →';
 
     Share.share(text,
         subject: isSpanish ? 'Cálculo — $name' : 'Calculation — $name');
