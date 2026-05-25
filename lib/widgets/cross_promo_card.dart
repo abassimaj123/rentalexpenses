@@ -58,6 +58,7 @@ class _CrossPromoCardState extends State<CrossPromoCard> {
   Widget build(BuildContext context) {
     if (!_checked || _dismissed || widget.isPremium)
       return const SizedBox.shrink();
+    final ct = CalcwiseTheme.of(context);
     return Container(
       margin:
           const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: 6),
@@ -92,13 +93,13 @@ class _CrossPromoCardState extends State<CrossPromoCard> {
               child: const Text('CalqWise',
                   style: TextStyle(
                       color: Colors.white,
-                      fontSize: 9,
+                      fontSize: AppTextSize.xxs,
                       fontWeight: FontWeight.bold)),
             ),
             const SizedBox(width: 6),
             Text('Also from us',
                 style: TextStyle(
-                    fontSize: 10,
+                    fontSize: AppTextSize.xs,
                     color: CalcwiseTheme.of(context).textSecondary)),
           ]),
           const SizedBox(height: AppSpacing.xxs),
@@ -114,14 +115,17 @@ class _CrossPromoCardState extends State<CrossPromoCard> {
         ])),
         const SizedBox(width: AppSpacing.sm),
         Column(children: [
-          GestureDetector(
-            onTap: _dismiss,
-            child: const Icon(Icons.close_rounded,
-                size: 16, color: AppTheme.labelGray),
+          IconButton(
+            onPressed: _dismiss,
+            tooltip: 'Dismiss',
+            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+            padding: EdgeInsets.zero,
+            icon: Icon(Icons.close_rounded, size: 16, color: ct.textSecondary),
           ),
           const SizedBox(height: AppSpacing.sm),
-          GestureDetector(
+          InkWell(
             onTap: _open,
+            borderRadius: BorderRadius.circular(AppRadius.md),
             child: Container(
               padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.smPlus, vertical: 5),
@@ -141,3 +145,4 @@ class _CrossPromoCardState extends State<CrossPromoCard> {
     );
   }
 }
+
