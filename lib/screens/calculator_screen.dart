@@ -1062,7 +1062,7 @@ class _ResultsSection extends StatelessWidget {
                       ? 'Cap Rate > 6% = bueno  •  CoC ROI > 8% = excelente'
                       : 'Cap Rate > 6% = good  •  CoC ROI > 8% = excellent',
                   style: TextStyle(
-                      fontSize: 10,
+                      fontSize: AppTextSize.xs,
                       color: CalcwiseTheme.of(context).textSecondary),
                   textAlign: TextAlign.center,
                 ),

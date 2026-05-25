@@ -1164,7 +1164,7 @@ class _ExpenseCategoryChart extends StatelessWidget {
                                 return Text(
                                   '\$${val >= 1000 ? '${(val / 1000).toStringAsFixed(1)}k' : val.toStringAsFixed(0)}',
                                   style: TextStyle(
-                                      fontSize: 10,
+                                      fontSize: AppTextSize.xs,
                                       color: CalcwiseTheme.of(context)
                                           .textSecondary),
                                 );
@@ -1186,7 +1186,7 @@ class _ExpenseCategoryChart extends StatelessWidget {
                                   child: Text(
                                     labels[catIdx],
                                     style: TextStyle(
-                                        fontSize: 9,
+                                        fontSize: AppTextSize.xxs,
                                         color: CalcwiseTheme.of(context)
                                             .textSecondary),
                                     textAlign: TextAlign.center,
@@ -1238,7 +1238,7 @@ class _ExpenseCategoryChart extends StatelessWidget {
                       const SizedBox(width: 4),
                       Text(labels[catIdx],
                           style: TextStyle(
-                              fontSize: 10,
+                              fontSize: AppTextSize.xs,
                               color: CalcwiseTheme.of(context).textSecondary)),
                     ],
                   );
@@ -1592,7 +1592,7 @@ class _CashFlowTrendChart extends StatelessWidget {
                                     : '\$${val.toStringAsFixed(0)}';
                                 return Text(s,
                                     style: TextStyle(
-                                        fontSize: 10,
+                                        fontSize: AppTextSize.xs,
                                         color: theme.textSecondary));
                               },
                             ),
@@ -1617,7 +1617,7 @@ class _CashFlowTrendChart extends StatelessWidget {
                                   child: Text(
                                     '$lbl$suffix',
                                     style: TextStyle(
-                                        fontSize: 10,
+                                        fontSize: AppTextSize.xs,
                                         color: theme.textSecondary),
                                     textAlign: TextAlign.center,
                                   ),
