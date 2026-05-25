@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../core/firebase/analytics_service.dart';
 import '../core/freemium/freemium_service.dart';
 import '../core/freemium/iap_service.dart';
 import '../core/theme/app_theme.dart';
@@ -13,7 +14,6 @@ import '../main.dart';
 import '../widgets/insight_card.dart';
 import '../widgets/paywall_hard.dart';
 import '../widgets/paywall_soft.dart';
-import 'settings_screen.dart';
 import '../core/insight_engine.dart';
 
 // ── Data model ────────────────────────────────────────────────────────────────
@@ -200,7 +200,8 @@ class CalculatorScreen extends StatefulWidget {
   State<CalculatorScreen> createState() => _CalculatorScreenState();
 }
 
-class _CalculatorScreenState extends State<CalculatorScreen> {
+class _CalculatorScreenState extends State<CalculatorScreen>
+    with CalcwiseAutoCalcMixin {
   final _fmt = NumberFormat('#,##0.00', 'en_US');
 
   // Controllers
@@ -209,10 +210,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   final _mortCtrl = TextEditingController(text: '1200');
   final _taxCtrl = TextEditingController(text: '200');
   final _insCtrl = TextEditingController(text: '150');
-  final _hoaCtrl = TextEditingController();
-  final _mgmtCtrl = TextEditingController();
-  final _maintCtrl = TextEditingController();
-  final _vacCtrl = TextEditingController();
+  final _hoaCtrl = TextEditingController(text: '0');
+  final _mgmtCtrl = TextEditingController(text: '8');
+  final _maintCtrl = TextEditingController(text: '100');
+  final _vacCtrl = TextEditingController(text: '5');
   final _utilCtrl = TextEditingController();
   final _landCtrl = TextEditingController();
   final _otherCtrl = TextEditingController();
@@ -228,12 +229,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   ExpenseCalc? _result;
   bool _saved = false;
 
-  Timer? _debounce;
   Timer? _saveDebounce;
 
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView('calculator');
     if (widget.preload != null) _populateFrom(widget.preload!);
     for (final c in _allControllers) {
       c.addListener(_clearSaved);
@@ -260,14 +261,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       ];
 
   void _debouncedCalculate() {
-    _debounce?.cancel();
-    _debounce = Timer(AppDuration.page, () {
-      if (!mounted) return;
+    scheduleCalc(() {
       _calculate(isSpanishNotifier.value);
       _saveDebounce?.cancel();
       _saveDebounce = Timer(const Duration(milliseconds: 2000), () {
-        if (mounted && _result != null && !_saved)
-          _save(isSpanishNotifier.value);
+        if (mounted && _result != null && !_saved) _save(isSpanishNotifier.value);
       });
     });
   }
@@ -446,7 +444,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   @override
   void dispose() {
-    _debounce?.cancel();
     _saveDebounce?.cancel();
     for (final c in _allControllers) c.dispose();
     super.dispose();
@@ -465,20 +462,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 icon: const Icon(Icons.refresh_rounded),
                 tooltip: isSpanish ? 'Reiniciar' : 'Reset',
                 onPressed: _reset,
-              ),
-              CalcwiseAppBarActions(
-                freemium: freemiumService,
-                session: paywallSession,
-                onSettings: () => Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (_, __, ___) => const SettingsScreen(),
-                    transitionsBuilder: (_, anim, __, child) =>
-                        FadeTransition(opacity: anim, child: child),
-                    transitionDuration: AppDuration.base,
-                  ),
-                ),
-                onRewardAd: () => CalcwiseRewardAdSheet.show(context),
               ),
             ],
           ),

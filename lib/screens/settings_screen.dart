@@ -6,6 +6,7 @@ import '../core/freemium/freemium_service.dart';
 import '../core/freemium/iap_service.dart';
 import '../core/theme/app_theme.dart';
 import '../main.dart';
+import '../services/rental_notification_service.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -58,73 +59,6 @@ class SettingsScreen extends StatelessWidget {
                 child: ListView(
                   padding: const EdgeInsets.all(AppSpacing.lg),
                   children: [
-                    // ── Language ──────────────────────────────────────
-                    _SectionHeader(label: isSpanish ? 'Idioma' : 'Language'),
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.language_rounded,
-                                color: AppTheme.primary),
-                            const SizedBox(width: AppSpacing.md),
-                            Expanded(
-                              child: Text(
-                                isSpanish
-                                    ? 'Idioma actual'
-                                    : 'Current language',
-                                style: const TextStyle(
-                                    fontSize: AppTextSize.bodyMd),
-                              ),
-                            ),
-                            SegmentedButton<bool>(
-                              segments: const [
-                                ButtonSegment(value: false, label: Text('EN')),
-                                ButtonSegment(value: true, label: Text('ES')),
-                              ],
-                              selected: {isSpanish},
-                              onSelectionChanged: (s) => _setLanguage(s.first),
-                              style: ButtonStyle(
-                                backgroundColor:
-                                    WidgetStateProperty.resolveWith((states) {
-                                  if (states.contains(WidgetState.selected)) {
-                                    return AppTheme.primary;
-                                  }
-                                  return null;
-                                }),
-                                foregroundColor:
-                                    WidgetStateProperty.resolveWith((states) {
-                                  if (states.contains(WidgetState.selected)) {
-                                    return Colors.white;
-                                  }
-                                  return null;
-                                }),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    // ── Theme ────────────────────────────────────────
-                    _SectionHeader(label: isSpanish ? 'Tema' : 'Theme'),
-                    Card(
-                      child: ValueListenableBuilder<ThemeMode>(
-                        valueListenable: themeModeService.notifier,
-                        builder: (_, mode, __) => ListTile(
-                          leading: Icon(themeModeService.icon,
-                              color: AppTheme.primary),
-                          title: Text(
-                              themeModeService.label(isSpanish: isSpanish)),
-                          trailing: Icon(Icons.chevron_right_rounded,
-                              size: 18,
-                              color: CalcwiseTheme.of(context).textSecondary),
-                          onTap: () => themeModeService.toggle(),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xl),
-
                     // ── Premium ───────────────────────────────────────
                     _SectionHeader(label: isSpanish ? 'Premium' : 'Premium'),
                     ValueListenableBuilder<bool>(
@@ -209,6 +143,81 @@ class SettingsScreen extends StatelessWidget {
                           ),
                         );
                       },
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
+
+                    // ── Language ──────────────────────────────────────
+                    _SectionHeader(label: isSpanish ? 'Idioma' : 'Language'),
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.language_rounded,
+                                color: AppTheme.primary),
+                            const SizedBox(width: AppSpacing.md),
+                            Expanded(
+                              child: Text(
+                                isSpanish
+                                    ? 'Idioma actual'
+                                    : 'Current language',
+                                style: const TextStyle(
+                                    fontSize: AppTextSize.bodyMd),
+                              ),
+                            ),
+                            SegmentedButton<bool>(
+                              segments: const [
+                                ButtonSegment(value: false, label: Text('EN')),
+                                ButtonSegment(value: true, label: Text('ES')),
+                              ],
+                              selected: {isSpanish},
+                              onSelectionChanged: (s) => _setLanguage(s.first),
+                              style: ButtonStyle(
+                                backgroundColor:
+                                    WidgetStateProperty.resolveWith((states) {
+                                  if (states.contains(WidgetState.selected)) {
+                                    return AppTheme.primary;
+                                  }
+                                  return null;
+                                }),
+                                foregroundColor:
+                                    WidgetStateProperty.resolveWith((states) {
+                                  if (states.contains(WidgetState.selected)) {
+                                    return Colors.white;
+                                  }
+                                  return null;
+                                }),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    // ── Theme ────────────────────────────────────────
+                    _SectionHeader(label: isSpanish ? 'Tema' : 'Theme'),
+                    Card(
+                      child: ValueListenableBuilder<ThemeMode>(
+                        valueListenable: themeModeService.notifier,
+                        builder: (_, mode, __) => ListTile(
+                          leading: Icon(themeModeService.icon,
+                              color: AppTheme.primary),
+                          title: Text(
+                              themeModeService.label(isSpanish: isSpanish)),
+                          trailing: Icon(Icons.chevron_right_rounded,
+                              size: 18,
+                              color: CalcwiseTheme.of(context).textSecondary),
+                          onTap: () => themeModeService.toggle(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
+
+                    // ── Notifications ─────────────────────────────────
+                    _SectionHeader(
+                        label: isSpanish ? 'Notificaciones' : 'Notifications'),
+                    Card(
+                      child: _ReminderTile(isSpanish: isSpanish),
                     ),
                     const SizedBox(height: AppSpacing.xl),
 
@@ -418,6 +427,66 @@ class _AppTile extends StatelessWidget {
       trailing: Icon(Icons.chevron_right_rounded,
           color: CalcwiseTheme.of(context).textSecondary),
       onTap: onTap,
+    );
+  }
+}
+
+class _ReminderTile extends StatefulWidget {
+  final bool isSpanish;
+  const _ReminderTile({required this.isSpanish});
+
+  @override
+  State<_ReminderTile> createState() => _ReminderTileState();
+}
+
+class _ReminderTileState extends State<_ReminderTile> {
+  static const _prefKey = 'rental_reminder_enabled';
+  bool _enabled = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() => _enabled = prefs.getBool(_prefKey) ?? true);
+    }
+  }
+
+  Future<void> _toggle(bool value) async {
+    setState(() => _enabled = value);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_prefKey, value);
+    if (value) {
+      await RentalNotificationService.scheduleMonthlyReminder(
+          widget.isSpanish);
+    } else {
+      await RentalNotificationService.cancel();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SwitchListTile(
+      secondary: const Icon(Icons.notifications_rounded, color: AppTheme.primary),
+      title: Text(
+        widget.isSpanish ? 'Recordatorio mensual' : 'Monthly expense reminder',
+        style: const TextStyle(fontSize: AppTextSize.body),
+      ),
+      subtitle: Text(
+        widget.isSpanish
+            ? 'Aviso el 28 de cada mes a las 10:00 AM'
+            : 'Reminder on the 28th of each month at 10:00 AM',
+        style: TextStyle(
+            fontSize: AppTextSize.xs,
+            color: CalcwiseTheme.of(context).textSecondary),
+      ),
+      value: _enabled,
+      onChanged: _toggle,
+      activeColor: AppTheme.primary,
     );
   }
 }

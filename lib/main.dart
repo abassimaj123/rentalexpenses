@@ -18,8 +18,10 @@ import 'screens/calculator_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/property_list_screen.dart';
 import 'screens/reports_screen.dart';
+import 'screens/settings_screen.dart';
 import 'screens/tools_screen.dart';
 import 'screens/history_screen.dart';
+import 'services/rental_notification_service.dart';
 import 'widgets/paywall_hard.dart';
 import 'widgets/paywall_soft.dart';
 
@@ -58,6 +60,8 @@ Future<void> main() async {
 
   await themeModeService.initialize();
   await freemiumService.initialize();
+  await RentalNotificationService.initialize();
+  await RentalNotificationService.scheduleMonthlyReminder(isSpanishNotifier.value);
   await IAPService.instance.initialize();
   await paywallSession.initialize();
 
@@ -70,11 +74,9 @@ Future<void> main() async {
   }
 
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  // Initial style — will be overridden per-frame in MainShell based on theme brightness.
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
-    statusBarIconBrightness: Brightness.light,
-    systemNavigationBarColor: Color(0xFF0D0B1E),
-    systemNavigationBarIconBrightness: Brightness.light,
   ));
 
   CalcwiseAdFooter.configure(
@@ -141,6 +143,20 @@ class RentalExpensesApp extends StatelessWidget {
             darkTheme: AppTheme.dark,
             themeMode: themeMode,
             debugShowCheckedModeBanner: false,
+            builder: (context, child) {
+              if (!MediaQuery.of(context).disableAnimations) return child!;
+              return Theme(
+                data: Theme.of(context).copyWith(
+                  pageTransitionsTheme: const PageTransitionsTheme(
+                    builders: {
+                      TargetPlatform.android: _NoAnimPageTransitionsBuilder(),
+                      TargetPlatform.iOS: _NoAnimPageTransitionsBuilder(),
+                    },
+                  ),
+                ),
+                child: child!,
+              );
+            },
             initialRoute: '/',
             routes: {
               '/': (_) => const SplashScreen(),
@@ -196,14 +212,52 @@ class _MainShellState extends State<MainShell> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      systemNavigationBarColor: Theme.of(context).scaffoldBackgroundColor,
+      systemNavigationBarColor:
+          isDark ? const Color(0xFF121212) : const Color(0xFFF8FAFC),
       systemNavigationBarIconBrightness:
           isDark ? Brightness.light : Brightness.dark,
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
     ));
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (_, isSpanish, __) {
         return Scaffold(
+          appBar: AppBar(
+            flexibleSpace: Container(
+              decoration: BoxDecoration(gradient: AppTheme.primaryGradient),
+            ),
+            title: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.home_work_rounded,
+                    color: Colors.white, size: 22),
+                const SizedBox(width: 8),
+                Text(
+                  isSpanish ? 'Gastos de Alquiler' : 'Rental Expenses',
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ],
+            ),
+            iconTheme: const IconThemeData(color: Colors.white),
+            actions: [
+              CalcwiseAppBarActions(
+                freemium: freemiumService,
+                session: paywallSession,
+                onSettings: () => Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (_, __, ___) => const SettingsScreen(),
+                    transitionsBuilder: (_, anim, __, child) =>
+                        FadeTransition(opacity: anim, child: child),
+                    transitionDuration: AppDuration.base,
+                  ),
+                ),
+                onRewardAd: () => CalcwiseRewardAdSheet.show(context),
+                onPremium: () => PaywallHard.show(context),
+              ),
+            ],
+          ),
           body: IndexedStack(index: _index, children: _screens),
           bottomNavigationBar: NavigationBar(
             selectedIndex: _index,
@@ -240,4 +294,17 @@ class _MainShellState extends State<MainShell> {
       },
     );
   }
+}
+
+class _NoAnimPageTransitionsBuilder extends PageTransitionsBuilder {
+  const _NoAnimPageTransitionsBuilder();
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) =>
+      child;
 }

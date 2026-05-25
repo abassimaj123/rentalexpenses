@@ -32,7 +32,8 @@ class ExpenseEntryScreen extends StatefulWidget {
   State<ExpenseEntryScreen> createState() => _ExpenseEntryScreenState();
 }
 
-class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
+class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
+    with CalcwiseAutoCalcMixin {
   final _fmt = NumberFormat('#,##0.00', 'en_US');
 
   late DateTime _selectedMonth;
@@ -92,7 +93,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen> {
       _receiptPath = e.receiptPath;
     }
     for (final c in _allControllers) {
-      c.addListener(_recalculate);
+      c.addListener(() => scheduleCalc(_recalculate));
     }
     _recalculate();
   }

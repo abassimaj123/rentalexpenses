@@ -19,7 +19,6 @@ import '../widgets/paywall_hard.dart';
 import '../widgets/paywall_soft.dart';
 import '../widgets/premium_cta_widget.dart';
 import 'tax_summary_screen.dart';
-import 'settings_screen.dart';
 
 // ── Palette cycling for bar chart ─────────────────────────────────────────────
 const _chartColors = [
@@ -56,6 +55,22 @@ const _catKeysEs = [
   'Jardinería',
   'Otro',
 ];
+
+// ── Cash-flow month data (net BarChart) ───────────────────────────────────────
+class _CashFlowMonth {
+  final int year;
+  final int month;
+  final double income;
+  final double expenses;
+  double get net => income - expenses;
+
+  const _CashFlowMonth({
+    required this.year,
+    required this.month,
+    required this.income,
+    required this.expenses,
+  });
+}
 
 // ── Trend data point ──────────────────────────────────────────────────────────
 class _TrendPoint {
@@ -103,6 +118,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
   List<Property> _properties = [];
   Map<String, MonthlyExpense?> _expenseMap = {};
   List<_TrendPoint> _trendData = [];
+  List<_CashFlowMonth> _cashFlowData = [];
   bool _loading = true;
 
   @override
@@ -139,14 +155,22 @@ class _ReportsScreenState extends State<ReportsScreen> {
     );
 
     final trend = <_TrendPoint>[];
+    final cashFlow = <_CashFlowMonth>[];
     for (int i = 0; i < 12; i++) {
       final d = DateTime(now.year, now.month - 11 + i);
       final key = d.year * 12 + d.month;
+      final expTotal = expTotals[key] ?? 0;
       trend.add(_TrendPoint(
         year: d.year,
         month: d.month,
         income: totalRent,
-        expenses: expTotals[key] ?? 0,
+        expenses: expTotal,
+      ));
+      cashFlow.add(_CashFlowMonth(
+        year: d.year,
+        month: d.month,
+        income: totalRent,
+        expenses: expTotal,
       ));
     }
 
@@ -155,6 +179,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
         _properties = props;
         _expenseMap = map;
         _trendData = trend;
+        _cashFlowData = cashFlow;
         _loading = false;
       });
     }
@@ -470,24 +495,6 @@ class _ReportsScreenState extends State<ReportsScreen> {
           appBar: AppBar(
             title: Text(isSpanish ? 'Reportes' : 'Reports'),
             actions: [
-              // Premium badge
-              ValueListenableBuilder<bool>(
-                valueListenable: freemiumService.isPremiumNotifier,
-                builder: (_, isPremium, __) {
-                  if (isPremium) {
-                    return const Padding(
-                      padding: EdgeInsets.only(right: 4),
-                      child: Icon(Icons.verified_rounded,
-                          color: Colors.amber, size: 22),
-                    );
-                  }
-                  return IconButton(
-                    icon: const Icon(Icons.star_outline, color: Colors.amber),
-                    tooltip: isSpanish ? 'Obtener Premium' : 'Go Premium',
-                    onPressed: () => PaywallSoft.show(context),
-                  );
-                },
-              ),
               IconButton(
                 icon: const Icon(Icons.account_balance_rounded),
                 tooltip:
@@ -516,33 +523,36 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 tooltip: isSpanish ? 'Actualizar' : 'Refresh',
                 onPressed: _load,
               ),
-              IconButton(
-                icon: const Icon(Icons.settings_rounded),
-                onPressed: () => Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (_, __, ___) => const SettingsScreen(),
-                    transitionsBuilder: (_, anim, __, child) =>
-                        FadeTransition(opacity: anim, child: child),
-                    transitionDuration: AppDuration.base,
-                  ),
-                ),
-              ),
             ],
           ),
           body: Column(
             children: [
               Expanded(
                 child: _loading
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const _ReportsSkeleton()
                     : _properties.isEmpty
                         ? _EmptyState(isSpanish: isSpanish)
                         : ListView(
                             padding: const EdgeInsets.all(AppSpacing.lg),
                             children: [
+                              // ── Cash Flow — Last 12 Months ─────────────
+                              if (_cashFlowData.isNotEmpty) ...[
+                                _SectionLabel(isSpanish
+                                    ? 'FLUJO DE EFECTIVO — ÚLTIMOS 12 MESES'
+                                    : 'CASH FLOW — LAST 12 MONTHS'),
+                                _CashFlowNetChart(
+                                  months: _cashFlowData,
+                                  isSpanish: isSpanish,
+                                  fmt: _fmt,
+                                ),
+                                const SizedBox(height: 20),
+                              ],
+
                               // Month selector chip
-                              GestureDetector(
+                              InkWell(
                                 onTap: () => _pickMonth(isSpanish),
+                                borderRadius:
+                                    BorderRadius.circular(AppRadius.lg),
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(
                                       vertical: 10, horizontal: 16),
@@ -723,6 +733,324 @@ class _ReportsScreenState extends State<ReportsScreen> {
           ),
         );
       },
+    );
+  }
+}
+
+// ── Cash Flow Net BarChart (new retention section) ────────────────────────────
+
+class _CashFlowNetChart extends StatelessWidget {
+  final List<_CashFlowMonth> months;
+  final bool isSpanish;
+  final NumberFormat fmt;
+
+  const _CashFlowNetChart({
+    required this.months,
+    required this.isSpanish,
+    required this.fmt,
+  });
+
+  static const _monthsEn = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  ];
+  static const _monthsEs = [
+    'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+    'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
+  ];
+
+  String _compact(double v) {
+    final abs = v.abs();
+    final sign = v < 0 ? '-' : '';
+    if (abs >= 1000) return '$sign\$${(abs / 1000).toStringAsFixed(1)}k';
+    return '$sign\$${abs.toStringAsFixed(0)}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = CalcwiseTheme.of(context);
+    final labels = isSpanish ? _monthsEs : _monthsEn;
+
+    // Summary stats
+    final nets = months.map((m) => m.net).toList();
+    final totalNet = nets.fold<double>(0, (s, n) => s + n);
+    final avgNet = nets.isEmpty ? 0.0 : totalNet / nets.length;
+
+    double bestNet = nets.isEmpty ? 0.0 : nets[0];
+    int bestIdx = 0;
+    for (int i = 1; i < nets.length; i++) {
+      if (nets[i] > bestNet) {
+        bestNet = nets[i];
+        bestIdx = i;
+      }
+    }
+    final bestMonth = months.isEmpty ? null : months[bestIdx];
+
+    // Compute chart maxY / minY
+    final maxAbsNet =
+        nets.isEmpty ? 1.0 : nets.map((n) => n.abs()).reduce(math.max);
+    final chartMax = (maxAbsNet * 1.3).clamp(1.0, double.infinity);
+
+    // Accessibility label
+    final semanticLabel = isSpanish
+        ? 'Gráfico de flujo neto: promedio ${fmt.format(avgNet)}, total ${fmt.format(totalNet)}'
+        : 'Net cash flow chart: avg ${fmt.format(avgNet)}, total ${fmt.format(totalNet)}';
+
+    final barGroups = months.asMap().entries.map((entry) {
+      final i = entry.key;
+      final m = entry.value;
+      final isPositive = m.net >= 0;
+      return BarChartGroupData(
+        x: i,
+        barRods: [
+          BarChartRodData(
+            toY: m.net.abs() < 0.01 ? 0.01 : m.net,
+            color: isPositive
+                ? const Color(0xFF16A34A)
+                : const Color(0xFFDC2626),
+            width: 16,
+            borderRadius: isPositive
+                ? const BorderRadius.only(
+                    topLeft: Radius.circular(4),
+                    topRight: Radius.circular(4),
+                  )
+                : const BorderRadius.only(
+                    bottomLeft: Radius.circular(4),
+                    bottomRight: Radius.circular(4),
+                  ),
+          ),
+        ],
+      );
+    }).toList();
+
+    return Semantics(
+      label: semanticLabel,
+      excludeSemantics: true,
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 16, 16, 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Legend
+              Padding(
+                padding: const EdgeInsets.only(left: 8, bottom: 10),
+                child: Row(children: [
+                  Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF16A34A),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    isSpanish ? 'Positivo' : 'Positive',
+                    style: TextStyle(
+                        fontSize: AppTextSize.xs, color: theme.textSecondary),
+                  ),
+                  const SizedBox(width: 14),
+                  Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFDC2626),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    isSpanish ? 'Negativo' : 'Negative',
+                    style: TextStyle(
+                        fontSize: AppTextSize.xs, color: theme.textSecondary),
+                  ),
+                ]),
+              ),
+
+              // Bar chart
+              LayoutBuilder(builder: (context, constraints) {
+                final chartHeight =
+                    (constraints.maxWidth < 400) ? 185.0 : 220.0;
+                return SizedBox(
+                  height: chartHeight,
+                  child: BarChart(
+                    BarChartData(
+                      minY: -chartMax,
+                      maxY: chartMax,
+                      barGroups: barGroups,
+                      gridData: FlGridData(
+                        show: true,
+                        drawVerticalLine: false,
+                        getDrawingHorizontalLine: (val) => FlLine(
+                          color: val == 0
+                              ? theme.cardBorder.withValues(alpha: 0.8)
+                              : theme.cardBorder.withValues(alpha: 0.35),
+                          strokeWidth: val == 0 ? 1.5 : 0.8,
+                        ),
+                      ),
+                      borderData: FlBorderData(show: false),
+                      titlesData: FlTitlesData(
+                        leftTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: 54,
+                            getTitlesWidget: (val, meta) {
+                              if (val == chartMax || val == -chartMax) {
+                                return const SizedBox.shrink();
+                              }
+                              return Text(
+                                _compact(val),
+                                style: TextStyle(
+                                    fontSize: 10, color: theme.textSecondary),
+                              );
+                            },
+                          ),
+                        ),
+                        bottomTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: 36,
+                            getTitlesWidget: (val, meta) {
+                              final i = val.toInt();
+                              if (i < 0 || i >= months.length) {
+                                return const SizedBox.shrink();
+                              }
+                              final m = months[i];
+                              final lbl = labels[m.month - 1];
+                              final suffix = m.month == 1
+                                  ? "\n'${m.year % 100}"
+                                  : '';
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Text(
+                                  '$lbl$suffix',
+                                  style: TextStyle(
+                                      fontSize: 10, color: theme.textSecondary),
+                                  textAlign: TextAlign.center,
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        rightTitles: const AxisTitles(
+                            sideTitles: SideTitles(showTitles: false)),
+                        topTitles: const AxisTitles(
+                            sideTitles: SideTitles(showTitles: false)),
+                      ),
+                      barTouchData: BarTouchData(
+                        touchTooltipData: BarTouchTooltipData(
+                          getTooltipItem: (group, _, rod, __) {
+                            final m = months[group.x];
+                            final net = m.net;
+                            final sign = net >= 0 ? '+' : '-';
+                            return BarTooltipItem(
+                              '${labels[m.month - 1]} ${m.year}\n'
+                              '${isSpanish ? "Ingresos" : "Income"}: \$${fmt.format(m.income)}\n'
+                              '${isSpanish ? "Gastos" : "Expenses"}: \$${fmt.format(m.expenses)}\n'
+                              '${isSpanish ? "Neto" : "Net"}: $sign\$${fmt.format(net.abs())}',
+                              const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: AppTextSize.xs),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }),
+
+              const SizedBox(height: 12),
+
+              // Summary row
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: AppTheme.surfaceTint,
+                  borderRadius: BorderRadius.circular(AppRadius.mdPlus),
+                  border: Border.all(
+                      color: AppTheme.primary.withValues(alpha: 0.18)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _NetStat(
+                            label: isSpanish
+                                ? 'Promedio mensual'
+                                : 'Avg monthly net',
+                            value: _compact(avgNet),
+                            positive: avgNet >= 0,
+                          ),
+                        ),
+                        Expanded(
+                          child: _NetStat(
+                            label: isSpanish ? 'Total neto YTD' : 'Total net YTD',
+                            value: _compact(totalNet),
+                            positive: totalNet >= 0,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (bestMonth != null) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        '${isSpanish ? "Mejor mes" : "Best month"}: '
+                        '${labels[bestMonth.month - 1]} ${bestMonth.year} '
+                        '(${_compact(bestNet)})',
+                        style: const TextStyle(
+                          fontSize: AppTextSize.xs,
+                          color: Color(0xFF16A34A),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NetStat extends StatelessWidget {
+  final String label;
+  final String value;
+  final bool positive;
+
+  const _NetStat({
+    required this.label,
+    required this.value,
+    required this.positive,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+              fontSize: AppTextSize.xs,
+              color: CalcwiseTheme.of(context).textSecondary),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: AppTextSize.bodyMd,
+            fontWeight: FontWeight.bold,
+            color: positive ? const Color(0xFF16A34A) : const Color(0xFFDC2626),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -1429,6 +1757,82 @@ class _EmptyState extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Skeleton loading placeholder for ReportsScreen
+// ---------------------------------------------------------------------------
+class _ReportsSkeleton extends StatefulWidget {
+  const _ReportsSkeleton();
+  @override
+  State<_ReportsSkeleton> createState() => _ReportsSkeletonState();
+}
+
+class _ReportsSkeletonState extends State<_ReportsSkeleton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _anim;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
+    _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  Widget _shimmer({double? width, required double height}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final base = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE8E8E8);
+    final shine = isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF5F5F5);
+    return AnimatedBuilder(
+      animation: _anim,
+      builder: (_, __) => Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: Color.lerp(base, shine, _anim.value),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Month picker chip placeholder
+          _shimmer(width: 160, height: 36),
+          const SizedBox(height: AppSpacing.xl),
+          // Summary card placeholder
+          _shimmer(height: 120),
+          const SizedBox(height: AppSpacing.xl),
+          // Chart placeholder
+          _shimmer(width: 140, height: 14),
+          const SizedBox(height: AppSpacing.md),
+          _shimmer(height: 220),
+          const SizedBox(height: AppSpacing.xl),
+          // Property rows
+          for (int i = 0; i < 3; i++) ...[
+            _shimmer(height: 64),
+            const SizedBox(height: AppSpacing.md),
+          ],
+        ],
       ),
     );
   }
