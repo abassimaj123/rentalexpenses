@@ -572,7 +572,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                   ? 'Net Loss'
                                                   : 'Net Loss'),
                                           style: TextStyle(
-                                            fontSize: 10,
+                                            fontSize: AppTextSize.xs,
                                             fontWeight: FontWeight.bold,
                                             color: grandNet >= 0
                                                 ? AppTheme.success

@@ -574,7 +574,7 @@ class _LeaseDateTile extends StatelessWidget {
           children: [
             Text(label,
                 style: TextStyle(
-                    fontSize: 10,
+                    fontSize: AppTextSize.xs,
                     color: CalcwiseTheme.of(context).textSecondary)),
             Text(value,
                 style: const TextStyle(

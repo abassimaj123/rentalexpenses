@@ -902,7 +902,7 @@ class _CashFlowNetChart extends StatelessWidget {
                               return Text(
                                 _compact(val),
                                 style: TextStyle(
-                                    fontSize: 10, color: theme.textSecondary),
+                                    fontSize: AppTextSize.xs, color: theme.textSecondary),
                               );
                             },
                           ),
@@ -926,7 +926,7 @@ class _CashFlowNetChart extends StatelessWidget {
                                 child: Text(
                                   '$lbl$suffix',
                                   style: TextStyle(
-                                      fontSize: 10, color: theme.textSecondary),
+                                      fontSize: AppTextSize.xs, color: theme.textSecondary),
                                   textAlign: TextAlign.center,
                                 ),
                               );
