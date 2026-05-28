@@ -512,7 +512,7 @@ class _ComparisonTable extends StatelessWidget {
       _RowData(
         label: isSpanish ? 'Alquiler mensual' : 'Monthly Rent',
         values:
-            properties.map((p) => AmountFormatter.format(p.monthlyRent, 'USD')).toList(),
+            properties.map((p) => AmountFormatter.ui(p.monthlyRent, 'USD')).toList(),
         colors: properties
             .map((_) => CalcwiseTheme.of(context).textSecondary)
             .toList(),
@@ -523,7 +523,7 @@ class _ComparisonTable extends StatelessWidget {
         label: isSpanish ? 'Total gastos' : 'Total Expenses',
         values: properties.map((p) {
           final e = expenseMap[p.id];
-          return AmountFormatter.format(e?.totalExpenses ?? 0, 'USD');
+          return AmountFormatter.ui(e?.totalExpenses ?? 0, 'USD');
         }).toList(),
         colors: properties
             .map((_) => CalcwiseTheme.of(context).textSecondary)
@@ -537,7 +537,7 @@ class _ComparisonTable extends StatelessWidget {
         label: isSpanish ? 'Flujo mensual' : 'Monthly CF',
         values: properties.map((p) {
           final cf = cfFn(p);
-          return '${cf < 0 ? '-' : '+'}${AmountFormatter.format(cf.abs(), 'USD')}';
+          return '${cf < 0 ? '-' : '+'}${AmountFormatter.ui(cf.abs(), 'USD')}';
         }).toList(),
         colors: properties.map((p) {
           final cf = cfFn(p);
@@ -550,7 +550,7 @@ class _ComparisonTable extends StatelessWidget {
         label: isSpanish ? 'Flujo anual' : 'Annual CF',
         values: properties.map((p) {
           final cf = cfFn(p) * 12;
-          return '${cf < 0 ? '-' : '+'}${AmountFormatter.format(cf.abs(), 'USD')}';
+          return '${cf < 0 ? '-' : '+'}${AmountFormatter.ui(cf.abs(), 'USD')}';
         }).toList(),
         colors: properties.map((p) {
           final cf = cfFn(p);
@@ -574,7 +574,7 @@ class _ComparisonTable extends StatelessWidget {
         label: 'NOI (${isSpanish ? 'anual' : 'annual'})',
         values: properties.map((p) {
           final n = noiFn(p);
-          return '${n < 0 ? '-' : ''}${AmountFormatter.format(n.abs(), 'USD')}';
+          return '${n < 0 ? '-' : ''}${AmountFormatter.ui(n.abs(), 'USD')}';
         }).toList(),
         colors: properties.map((p) {
           final n = noiFn(p);

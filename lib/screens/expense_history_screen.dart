@@ -217,7 +217,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                                 const SizedBox(
                                                     height: AppSpacing.xs),
                                                 Text(
-                                                  '${isSpanish ? 'Gastos' : 'Expenses'}: ${AmountFormatter.format(e.totalExpenses, 'USD')}  •  ${ratio.toStringAsFixed(1)}%',
+                                                  '${isSpanish ? 'Gastos' : 'Expenses'}: ${AmountFormatter.ui(e.totalExpenses, 'USD')}  •  ${ratio.toStringAsFixed(1)}%',
                                                   style: TextStyle(
                                                     fontSize: AppTextSize.md,
                                                     color: CalcwiseTheme.of(
@@ -275,7 +275,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                                 CrossAxisAlignment.end,
                                             children: [
                                               Text(
-                                                '${cf < 0 ? '-' : '+'}${AmountFormatter.format(cf.abs(), 'USD')}',
+                                                '${cf < 0 ? '-' : '+'}${AmountFormatter.ui(cf.abs(), 'USD')}',
                                                 style: TextStyle(
                                                   fontSize: AppTextSize.bodyMd,
                                                   fontWeight: FontWeight.bold,

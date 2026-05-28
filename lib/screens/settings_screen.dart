@@ -34,7 +34,7 @@ class SettingsScreen extends StatelessWidget {
             title: Text(isSpanish ? 'Configuración' : 'Settings'),
             actions: [
               ValueListenableBuilder<bool>(
-                valueListenable: freemiumService.isPremiumNotifier,
+                valueListenable: freemiumService.hasFullAccessNotifier,
                 builder: (_, isPremium, __) {
                   if (isPremium) {
                     return const Padding(
@@ -53,16 +53,18 @@ class SettingsScreen extends StatelessWidget {
               ),
             ],
           ),
-          body: Column(
-            children: [
-              Expanded(
-                child: ListView(
+          body: SafeArea(
+            top: false,
+            child: Column(
+              children: [
+                Expanded(
+                  child: ListView(
                   padding: const EdgeInsets.all(AppSpacing.lg),
                   children: [
                     // ── Premium ───────────────────────────────────────
                     _SectionHeader(label: isSpanish ? 'Premium' : 'Premium'),
                     ValueListenableBuilder<bool>(
-                      valueListenable: freemiumService.isPremiumNotifier,
+                      valueListenable: freemiumService.hasFullAccessNotifier,
                       builder: (_, isPremium, __) {
                         if (isPremium) {
                           return Card(
@@ -381,8 +383,9 @@ class SettingsScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              const CalcwiseAdFooter(),
-            ],
+                const CalcwiseAdFooter(),
+              ],
+            ),
           ),
         );
       },

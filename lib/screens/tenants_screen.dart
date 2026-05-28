@@ -327,7 +327,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                                   ),
                                                   if (t.monthlyRent > 0)
                                                     Text(
-                                                      '${AmountFormatter.format(t.monthlyRent, 'USD')}/mo',
+                                                      '${AmountFormatter.ui(t.monthlyRent, 'USD')}/mo',
                                                       style: const TextStyle(
                                                           fontSize:
                                                               AppTextSize.sm,

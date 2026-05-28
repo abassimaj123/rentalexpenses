@@ -627,7 +627,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
                             _ResultRow(
                               label:
                                   isSpanish ? 'Total gastos' : 'Total Expenses',
-                              value: AmountFormatter.format(_totalExpenses, 'USD'),
+                              value: AmountFormatter.ui(_totalExpenses, 'USD'),
                               bold: true,
                             ),
                             Divider(
@@ -638,7 +638,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
                                   ? 'Flujo de caja mensual'
                                   : 'Monthly Cash Flow',
                               value:
-                                  '${_monthlyCF < 0 ? '-' : ''}${AmountFormatter.format(_monthlyCF.abs(), 'USD')}',
+                                  '${_monthlyCF < 0 ? '-' : ''}${AmountFormatter.ui(_monthlyCF.abs(), 'USD')}',
                               valueColor: cfColor,
                               bold: true,
                             ),
@@ -654,7 +654,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
                               label: isSpanish
                                   ? 'Alquiler mínimo'
                                   : 'Break-Even Rent',
-                              value: AmountFormatter.format(_breakEven, 'USD'),
+                              value: AmountFormatter.ui(_breakEven, 'USD'),
                             ),
                           ],
                         ),

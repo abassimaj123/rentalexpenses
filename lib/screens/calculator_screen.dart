@@ -382,20 +382,20 @@ class _CalculatorScreenState extends State<CalculatorScreen>
           : '🏠 ${c.propertyName} — Rental Expense Summary',
       '',
       isSpanish
-          ? '• Alquiler mensual: ${AmountFormatter.format(c.rentIncome, 'USD')}'
-          : '• Monthly Rent: ${AmountFormatter.format(c.rentIncome, 'USD')}',
+          ? '• Alquiler mensual: ${AmountFormatter.ui(c.rentIncome, 'USD')}'
+          : '• Monthly Rent: ${AmountFormatter.ui(c.rentIncome, 'USD')}',
       isSpanish
-          ? '• Total gastos: ${AmountFormatter.format(c.totalExpenses, 'USD')}'
-          : '• Total Expenses: ${AmountFormatter.format(c.totalExpenses, 'USD')}',
+          ? '• Total gastos: ${AmountFormatter.ui(c.totalExpenses, 'USD')}'
+          : '• Total Expenses: ${AmountFormatter.ui(c.totalExpenses, 'USD')}',
       isSpanish
-          ? '• Flujo de caja mensual: ${cf < 0 ? '-' : '+'}${AmountFormatter.format(cf.abs(), 'USD')}'
-          : '• Monthly Cash Flow: ${cf < 0 ? '-' : '+'}${AmountFormatter.format(cf.abs(), 'USD')}',
+          ? '• Flujo de caja mensual: ${cf < 0 ? '-' : '+'}${AmountFormatter.ui(cf.abs(), 'USD')}'
+          : '• Monthly Cash Flow: ${cf < 0 ? '-' : '+'}${AmountFormatter.ui(cf.abs(), 'USD')}',
       isSpanish
-          ? '• Flujo de caja anual: ${c.annualCashFlow < 0 ? '-' : '+'}${AmountFormatter.format(c.annualCashFlow.abs(), 'USD')}'
-          : '• Annual Cash Flow: ${c.annualCashFlow < 0 ? '-' : '+'}${AmountFormatter.format(c.annualCashFlow.abs(), 'USD')}',
+          ? '• Flujo de caja anual: ${c.annualCashFlow < 0 ? '-' : '+'}${AmountFormatter.ui(c.annualCashFlow.abs(), 'USD')}'
+          : '• Annual Cash Flow: ${c.annualCashFlow < 0 ? '-' : '+'}${AmountFormatter.ui(c.annualCashFlow.abs(), 'USD')}',
       isSpanish
-          ? '• NOI anual: ${AmountFormatter.format(c.noi, 'USD')}'
-          : '• Annual NOI: ${AmountFormatter.format(c.noi, 'USD')}',
+          ? '• NOI anual: ${AmountFormatter.ui(c.noi, 'USD')}'
+          : '• Annual NOI: ${AmountFormatter.ui(c.noi, 'USD')}',
       if (c.capRate != null)
         isSpanish
             ? '• Cap Rate: ${c.capRate!.toStringAsFixed(2)}%'
@@ -936,10 +936,10 @@ class _ResultsSection extends StatelessWidget {
         Semantics(
           label: isSpanish
               ? 'Flujo de caja mensual: ${cf < 0 ? 'menos' : ''} ${AmountFormatter.formatNumber(cf.abs())} dólares'
-              : 'Monthly cash flow: ${cf < 0 ? 'negative' : ''} ${AmountFormatter.format(cf.abs(), 'USD')}',
+              : 'Monthly cash flow: ${cf < 0 ? 'negative' : ''} ${AmountFormatter.ui(cf.abs(), 'USD')}',
           child: CalcwiseHeroCard(
             label: isSpanish ? 'Flujo de Caja Mensual' : 'Monthly Cash Flow',
-            value: '${cf < 0 ? '-' : ''}${AmountFormatter.format(cf.abs(), 'USD')}',
+            value: '${cf < 0 ? '-' : ''}${AmountFormatter.ui(cf.abs(), 'USD')}',
             secondary: isSpanish
                 ? 'Alquiler − Gastos Totales'
                 : 'Rent − Total Expenses',
@@ -947,11 +947,11 @@ class _ResultsSection extends StatelessWidget {
               (
                 label: isSpanish ? 'Flujo Anual' : 'Annual CF',
                 value:
-                    '${calc.annualCashFlow < 0 ? '-' : ''}${AmountFormatter.format(calc.annualCashFlow.abs(), 'USD')}',
+                    '${calc.annualCashFlow < 0 ? '-' : ''}${AmountFormatter.ui(calc.annualCashFlow.abs(), 'USD')}',
               ),
               (
                 label: isSpanish ? 'NOI Anual' : 'Annual NOI',
-                value: AmountFormatter.format(calc.noi, 'USD'),
+                value: AmountFormatter.ui(calc.noi, 'USD'),
               ),
             ],
           ),
@@ -967,7 +967,7 @@ class _ResultsSection extends StatelessWidget {
                   label: isSpanish
                       ? 'Total gastos mensuales'
                       : 'Total Monthly Expenses',
-                  value: AmountFormatter.format(calc.totalExpenses, 'USD'),
+                  value: AmountFormatter.ui(calc.totalExpenses, 'USD'),
                   bold: true,
                 ),
                 Divider(
@@ -982,14 +982,14 @@ class _ResultsSection extends StatelessWidget {
                   label: isSpanish
                       ? 'Alquiler mínimo necesario'
                       : 'Break-Even Rent',
-                  value: AmountFormatter.format(calc.breakEvenRent, 'USD'),
+                  value: AmountFormatter.ui(calc.breakEvenRent, 'USD'),
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 _ResultRow(
                   label: isSpanish
                       ? 'Ingreso operativo neto (NOI anual)'
                       : 'Net Operating Income (Annual NOI)',
-                  value: AmountFormatter.format(calc.noi, 'USD'),
+                  value: AmountFormatter.ui(calc.noi, 'USD'),
                   valueColor:
                       calc.noi >= 0 ? AppTheme.success : AppTheme.dangerRed,
                 ),
@@ -1194,7 +1194,7 @@ class _BreakdownRow extends StatelessWidget {
                   Text(label, style: const TextStyle(fontSize: AppTextSize.md)),
             ),
             Text(
-              AmountFormatter.format(amount, 'USD'),
+              AmountFormatter.ui(amount, 'USD'),
               style: const TextStyle(
                   fontSize: AppTextSize.md, fontWeight: FontWeight.w600),
             ),

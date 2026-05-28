@@ -101,7 +101,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Widget _buildList(bool isSpanish) {
     return ValueListenableBuilder<bool>(
-      valueListenable: freemiumService.isPremiumNotifier,
+      valueListenable: freemiumService.hasFullAccessNotifier,
       builder: (_, isPremium, __) {
         final limit = MonetizationConfig.freeCalculationLimit;
         return ListView.builder(
@@ -161,8 +161,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       const SizedBox(height: AppSpacing.xxs),
                       Text(
                         isSpanish
-                            ? 'Flujo mensual: ${cf < 0 ? '-' : ''}${AmountFormatter.format(cf.abs(), 'USD')}'
-                            : 'Monthly CF: ${cf < 0 ? '-' : ''}${AmountFormatter.format(cf.abs(), 'USD')}',
+                            ? 'Flujo mensual: ${cf < 0 ? '-' : ''}${AmountFormatter.ui(cf.abs(), 'USD')}'
+                            : 'Monthly CF: ${cf < 0 ? '-' : ''}${AmountFormatter.ui(cf.abs(), 'USD')}',
                         style: TextStyle(
                             color: cfColor, fontWeight: FontWeight.w500),
                       ),

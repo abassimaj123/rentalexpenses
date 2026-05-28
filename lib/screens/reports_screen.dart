@@ -383,14 +383,14 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
             final tableData = <List<String>>[
               [pdfCategory, pdfAmount],
-              [pdfMonthlyRent, AmountFormatter.format(p.monthlyRent, 'USD')],
+              [pdfMonthlyRent, AmountFormatter.ui(p.monthlyRent, 'USD')],
               ...catKeys
                   .asMap()
                   .entries
                   .where((en) => vals[en.key] > 0)
-                  .map((en) => [en.value, AmountFormatter.format(vals[en.key], 'USD')]),
-              [pdfTotalExpenses, AmountFormatter.format(e?.totalExpenses ?? 0, 'USD')],
-              [pdfCashFlow, '${cf < 0 ? '-' : '+'}${AmountFormatter.format(cf.abs(), 'USD')}'],
+                  .map((en) => [en.value, AmountFormatter.ui(vals[en.key], 'USD')]),
+              [pdfTotalExpenses, AmountFormatter.ui(e?.totalExpenses ?? 0, 'USD')],
+              [pdfCashFlow, '${cf < 0 ? '-' : '+'}${AmountFormatter.ui(cf.abs(), 'USD')}'],
             ];
 
             rows.add(
@@ -429,15 +429,15 @@ class _ReportsScreenState extends State<ReportsScreen> {
               headers: [pdfMetric, pdfAmount],
               data: [
                 [pdfProperties, '${_properties.length}'],
-                [pdfTotalRent, AmountFormatter.format(totalRent, 'USD')],
-                [pdfTotalExpenses, AmountFormatter.format(totalExp, 'USD')],
+                [pdfTotalRent, AmountFormatter.ui(totalRent, 'USD')],
+                [pdfTotalExpenses, AmountFormatter.ui(totalExp, 'USD')],
                 [
                   pdfMonthlyFlow,
-                  '${totalCF < 0 ? '-' : '+'}${AmountFormatter.format(totalCF.abs(), 'USD')}'
+                  '${totalCF < 0 ? '-' : '+'}${AmountFormatter.ui(totalCF.abs(), 'USD')}'
                 ],
                 [
                   pdfAnnualFlow,
-                  '${(totalCF * 12) < 0 ? '-' : '+'}${AmountFormatter.format((totalCF * 12).abs(), 'USD')}'
+                  '${(totalCF * 12) < 0 ? '-' : '+'}${AmountFormatter.ui((totalCF * 12).abs(), 'USD')}'
                 ],
               ],
               border: pw.TableBorder.all(color: PdfColors.grey300),
@@ -614,7 +614,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                                                   ? 'Ingresos totales'
                                                   : 'Total Rent',
                                               value:
-                                                  AmountFormatter.format(totalRent, 'USD'),
+                                                  AmountFormatter.ui(totalRent, 'USD'),
                                               color: CalcwiseTheme.of(context)
                                                   .textSecondary,
                                             ),
@@ -634,7 +634,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                                                   ? 'Flujo de caja mensual'
                                                   : 'Monthly Cash Flow',
                                               value:
-                                                  '${totalCF < 0 ? '-' : '+'}${AmountFormatter.format(totalCF.abs(), 'USD')}',
+                                                  '${totalCF < 0 ? '-' : '+'}${AmountFormatter.ui(totalCF.abs(), 'USD')}',
                                               color: totalCF >= 0
                                                   ? AppTheme.success
                                                   : AppTheme.dangerRed,
@@ -648,7 +648,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                                                   ? 'Flujo de caja anual'
                                                   : 'Annual Cash Flow',
                                               value:
-                                                  '${totalAnnualCF < 0 ? '-' : '+'}${AmountFormatter.format(totalAnnualCF.abs(), 'USD')}',
+                                                  '${totalAnnualCF < 0 ? '-' : '+'}${AmountFormatter.ui(totalAnnualCF.abs(), 'USD')}',
                                               color: totalAnnualCF >= 0
                                                   ? AppTheme.success
                                                   : AppTheme.dangerRed,
@@ -787,7 +787,7 @@ class _CashFlowNetChart extends StatelessWidget {
     // Accessibility label
     final semanticLabel = isSpanish
         ? 'Gráfico de flujo neto: promedio ${AmountFormatter.formatNumber(avgNet)}, total ${AmountFormatter.formatNumber(totalNet)}'
-        : 'Net cash flow chart: avg ${AmountFormatter.format(avgNet, 'USD')}, total ${AmountFormatter.format(totalNet, 'USD')}';
+        : 'Net cash flow chart: avg ${AmountFormatter.ui(avgNet, 'USD')}, total ${AmountFormatter.ui(totalNet, 'USD')}';
 
     final barGroups = months.asMap().entries.map((entry) {
       final i = entry.key;
@@ -939,9 +939,9 @@ class _CashFlowNetChart extends StatelessWidget {
                             final sign = net >= 0 ? '+' : '-';
                             return BarTooltipItem(
                               '${labels[m.month - 1]} ${m.year}\n'
-                              '${isSpanish ? "Ingresos" : "Income"}: ${AmountFormatter.format(m.income, 'USD')}\n'
-                              '${isSpanish ? "Gastos" : "Expenses"}: ${AmountFormatter.format(m.expenses, 'USD')}\n'
-                              '${isSpanish ? "Neto" : "Net"}: $sign${AmountFormatter.format(net.abs(), 'USD')}',
+                              '${isSpanish ? "Ingresos" : "Income"}: ${AmountFormatter.ui(m.income, 'USD')}\n'
+                              '${isSpanish ? "Gastos" : "Expenses"}: ${AmountFormatter.ui(m.expenses, 'USD')}\n'
+                              '${isSpanish ? "Neto" : "Net"}: $sign${AmountFormatter.ui(net.abs(), 'USD')}',
                               const TextStyle(
                                   color: Colors.white,
                                   fontSize: AppTextSize.xs),
@@ -1098,7 +1098,7 @@ class _ExpenseCategoryChart extends StatelessWidget {
 
     // Accessibility: build descriptive text summary for screen readers
     final _chartSummaryParts = activeIndices
-        .map((i) => '${labels[i]}: ${AmountFormatter.format(totals[i], 'USD')}')
+        .map((i) => '${labels[i]}: ${AmountFormatter.ui(totals[i], 'USD')}')
         .join(', ');
     final _chartSemanticLabel = isSpanish
         ? 'Gráfico de gastos por categoría: $_chartSummaryParts'
@@ -1196,7 +1196,7 @@ class _ExpenseCategoryChart extends StatelessWidget {
                             getTooltipItem: (group, groupIndex, rod, rodIndex) {
                               final catIdx = activeIndices[group.x];
                               return BarTooltipItem(
-                                '${labels[catIdx]}\n${AmountFormatter.format(rod.toY, 'USD')}',
+                                '${labels[catIdx]}\n${AmountFormatter.ui(rod.toY, 'USD')}',
                                 const TextStyle(
                                     color: Colors.white,
                                     fontSize: AppTextSize.xs),
@@ -1354,7 +1354,7 @@ class _PropertyRow extends StatelessWidget {
                   Text(property.name,
                       style: const TextStyle(fontWeight: FontWeight.w600)),
                   Text(
-                    '${isSpanish ? 'Alquiler' : 'Rent'}: ${AmountFormatter.format(property.monthlyRent, 'USD')}  •  ${ratio.toStringAsFixed(1)}%',
+                    '${isSpanish ? 'Alquiler' : 'Rent'}: ${AmountFormatter.ui(property.monthlyRent, 'USD')}  •  ${ratio.toStringAsFixed(1)}%',
                     style: TextStyle(
                         fontSize: AppTextSize.sm,
                         color: CalcwiseTheme.of(context).textSecondary),
@@ -1366,7 +1366,7 @@ class _PropertyRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '${cf < 0 ? '-' : '+'}${AmountFormatter.format(cf.abs(), 'USD')}',
+                  '${cf < 0 ? '-' : '+'}${AmountFormatter.ui(cf.abs(), 'USD')}',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: cfColor,
@@ -1471,10 +1471,10 @@ class _CashFlowTrendChart extends StatelessWidget {
     final _totalExpenses =
         displayPoints.fold<double>(0, (s, p) => s + p.expenses);
     final _cashFlowLabel = isSpanish
-        ? 'Tendencia de flujo de caja: ingresos ${AmountFormatter.format(_totalIncome, 'USD')}, '
-            'gastos ${AmountFormatter.format(_totalExpenses, 'USD')}'
-        : 'Cash flow trend: income ${AmountFormatter.format(_totalIncome, 'USD')}, '
-            'expenses ${AmountFormatter.format(_totalExpenses, 'USD')}';
+        ? 'Tendencia de flujo de caja: ingresos ${AmountFormatter.ui(_totalIncome, 'USD')}, '
+            'gastos ${AmountFormatter.ui(_totalExpenses, 'USD')}'
+        : 'Cash flow trend: income ${AmountFormatter.ui(_totalIncome, 'USD')}, '
+            'expenses ${AmountFormatter.ui(_totalExpenses, 'USD')}';
 
     final barGroups = displayPoints.asMap().entries.map((entry) {
       final i = entry.key;
@@ -1625,9 +1625,9 @@ class _CashFlowTrendChart extends StatelessWidget {
                               final sign = cf >= 0 ? '+' : '-';
                               return BarTooltipItem(
                                 '${labels[pt.month - 1]} ${pt.year}\n'
-                                '${isSpanish ? "Alquiler" : "Rent"}: ${AmountFormatter.format(pt.income, 'USD')}\n'
-                                '${isSpanish ? "Gastos" : "Expenses"}: ${AmountFormatter.format(pt.expenses, 'USD')}\n'
-                                '${isSpanish ? "Flujo" : "Cash Flow"}: $sign${AmountFormatter.format(cf.abs(), 'USD')}',
+                                '${isSpanish ? "Alquiler" : "Rent"}: ${AmountFormatter.ui(pt.income, 'USD')}\n'
+                                '${isSpanish ? "Gastos" : "Expenses"}: ${AmountFormatter.ui(pt.expenses, 'USD')}\n'
+                                '${isSpanish ? "Flujo" : "Cash Flow"}: $sign${AmountFormatter.ui(cf.abs(), 'USD')}',
                                 const TextStyle(
                                     color: Colors.white,
                                     fontSize: AppTextSize.xs),

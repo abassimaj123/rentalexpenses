@@ -59,7 +59,7 @@ class _State extends State<BannerAdWidget> {
   Widget build(BuildContext context) {
     if (!AdConfig.adsEnabled) return const SizedBox.shrink();
     return ValueListenableBuilder<bool>(
-      valueListenable: freemiumService.isPremiumNotifier,
+      valueListenable: freemiumService.hasFullAccessNotifier,
       builder: (_, isPremium, __) {
         if (isPremium) return const SizedBox.shrink();
         if (!_loaded || _ad == null) return const SizedBox(height: 50);

@@ -241,7 +241,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
             actions: [
               // Premium badge — always visible in AppBar
               ValueListenableBuilder<bool>(
-                valueListenable: freemiumService.isPremiumNotifier,
+                valueListenable: freemiumService.hasFullAccessNotifier,
                 builder: (_, isPremium, __) {
                   if (isPremium) {
                     return const Padding(
@@ -505,7 +505,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                                         ? 'Alquiler'
                                                         : 'Rent',
                                                     value:
-                                                        AmountFormatter.format(p.monthlyRent, 'USD'),
+                                                        AmountFormatter.ui(p.monthlyRent, 'USD'),
                                                     color: CalcwiseTheme.of(
                                                             context)
                                                         .textSecondary,
@@ -518,7 +518,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                                           ? 'Flujo mensual'
                                                           : 'Monthly CF',
                                                       value:
-                                                          '${cf < 0 ? '-' : '+'}${AmountFormatter.format(cf.abs(), 'USD')}',
+                                                          '${cf < 0 ? '-' : '+'}${AmountFormatter.ui(cf.abs(), 'USD')}',
                                                       color: cfColor,
                                                     ),
                                                   ),

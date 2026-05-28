@@ -85,20 +85,20 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
             pw.Row(children: [
               _pdfMetric(
                 label: isSpanish ? 'Flujo mensual' : 'Monthly Cash Flow',
-                value: '$cfSign${AmountFormatter.format(cf.abs(), 'USD')}',
+                value: '$cfSign${AmountFormatter.ui(cf.abs(), 'USD')}',
                 color: cf >= 0 ? green : red,
               ),
               pw.SizedBox(width: 12),
               _pdfMetric(
                 label: isSpanish ? 'Flujo anual' : 'Annual Cash Flow',
                 value:
-                    '${c.annualCashFlow >= 0 ? '+' : '-'}${AmountFormatter.format(c.annualCashFlow.abs(), 'USD')}',
+                    '${c.annualCashFlow >= 0 ? '+' : '-'}${AmountFormatter.ui(c.annualCashFlow.abs(), 'USD')}',
                 color: c.annualCashFlow >= 0 ? green : red,
               ),
               pw.SizedBox(width: 12),
               _pdfMetric(
                 label: 'NOI',
-                value: '${c.noi >= 0 ? '+' : '-'}${AmountFormatter.format(c.noi.abs(), 'USD')}',
+                value: '${c.noi >= 0 ? '+' : '-'}${AmountFormatter.ui(c.noi.abs(), 'USD')}',
                 color: c.noi >= 0 ? green : red,
               ),
             ]),
@@ -121,57 +121,57 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
               data: [
                 [
                   isSpanish ? 'Alquiler mensual' : 'Monthly Rent',
-                  AmountFormatter.format(c.rentIncome, 'USD')
+                  AmountFormatter.ui(c.rentIncome, 'USD')
                 ],
                 if (c.mortgage > 0)
                   [
                     isSpanish ? 'Hipoteca' : 'Mortgage',
-                    AmountFormatter.format(c.mortgage, 'USD')
+                    AmountFormatter.ui(c.mortgage, 'USD')
                   ],
                 if (c.propertyTaxes > 0)
                   [
                     isSpanish ? 'Impuestos' : 'Property Taxes',
-                    AmountFormatter.format(c.propertyTaxes, 'USD')
+                    AmountFormatter.ui(c.propertyTaxes, 'USD')
                   ],
                 if (c.insurance > 0)
                   [
                     isSpanish ? 'Seguro' : 'Insurance',
-                    AmountFormatter.format(c.insurance, 'USD')
+                    AmountFormatter.ui(c.insurance, 'USD')
                   ],
-                if (c.hoaFees > 0) ['HOA', AmountFormatter.format(c.hoaFees, 'USD')],
+                if (c.hoaFees > 0) ['HOA', AmountFormatter.ui(c.hoaFees, 'USD')],
                 if (c.propertyMgmt > 0)
                   [
                     isSpanish ? 'Administración' : 'Property Mgmt',
-                    AmountFormatter.format(c.propertyMgmt, 'USD')
+                    AmountFormatter.ui(c.propertyMgmt, 'USD')
                   ],
                 if (c.maintenance > 0)
                   [
                     isSpanish ? 'Mantenimiento' : 'Maintenance',
-                    AmountFormatter.format(c.maintenance, 'USD')
+                    AmountFormatter.ui(c.maintenance, 'USD')
                   ],
                 if (c.vacancyLoss > 0)
                   [
                     isSpanish ? 'Vacancia' : 'Vacancy',
-                    AmountFormatter.format(c.vacancyLoss, 'USD')
+                    AmountFormatter.ui(c.vacancyLoss, 'USD')
                   ],
                 if (c.utilities > 0)
                   [
                     isSpanish ? 'Servicios' : 'Utilities',
-                    AmountFormatter.format(c.utilities, 'USD')
+                    AmountFormatter.ui(c.utilities, 'USD')
                   ],
                 if (c.landscaping > 0)
                   [
                     isSpanish ? 'Jardinería' : 'Landscaping',
-                    AmountFormatter.format(c.landscaping, 'USD')
+                    AmountFormatter.ui(c.landscaping, 'USD')
                   ],
                 if (c.otherExpenses > 0)
                   [
                     isSpanish ? 'Otros' : 'Other',
-                    AmountFormatter.format(c.otherExpenses, 'USD')
+                    AmountFormatter.ui(c.otherExpenses, 'USD')
                   ],
                 [
                   isSpanish ? 'TOTAL GASTOS' : 'TOTAL EXPENSES',
-                  AmountFormatter.format(c.totalExpenses, 'USD')
+                  AmountFormatter.ui(c.totalExpenses, 'USD')
                 ],
               ],
               border: pw.TableBorder.all(color: PdfColors.grey300),
@@ -304,7 +304,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
             actions: [
               // PDF export (Premium)
               ValueListenableBuilder<bool>(
-                valueListenable: freemiumService.isPremiumNotifier,
+                valueListenable: freemiumService.hasFullAccessNotifier,
                 builder: (_, isPremium, __) => IconButton(
                   icon: _exporting
                       ? const SizedBox(
@@ -324,7 +324,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
               ),
               // Premium badge / upsell
               ValueListenableBuilder<bool>(
-                valueListenable: freemiumService.isPremiumNotifier,
+                valueListenable: freemiumService.hasFullAccessNotifier,
                 builder: (_, isPremium, __) {
                   if (isPremium) {
                     return const Padding(
@@ -379,7 +379,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                           ? 'Flujo de caja mensual'
                           : 'Monthly Cash Flow',
                       value:
-                          '${c.monthlyCashFlow < 0 ? '-' : ''}${AmountFormatter.format(c.monthlyCashFlow.abs(), 'USD')}',
+                          '${c.monthlyCashFlow < 0 ? '-' : ''}${AmountFormatter.ui(c.monthlyCashFlow.abs(), 'USD')}',
                       color: cfColor,
                     ),
                     const SizedBox(height: 16),
@@ -390,7 +390,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                       rows: [
                         _Row(
                           isSpanish ? 'Ingreso por renta' : 'Rent Income',
-                          AmountFormatter.format(c.rentIncome, 'USD'),
+                          AmountFormatter.ui(c.rentIncome, 'USD'),
                         ),
                       ],
                     ),
@@ -403,37 +403,37 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                       rows: [
                         if (c.mortgage > 0)
                           _Row(isSpanish ? 'Hipoteca' : 'Mortgage',
-                              AmountFormatter.format(c.mortgage, 'USD')),
+                              AmountFormatter.ui(c.mortgage, 'USD')),
                         if (c.propertyTaxes > 0)
                           _Row(
                               isSpanish ? 'Impuesto predial' : 'Property Taxes',
-                              AmountFormatter.format(c.propertyTaxes, 'USD')),
+                              AmountFormatter.ui(c.propertyTaxes, 'USD')),
                         if (c.insurance > 0)
                           _Row(isSpanish ? 'Seguro' : 'Insurance',
-                              AmountFormatter.format(c.insurance, 'USD')),
+                              AmountFormatter.ui(c.insurance, 'USD')),
                         if (c.hoaFees > 0)
-                          _Row('HOA', AmountFormatter.format(c.hoaFees, 'USD')),
+                          _Row('HOA', AmountFormatter.ui(c.hoaFees, 'USD')),
                         if (c.propertyMgmt > 0)
                           _Row(isSpanish ? 'Administración' : 'Property Mgmt',
-                              AmountFormatter.format(c.propertyMgmt, 'USD')),
+                              AmountFormatter.ui(c.propertyMgmt, 'USD')),
                         if (c.maintenance > 0)
                           _Row(isSpanish ? 'Mantenimiento' : 'Maintenance',
-                              AmountFormatter.format(c.maintenance, 'USD')),
+                              AmountFormatter.ui(c.maintenance, 'USD')),
                         if (c.vacancyLoss > 0)
                           _Row(isSpanish ? 'Vacancia' : 'Vacancy Loss',
-                              AmountFormatter.format(c.vacancyLoss, 'USD')),
+                              AmountFormatter.ui(c.vacancyLoss, 'USD')),
                         if (c.utilities > 0)
                           _Row(isSpanish ? 'Servicios' : 'Utilities',
-                              AmountFormatter.format(c.utilities, 'USD')),
+                              AmountFormatter.ui(c.utilities, 'USD')),
                         if (c.landscaping > 0)
                           _Row(isSpanish ? 'Jardinería' : 'Landscaping',
-                              AmountFormatter.format(c.landscaping, 'USD')),
+                              AmountFormatter.ui(c.landscaping, 'USD')),
                         if (c.otherExpenses > 0)
                           _Row(isSpanish ? 'Otros gastos' : 'Other Expenses',
-                              AmountFormatter.format(c.otherExpenses, 'USD')),
+                              AmountFormatter.ui(c.otherExpenses, 'USD')),
                         _Row(
                           isSpanish ? 'Total gastos' : 'Total Expenses',
-                          AmountFormatter.format(c.totalExpenses, 'USD'),
+                          AmountFormatter.ui(c.totalExpenses, 'USD'),
                           bold: true,
                           valueColor: AppTheme.dangerRed,
                         ),
@@ -447,7 +447,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                       rows: [
                         _Row(
                           isSpanish ? 'Flujo anual' : 'Annual Cash Flow',
-                          '${c.annualCashFlow < 0 ? '-' : ''}${AmountFormatter.format(c.annualCashFlow.abs(), 'USD')}',
+                          '${c.annualCashFlow < 0 ? '-' : ''}${AmountFormatter.ui(c.annualCashFlow.abs(), 'USD')}',
                           valueColor: cfColor,
                         ),
                         _Row(
@@ -461,11 +461,11 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                         ),
                         _Row(
                           isSpanish ? 'Renta mínima' : 'Break-even Rent',
-                          '${AmountFormatter.format(c.breakEvenRent, 'USD')}/mo',
+                          '${AmountFormatter.ui(c.breakEvenRent, 'USD')}/mo',
                         ),
                         _Row(
                           'NOI (anual)',
-                          '${c.noi < 0 ? '-' : ''}${AmountFormatter.format(c.noi.abs(), 'USD')}',
+                          '${c.noi < 0 ? '-' : ''}${AmountFormatter.ui(c.noi.abs(), 'USD')}',
                           valueColor: c.noi >= 0
                               ? AppTheme.success
                               : AppTheme.dangerRed,
@@ -540,21 +540,21 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
         ? c.propertyName
         : (isSpanish ? 'Mi propiedad' : 'My Property');
     final cf =
-        '${c.monthlyCashFlow < 0 ? '-' : ''}${AmountFormatter.format(c.monthlyCashFlow.abs(), 'USD')}';
+        '${c.monthlyCashFlow < 0 ? '-' : ''}${AmountFormatter.ui(c.monthlyCashFlow.abs(), 'USD')}';
     final text = isSpanish
         ? '$name\n'
-            'Renta: ${AmountFormatter.format(c.rentIncome, 'USD')}/mes\n'
-            'Gastos: ${AmountFormatter.format(c.totalExpenses, 'USD')}/mes\n'
+            'Renta: ${AmountFormatter.ui(c.rentIncome, 'USD')}/mes\n'
+            'Gastos: ${AmountFormatter.ui(c.totalExpenses, 'USD')}/mes\n'
             'Flujo mensual: $cf\n'
-            'Flujo anual: ${AmountFormatter.format(c.annualCashFlow, 'USD')}\n'
+            'Flujo anual: ${AmountFormatter.ui(c.annualCashFlow, 'USD')}\n'
             'Ratio de gastos: ${c.expenseRatio.toStringAsFixed(1)}%\n'
             '\nRental Expenses Tracker\n\n'
             '📄 Exporta el reporte completo en PDF →'
         : '$name\n'
-            'Rent: ${AmountFormatter.format(c.rentIncome, 'USD')}/mo\n'
-            'Expenses: ${AmountFormatter.format(c.totalExpenses, 'USD')}/mo\n'
+            'Rent: ${AmountFormatter.ui(c.rentIncome, 'USD')}/mo\n'
+            'Expenses: ${AmountFormatter.ui(c.totalExpenses, 'USD')}/mo\n'
             'Monthly CF: $cf\n'
-            'Annual CF: ${AmountFormatter.format(c.annualCashFlow, 'USD')}\n'
+            'Annual CF: ${AmountFormatter.ui(c.annualCashFlow, 'USD')}\n'
             'Expense Ratio: ${c.expenseRatio.toStringAsFixed(1)}%\n'
             '\nRental Expenses Tracker\n\n'
             '📄 Export the full PDF report in the app →';

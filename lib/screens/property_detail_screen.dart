@@ -309,7 +309,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                           label: isSpanish
                                               ? 'Alquiler mensual'
                                               : 'Monthly Rent',
-                                          value: AmountFormatter.format(rent, 'USD'),
+                                          value: AmountFormatter.ui(rent, 'USD'),
                                         ),
                                       ),
                                       if (_property.squareFootage > 0)
@@ -358,7 +358,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                         ? 'Flujo de caja'
                                         : 'Cash Flow',
                                     value:
-                                        '${curCF < 0 ? '-' : '+'}${AmountFormatter.format(curCF.abs(), 'USD')}',
+                                        '${curCF < 0 ? '-' : '+'}${AmountFormatter.ui(curCF.abs(), 'USD')}',
                                     color: curCF >= 0
                                         ? AppTheme.success
                                         : CalcwiseSemanticColors.errorDark,
@@ -390,7 +390,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                     label:
                                         isSpanish ? 'Flujo anual' : 'Annual CF',
                                     value:
-                                        '${annualCF < 0 ? '-' : '+'}${AmountFormatter.format(annualCF.abs(), 'USD')}',
+                                        '${annualCF < 0 ? '-' : '+'}${AmountFormatter.ui(annualCF.abs(), 'USD')}',
                                     color: annualCF >= 0
                                         ? AppTheme.success
                                         : CalcwiseSemanticColors.errorDark,
@@ -402,7 +402,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                   child: _StatCard(
                                     label: 'NOI',
                                     value:
-                                        '${noi < 0 ? '-' : ''}${AmountFormatter.format(noi.abs(), 'USD')}',
+                                        '${noi < 0 ? '-' : ''}${AmountFormatter.ui(noi.abs(), 'USD')}',
                                     color: noi >= 0
                                         ? AppTheme.success
                                         : CalcwiseSemanticColors.errorDark,
@@ -470,7 +470,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                                         FontWeight.w600),
                                               ),
                                               Text(
-                                                '${AmountFormatter.format(e.totalExpenses, 'USD')}  •  ${ratio.toStringAsFixed(1)}%',
+                                                '${AmountFormatter.ui(e.totalExpenses, 'USD')}  •  ${ratio.toStringAsFixed(1)}%',
                                                 style: TextStyle(
                                                     fontSize: AppTextSize.sm,
                                                     color: CalcwiseTheme.of(
@@ -481,7 +481,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                           ),
                                         ),
                                         Text(
-                                          '${cf < 0 ? '-' : '+'}${AmountFormatter.format(cf.abs(), 'USD')}',
+                                          '${cf < 0 ? '-' : '+'}${AmountFormatter.ui(cf.abs(), 'USD')}',
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             color: cfColor,
