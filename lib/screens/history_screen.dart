@@ -1,4 +1,4 @@
-import 'package:calcwise_core/calcwise_core.dart';
+import 'package:calcwise_core/calcwise_core.dart' hide PaywallHard;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,7 +21,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   bool _loading = true;
 
   final _dateFmt = DateFormat('MMM d, yyyy');
-  final _mFmt = NumberFormat('#,##0.00', 'en_US');
+  // AmountFormatter replaces NumberFormat _mFmt
 
   @override
   void initState() {
@@ -161,8 +161,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       const SizedBox(height: AppSpacing.xxs),
                       Text(
                         isSpanish
-                            ? 'Flujo mensual: ${cf < 0 ? '-' : ''}\$${_mFmt.format(cf.abs())}'
-                            : 'Monthly CF: ${cf < 0 ? '-' : ''}\$${_mFmt.format(cf.abs())}',
+                            ? 'Flujo mensual: ${cf < 0 ? '-' : ''}${AmountFormatter.format(cf.abs(), 'USD')}'
+                            : 'Monthly CF: ${cf < 0 ? '-' : ''}${AmountFormatter.format(cf.abs(), 'USD')}',
                         style: TextStyle(
                             color: cfColor, fontWeight: FontWeight.w500),
                       ),

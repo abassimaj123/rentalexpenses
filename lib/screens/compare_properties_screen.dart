@@ -1,6 +1,6 @@
-import 'package:calcwise_core/calcwise_core.dart';
+import 'package:calcwise_core/calcwise_core.dart' hide PaywallHard;
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' show DateFormat;
 import '../core/firebase/analytics_service.dart';
 import '../core/freemium/freemium_service.dart';
 import '../core/theme/app_theme.dart';
@@ -20,7 +20,7 @@ class ComparePropertiesScreen extends StatefulWidget {
 }
 
 class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
-  final _fmt = NumberFormat('#,##0.00', 'en_US');
+  // AmountFormatter replaces NumberFormat _fmt
 
   DateTime _selectedMonth = DateTime(DateTime.now().year, DateTime.now().month);
   List<Property> _allProperties = [];
@@ -36,10 +36,61 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
 
   Future<void> _loadProperties() async {
     setState(() => _loading = true);
-    final props = await PropertyDatabaseService.instance.getAllProperties();
+    var props = await PropertyDatabaseService.instance.getAllProperties();
+    // Seed sample properties on first open so comparison is visible immediately
+    if (props.isEmpty) {
+      final now = DateTime.now();
+      final propA = Property(
+        id: 'sample_prop_a',
+        name: 'Property A',
+        address: '123 Main St',
+        monthlyRent: 2000,
+        squareFootage: 900,
+        createdDate: now,
+      );
+      final propB = Property(
+        id: 'sample_prop_b',
+        name: 'Property B',
+        address: '456 Oak Ave',
+        monthlyRent: 2500,
+        squareFootage: 1100,
+        createdDate: now,
+      );
+      await PropertyDatabaseService.instance.insertProperty(propA);
+      await PropertyDatabaseService.instance.insertProperty(propB);
+      // Seed expenses for current month
+      await PropertyDatabaseService.instance.insertExpense(MonthlyExpense(
+        id: 'sample_exp_a',
+        propertyId: 'sample_prop_a',
+        year: now.year,
+        month: now.month,
+        mortgage: 1200,
+        insurance: 100,
+        propertyTaxes: 150,
+        maintenance: 80,
+        utilities: 0,
+      ));
+      await PropertyDatabaseService.instance.insertExpense(MonthlyExpense(
+        id: 'sample_exp_b',
+        propertyId: 'sample_prop_b',
+        year: now.year,
+        month: now.month,
+        mortgage: 1500,
+        insurance: 120,
+        propertyTaxes: 200,
+        maintenance: 100,
+        utilities: 0,
+      ));
+      props = await PropertyDatabaseService.instance.getAllProperties();
+    }
     if (mounted) {
       setState(() {
         _allProperties = props;
+        // Auto-select both sample properties so comparison shows immediately
+        if (props.length >= 2 && _selectedIds.isEmpty) {
+          _selectedIds.add(props[0].id);
+          _selectedIds.add(props[1].id);
+        }
         _loading = false;
       });
     }
@@ -395,7 +446,6 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                                     child: _ComparisonTable(
                                       properties: selected,
                                       expenseMap: _expenseMap,
-                                      fmt: _fmt,
                                       isSpanish: isSpanish,
                                       cfFn: _cf,
                                       ratioFn: _ratio,
@@ -442,7 +492,6 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
 class _ComparisonTable extends StatelessWidget {
   final List<Property> properties;
   final Map<String, MonthlyExpense?> expenseMap;
-  final NumberFormat fmt;
   final bool isSpanish;
   final double Function(Property) cfFn;
   final double Function(Property) ratioFn;
@@ -451,7 +500,6 @@ class _ComparisonTable extends StatelessWidget {
   const _ComparisonTable({
     required this.properties,
     required this.expenseMap,
-    required this.fmt,
     required this.isSpanish,
     required this.cfFn,
     required this.ratioFn,
@@ -464,7 +512,7 @@ class _ComparisonTable extends StatelessWidget {
       _RowData(
         label: isSpanish ? 'Alquiler mensual' : 'Monthly Rent',
         values:
-            properties.map((p) => '\$${fmt.format(p.monthlyRent)}').toList(),
+            properties.map((p) => AmountFormatter.format(p.monthlyRent, 'USD')).toList(),
         colors: properties
             .map((_) => CalcwiseTheme.of(context).textSecondary)
             .toList(),
@@ -475,7 +523,7 @@ class _ComparisonTable extends StatelessWidget {
         label: isSpanish ? 'Total gastos' : 'Total Expenses',
         values: properties.map((p) {
           final e = expenseMap[p.id];
-          return '\$${fmt.format(e?.totalExpenses ?? 0)}';
+          return AmountFormatter.format(e?.totalExpenses ?? 0, 'USD');
         }).toList(),
         colors: properties
             .map((_) => CalcwiseTheme.of(context).textSecondary)
@@ -489,7 +537,7 @@ class _ComparisonTable extends StatelessWidget {
         label: isSpanish ? 'Flujo mensual' : 'Monthly CF',
         values: properties.map((p) {
           final cf = cfFn(p);
-          return '${cf < 0 ? '-' : '+'}\$${fmt.format(cf.abs())}';
+          return '${cf < 0 ? '-' : '+'}${AmountFormatter.format(cf.abs(), 'USD')}';
         }).toList(),
         colors: properties.map((p) {
           final cf = cfFn(p);
@@ -502,7 +550,7 @@ class _ComparisonTable extends StatelessWidget {
         label: isSpanish ? 'Flujo anual' : 'Annual CF',
         values: properties.map((p) {
           final cf = cfFn(p) * 12;
-          return '${cf < 0 ? '-' : '+'}\$${fmt.format(cf.abs())}';
+          return '${cf < 0 ? '-' : '+'}${AmountFormatter.format(cf.abs(), 'USD')}';
         }).toList(),
         colors: properties.map((p) {
           final cf = cfFn(p);
@@ -526,7 +574,7 @@ class _ComparisonTable extends StatelessWidget {
         label: 'NOI (${isSpanish ? 'anual' : 'annual'})',
         values: properties.map((p) {
           final n = noiFn(p);
-          return '${n < 0 ? '-' : ''}\$${fmt.format(n.abs())}';
+          return '${n < 0 ? '-' : ''}${AmountFormatter.format(n.abs(), 'USD')}';
         }).toList(),
         colors: properties.map((p) {
           final n = noiFn(p);

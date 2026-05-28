@@ -1,9 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:calcwise_core/calcwise_core.dart';
+import 'package:calcwise_core/calcwise_core.dart' hide PaywallHard;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/firebase/analytics_service.dart';
@@ -202,7 +201,7 @@ class CalculatorScreen extends StatefulWidget {
 
 class _CalculatorScreenState extends State<CalculatorScreen>
     with CalcwiseAutoCalcMixin {
-  final _fmt = NumberFormat('#,##0.00', 'en_US');
+  // AmountFormatter replaces NumberFormat _fmt
 
   // Controllers
   final _nameCtrl = TextEditingController();
@@ -218,8 +217,8 @@ class _CalculatorScreenState extends State<CalculatorScreen>
   final _landCtrl = TextEditingController();
   final _otherCtrl = TextEditingController();
 
-  final _valueCtrl = TextEditingController(); // property value
-  final _investCtrl = TextEditingController(); // cash invested
+  final _valueCtrl = TextEditingController(text: '250000'); // property value
+  final _investCtrl = TextEditingController(text: '50000'); // cash invested
 
   // Toggles
   bool _mgmtIsPercent = true; // true = % of rent, false = $
@@ -383,20 +382,20 @@ class _CalculatorScreenState extends State<CalculatorScreen>
           : '🏠 ${c.propertyName} — Rental Expense Summary',
       '',
       isSpanish
-          ? '• Alquiler mensual: \$${_fmt.format(c.rentIncome)}'
-          : '• Monthly Rent: \$${_fmt.format(c.rentIncome)}',
+          ? '• Alquiler mensual: ${AmountFormatter.format(c.rentIncome, 'USD')}'
+          : '• Monthly Rent: ${AmountFormatter.format(c.rentIncome, 'USD')}',
       isSpanish
-          ? '• Total gastos: \$${_fmt.format(c.totalExpenses)}'
-          : '• Total Expenses: \$${_fmt.format(c.totalExpenses)}',
+          ? '• Total gastos: ${AmountFormatter.format(c.totalExpenses, 'USD')}'
+          : '• Total Expenses: ${AmountFormatter.format(c.totalExpenses, 'USD')}',
       isSpanish
-          ? '• Flujo de caja mensual: ${cf < 0 ? '-' : '+'}\$${_fmt.format(cf.abs())}'
-          : '• Monthly Cash Flow: ${cf < 0 ? '-' : '+'}\$${_fmt.format(cf.abs())}',
+          ? '• Flujo de caja mensual: ${cf < 0 ? '-' : '+'}${AmountFormatter.format(cf.abs(), 'USD')}'
+          : '• Monthly Cash Flow: ${cf < 0 ? '-' : '+'}${AmountFormatter.format(cf.abs(), 'USD')}',
       isSpanish
-          ? '• Flujo de caja anual: ${c.annualCashFlow < 0 ? '-' : '+'}\$${_fmt.format(c.annualCashFlow.abs())}'
-          : '• Annual Cash Flow: ${c.annualCashFlow < 0 ? '-' : '+'}\$${_fmt.format(c.annualCashFlow.abs())}',
+          ? '• Flujo de caja anual: ${c.annualCashFlow < 0 ? '-' : '+'}${AmountFormatter.format(c.annualCashFlow.abs(), 'USD')}'
+          : '• Annual Cash Flow: ${c.annualCashFlow < 0 ? '-' : '+'}${AmountFormatter.format(c.annualCashFlow.abs(), 'USD')}',
       isSpanish
-          ? '• NOI anual: \$${_fmt.format(c.noi)}'
-          : '• Annual NOI: \$${_fmt.format(c.noi)}',
+          ? '• NOI anual: ${AmountFormatter.format(c.noi, 'USD')}'
+          : '• Annual NOI: ${AmountFormatter.format(c.noi, 'USD')}',
       if (c.capRate != null)
         isSpanish
             ? '• Cap Rate: ${c.capRate!.toStringAsFixed(2)}%'
@@ -813,7 +812,6 @@ class _CalculatorScreenState extends State<CalculatorScreen>
                                         children: [
                                           _ResultsSection(
                                             calc: _result!,
-                                            fmt: _fmt,
                                             isSpanish: isSpanish,
                                           ),
                                           const SizedBox(height: AppSpacing.md),
@@ -917,12 +915,10 @@ class _CalculatorScreenState extends State<CalculatorScreen>
 
 class _ResultsSection extends StatelessWidget {
   final ExpenseCalc calc;
-  final NumberFormat fmt;
   final bool isSpanish;
 
   const _ResultsSection({
     required this.calc,
-    required this.fmt,
     required this.isSpanish,
   });
 
@@ -939,11 +935,11 @@ class _ResultsSection extends StatelessWidget {
         // Hero KPI — monthly cash flow
         Semantics(
           label: isSpanish
-              ? 'Flujo de caja mensual: ${cf < 0 ? 'menos' : ''} ${fmt.format(cf.abs())} dólares'
-              : 'Monthly cash flow: ${cf < 0 ? 'negative' : ''} \$${fmt.format(cf.abs())}',
+              ? 'Flujo de caja mensual: ${cf < 0 ? 'menos' : ''} ${AmountFormatter.formatNumber(cf.abs())} dólares'
+              : 'Monthly cash flow: ${cf < 0 ? 'negative' : ''} ${AmountFormatter.format(cf.abs(), 'USD')}',
           child: CalcwiseHeroCard(
             label: isSpanish ? 'Flujo de Caja Mensual' : 'Monthly Cash Flow',
-            value: '${cf < 0 ? '-' : ''}\$${fmt.format(cf.abs())}',
+            value: '${cf < 0 ? '-' : ''}${AmountFormatter.format(cf.abs(), 'USD')}',
             secondary: isSpanish
                 ? 'Alquiler − Gastos Totales'
                 : 'Rent − Total Expenses',
@@ -951,11 +947,11 @@ class _ResultsSection extends StatelessWidget {
               (
                 label: isSpanish ? 'Flujo Anual' : 'Annual CF',
                 value:
-                    '${calc.annualCashFlow < 0 ? '-' : ''}\$${fmt.format(calc.annualCashFlow.abs())}',
+                    '${calc.annualCashFlow < 0 ? '-' : ''}${AmountFormatter.format(calc.annualCashFlow.abs(), 'USD')}',
               ),
               (
                 label: isSpanish ? 'NOI Anual' : 'Annual NOI',
-                value: '\$${fmt.format(calc.noi)}',
+                value: AmountFormatter.format(calc.noi, 'USD'),
               ),
             ],
           ),
@@ -971,7 +967,7 @@ class _ResultsSection extends StatelessWidget {
                   label: isSpanish
                       ? 'Total gastos mensuales'
                       : 'Total Monthly Expenses',
-                  value: '\$${fmt.format(calc.totalExpenses)}',
+                  value: AmountFormatter.format(calc.totalExpenses, 'USD'),
                   bold: true,
                 ),
                 Divider(
@@ -986,14 +982,14 @@ class _ResultsSection extends StatelessWidget {
                   label: isSpanish
                       ? 'Alquiler mínimo necesario'
                       : 'Break-Even Rent',
-                  value: '\$${fmt.format(calc.breakEvenRent)}',
+                  value: AmountFormatter.format(calc.breakEvenRent, 'USD'),
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 _ResultRow(
                   label: isSpanish
                       ? 'Ingreso operativo neto (NOI anual)'
                       : 'Net Operating Income (Annual NOI)',
-                  value: '\$${fmt.format(calc.noi)}',
+                  value: AmountFormatter.format(calc.noi, 'USD'),
                   valueColor:
                       calc.noi >= 0 ? AppTheme.success : AppTheme.dangerRed,
                 ),
@@ -1116,7 +1112,7 @@ class _ResultsSection extends StatelessWidget {
         Card(
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.lg),
-            child: _BreakdownList(calc: calc, fmt: fmt, isSpanish: isSpanish),
+            child: _BreakdownList(calc: calc, isSpanish: isSpanish),
           ),
         ),
       ],
@@ -1126,12 +1122,10 @@ class _ResultsSection extends StatelessWidget {
 
 class _BreakdownList extends StatelessWidget {
   final ExpenseCalc calc;
-  final NumberFormat fmt;
   final bool isSpanish;
 
   const _BreakdownList({
     required this.calc,
-    required this.fmt,
     required this.isSpanish,
   });
 
@@ -1162,7 +1156,6 @@ class _BreakdownList extends StatelessWidget {
             amount: entries[i].value,
             pct: total > 0 ? entries[i].value / total * 100 : 0,
             color: _palette[i % _palette.length],
-            fmt: fmt,
           ),
         ],
       ],
@@ -1175,14 +1168,12 @@ class _BreakdownRow extends StatelessWidget {
   final double amount;
   final double pct;
   final Color color;
-  final NumberFormat fmt;
 
   const _BreakdownRow({
     required this.label,
     required this.amount,
     required this.pct,
     required this.color,
-    required this.fmt,
   });
 
   @override
@@ -1203,7 +1194,7 @@ class _BreakdownRow extends StatelessWidget {
                   Text(label, style: const TextStyle(fontSize: AppTextSize.md)),
             ),
             Text(
-              '\$${fmt.format(amount)}',
+              AmountFormatter.format(amount, 'USD'),
               style: const TextStyle(
                   fontSize: AppTextSize.md, fontWeight: FontWeight.w600),
             ),

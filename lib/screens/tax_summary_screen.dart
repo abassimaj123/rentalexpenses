@@ -1,6 +1,6 @@
-import 'package:calcwise_core/calcwise_core.dart';
+import 'package:calcwise_core/calcwise_core.dart' hide PaywallHard;
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' show DateFormat;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -22,7 +22,7 @@ class TaxSummaryScreen extends StatefulWidget {
 }
 
 class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
-  final _fmt = NumberFormat('#,##0.00', 'en_US');
+  // AmountFormatter replaces NumberFormat _fmt
   final _now = DateTime.now();
 
   late int _selectedYear;
@@ -294,7 +294,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                 pw.TableHelper.fromTextArray(
                   headers: ['Item', 'Amount'],
                   data: [
-                    ['Rental Income', '\$${_fmt.format(totalInc)}'],
+                    ['Rental Income', '\$${AmountFormatter.formatNumber(totalInc)}'],
                   ],
                   border: pw.TableBorder.all(color: PdfColors.grey300),
                   headerStyle: pw.TextStyle(
@@ -319,8 +319,8 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                     ...IrsCategories.all
                         .where((c) =>
                             catTotals.containsKey(c) && catTotals[c]! > 0)
-                        .map((c) => [c, '\$${_fmt.format(catTotals[c]!)}']),
-                    ['Total Expenses', '\$${_fmt.format(totalExp)}'],
+                        .map((c) => [c, '\$${AmountFormatter.formatNumber(catTotals[c]!)}']),
+                    ['Total Expenses', '\$${AmountFormatter.formatNumber(totalExp)}'],
                   ],
                   border: pw.TableBorder.all(color: PdfColors.grey300),
                   headerStyle: pw.TextStyle(
@@ -354,7 +354,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                 : PdfColors.red800),
                       ),
                       pw.Text(
-                        '${net < 0 ? '-' : ''}\$${_fmt.format(net.abs())}',
+                        '${net < 0 ? '-' : ''}\$${AmountFormatter.formatNumber(net.abs())}',
                         style: pw.TextStyle(
                             fontSize: AppTextSize.sm,
                             fontWeight: pw.FontWeight.bold,
@@ -491,7 +491,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                       label: isSpanish
                                           ? 'Total ingresos'
                                           : 'Total Rental Income',
-                                      value: '\$${_fmt.format(grandIncome)}',
+                                      value: '\$${AmountFormatter.formatNumber(grandIncome)}',
                                       color: AppTheme.success,
                                     ),
                                     const SizedBox(height: AppSpacing.sm),
@@ -499,7 +499,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                       label: isSpanish
                                           ? 'Total gastos'
                                           : 'Total Expenses',
-                                      value: '\$${_fmt.format(grandExpenses)}',
+                                      value: '\$${AmountFormatter.formatNumber(grandExpenses)}',
                                       color: CalcwiseSemanticColors.errorDark,
                                     ),
                                     Divider(
@@ -535,7 +535,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                 AppRadius.md),
                                           ),
                                           child: Text(
-                                            '${grandNet < 0 ? '-' : ''}\$${_fmt.format(grandNet.abs())}',
+                                            '${grandNet < 0 ? '-' : ''}\$${AmountFormatter.formatNumber(grandNet.abs())}',
                                             style: TextStyle(
                                               fontWeight: FontWeight.bold,
                                               fontSize: AppTextSize.bodyLg,
@@ -748,7 +748,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                         ),
                                                       ),
                                                       Text(
-                                                        '\$${_fmt.format(catTotals[c]!)}',
+                                                        '\$${AmountFormatter.formatNumber(catTotals[c]!)}',
                                                         style: const TextStyle(
                                                             fontSize:
                                                                 AppTextSize.md,
@@ -779,7 +779,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                 ),
                                               ),
                                               Text(
-                                                '\$${_fmt.format(totalExp)}',
+                                                '\$${AmountFormatter.formatNumber(totalExp)}',
                                                 style: const TextStyle(
                                                     fontWeight:
                                                         FontWeight.bold),
@@ -808,7 +808,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                 ),
                                               ),
                                               Text(
-                                                '${net < 0 ? '-' : ''}\$${_fmt.format(net.abs())}',
+                                                '${net < 0 ? '-' : ''}\$${AmountFormatter.formatNumber(net.abs())}',
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: AppTextSize.bodyMd,

@@ -1,5 +1,5 @@
 import 'package:calcwise_core/calcwise_core.dart'
-    hide CrashlyticsService, iapErrorNotifier;
+    hide CrashlyticsService, iapErrorNotifier, PaywallHard;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +28,10 @@ import 'widgets/paywall_soft.dart';
 final ValueNotifier<bool> isSpanishNotifier = ValueNotifier<bool>(false);
 
 /// Centralized paywall session service
-final paywallSession = PaywallSessionService(appKey: 'rentalexpenses');
+final paywallSession = PaywallSessionService(
+  appKey: 'rentalexpenses',
+  hasFullAccess: () => freemiumService.hasFullAccess,
+);
 
 /// Global AdService (calcwise_core)
 final adService = CalcwiseAdService(
@@ -60,8 +63,12 @@ Future<void> main() async {
 
   await themeModeService.initialize();
   await freemiumService.initialize();
-  await RentalNotificationService.initialize();
-  await RentalNotificationService.scheduleMonthlyReminder(isSpanishNotifier.value);
+  try {
+    await RentalNotificationService.initialize();
+    await RentalNotificationService.scheduleMonthlyReminder(isSpanishNotifier.value);
+  } catch (e) {
+    debugPrint('Notification init error: $e');
+  }
   await IAPService.instance.initialize();
   await paywallSession.initialize();
 

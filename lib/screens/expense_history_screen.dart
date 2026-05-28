@@ -1,6 +1,6 @@
-import 'package:calcwise_core/calcwise_core.dart';
+import 'package:calcwise_core/calcwise_core.dart' hide PaywallHard;
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' show DateFormat;
 import '../core/freemium/freemium_service.dart';
 import '../core/theme/app_theme.dart';
 import '../main.dart';
@@ -21,7 +21,7 @@ class ExpenseHistoryScreen extends StatefulWidget {
 }
 
 class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
-  final _fmt = NumberFormat('#,##0.00', 'en_US');
+  // AmountFormatter replaces NumberFormat _fmt
   List<MonthlyExpense> _expenses = [];
   bool _loading = true;
 
@@ -217,7 +217,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                                 const SizedBox(
                                                     height: AppSpacing.xs),
                                                 Text(
-                                                  '${isSpanish ? 'Gastos' : 'Expenses'}: \$${_fmt.format(e.totalExpenses)}  •  ${ratio.toStringAsFixed(1)}%',
+                                                  '${isSpanish ? 'Gastos' : 'Expenses'}: ${AmountFormatter.format(e.totalExpenses, 'USD')}  •  ${ratio.toStringAsFixed(1)}%',
                                                   style: TextStyle(
                                                     fontSize: AppTextSize.md,
                                                     color: CalcwiseTheme.of(
@@ -275,7 +275,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                                 CrossAxisAlignment.end,
                                             children: [
                                               Text(
-                                                '${cf < 0 ? '-' : '+'}\$${_fmt.format(cf.abs())}',
+                                                '${cf < 0 ? '-' : '+'}${AmountFormatter.format(cf.abs(), 'USD')}',
                                                 style: TextStyle(
                                                   fontSize: AppTextSize.bodyMd,
                                                   fontWeight: FontWeight.bold,

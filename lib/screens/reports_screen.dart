@@ -1,9 +1,9 @@
 import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
-import 'package:calcwise_core/calcwise_core.dart';
+import 'package:calcwise_core/calcwise_core.dart' hide PaywallHard;
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' show DateFormat;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -112,7 +112,7 @@ class ReportsScreen extends StatefulWidget {
 }
 
 class _ReportsScreenState extends State<ReportsScreen> {
-  final _fmt = NumberFormat('#,##0.00', 'en_US');
+  // AmountFormatter replaces NumberFormat _fmt
 
   DateTime _selectedMonth = DateTime(DateTime.now().year, DateTime.now().month);
   List<Property> _properties = [];
@@ -383,14 +383,14 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
             final tableData = <List<String>>[
               [pdfCategory, pdfAmount],
-              [pdfMonthlyRent, '\$${_fmt.format(p.monthlyRent)}'],
+              [pdfMonthlyRent, AmountFormatter.format(p.monthlyRent, 'USD')],
               ...catKeys
                   .asMap()
                   .entries
                   .where((en) => vals[en.key] > 0)
-                  .map((en) => [en.value, '\$${_fmt.format(vals[en.key])}']),
-              [pdfTotalExpenses, '\$${_fmt.format(e?.totalExpenses ?? 0)}'],
-              [pdfCashFlow, '${cf < 0 ? '-' : '+'}\$${_fmt.format(cf.abs())}'],
+                  .map((en) => [en.value, AmountFormatter.format(vals[en.key], 'USD')]),
+              [pdfTotalExpenses, AmountFormatter.format(e?.totalExpenses ?? 0, 'USD')],
+              [pdfCashFlow, '${cf < 0 ? '-' : '+'}${AmountFormatter.format(cf.abs(), 'USD')}'],
             ];
 
             rows.add(
@@ -429,15 +429,15 @@ class _ReportsScreenState extends State<ReportsScreen> {
               headers: [pdfMetric, pdfAmount],
               data: [
                 [pdfProperties, '${_properties.length}'],
-                [pdfTotalRent, '\$${_fmt.format(totalRent)}'],
-                [pdfTotalExpenses, '\$${_fmt.format(totalExp)}'],
+                [pdfTotalRent, AmountFormatter.format(totalRent, 'USD')],
+                [pdfTotalExpenses, AmountFormatter.format(totalExp, 'USD')],
                 [
                   pdfMonthlyFlow,
-                  '${totalCF < 0 ? '-' : '+'}\$${_fmt.format(totalCF.abs())}'
+                  '${totalCF < 0 ? '-' : '+'}${AmountFormatter.format(totalCF.abs(), 'USD')}'
                 ],
                 [
                   pdfAnnualFlow,
-                  '${(totalCF * 12) < 0 ? '-' : '+'}\$${_fmt.format((totalCF * 12).abs())}'
+                  '${(totalCF * 12) < 0 ? '-' : '+'}${AmountFormatter.format((totalCF * 12).abs(), 'USD')}'
                 ],
               ],
               border: pw.TableBorder.all(color: PdfColors.grey300),
@@ -543,7 +543,6 @@ class _ReportsScreenState extends State<ReportsScreen> {
                                 _CashFlowNetChart(
                                   months: _cashFlowData,
                                   isSpanish: isSpanish,
-                                  fmt: _fmt,
                                 ),
                                 const SizedBox(height: 20),
                               ],
@@ -615,7 +614,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                                                   ? 'Ingresos totales'
                                                   : 'Total Rent',
                                               value:
-                                                  '\$${_fmt.format(totalRent)}',
+                                                  AmountFormatter.format(totalRent, 'USD'),
                                               color: CalcwiseTheme.of(context)
                                                   .textSecondary,
                                             ),
@@ -635,7 +634,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                                                   ? 'Flujo de caja mensual'
                                                   : 'Monthly Cash Flow',
                                               value:
-                                                  '${totalCF < 0 ? '-' : '+'}\$${_fmt.format(totalCF.abs())}',
+                                                  '${totalCF < 0 ? '-' : '+'}${AmountFormatter.format(totalCF.abs(), 'USD')}',
                                               color: totalCF >= 0
                                                   ? AppTheme.success
                                                   : AppTheme.dangerRed,
@@ -649,7 +648,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                                                   ? 'Flujo de caja anual'
                                                   : 'Annual Cash Flow',
                                               value:
-                                                  '${totalAnnualCF < 0 ? '-' : '+'}\$${_fmt.format(totalAnnualCF.abs())}',
+                                                  '${totalAnnualCF < 0 ? '-' : '+'}${AmountFormatter.format(totalAnnualCF.abs(), 'USD')}',
                                               color: totalAnnualCF >= 0
                                                   ? AppTheme.success
                                                   : AppTheme.dangerRed,
@@ -672,7 +671,6 @@ class _ReportsScreenState extends State<ReportsScreen> {
                                   points: _trendData,
                                   isPremium: isPremium,
                                   isSpanish: isSpanish,
-                                  fmt: _fmt,
                                 ),
                                 const SizedBox(height: 20),
                               ],
@@ -685,7 +683,6 @@ class _ReportsScreenState extends State<ReportsScreen> {
                                 properties: chartProps,
                                 expenseMap: _expenseMap,
                                 isSpanish: isSpanish,
-                                fmt: _fmt,
                               ),
                               if (!showFullChart) ...[
                                 const SizedBox(height: 10),
@@ -705,7 +702,6 @@ class _ReportsScreenState extends State<ReportsScreen> {
                                 ...performers.map((p) => _PropertyRow(
                                       property: p,
                                       expense: _expenseMap[p.id],
-                                      fmt: _fmt,
                                       isSpanish: isSpanish,
                                       isUnderperformer: false,
                                     )),
@@ -720,7 +716,6 @@ class _ReportsScreenState extends State<ReportsScreen> {
                                 ...underperformers.map((p) => _PropertyRow(
                                       property: p,
                                       expense: _expenseMap[p.id],
-                                      fmt: _fmt,
                                       isSpanish: isSpanish,
                                       isUnderperformer: true,
                                     )),
@@ -742,12 +737,10 @@ class _ReportsScreenState extends State<ReportsScreen> {
 class _CashFlowNetChart extends StatelessWidget {
   final List<_CashFlowMonth> months;
   final bool isSpanish;
-  final NumberFormat fmt;
 
   const _CashFlowNetChart({
     required this.months,
     required this.isSpanish,
-    required this.fmt,
   });
 
   static const _monthsEn = [
@@ -793,8 +786,8 @@ class _CashFlowNetChart extends StatelessWidget {
 
     // Accessibility label
     final semanticLabel = isSpanish
-        ? 'Gráfico de flujo neto: promedio ${fmt.format(avgNet)}, total ${fmt.format(totalNet)}'
-        : 'Net cash flow chart: avg ${fmt.format(avgNet)}, total ${fmt.format(totalNet)}';
+        ? 'Gráfico de flujo neto: promedio ${AmountFormatter.formatNumber(avgNet)}, total ${AmountFormatter.formatNumber(totalNet)}'
+        : 'Net cash flow chart: avg ${AmountFormatter.format(avgNet, 'USD')}, total ${AmountFormatter.format(totalNet, 'USD')}';
 
     final barGroups = months.asMap().entries.map((entry) {
       final i = entry.key;
@@ -946,9 +939,9 @@ class _CashFlowNetChart extends StatelessWidget {
                             final sign = net >= 0 ? '+' : '-';
                             return BarTooltipItem(
                               '${labels[m.month - 1]} ${m.year}\n'
-                              '${isSpanish ? "Ingresos" : "Income"}: \$${fmt.format(m.income)}\n'
-                              '${isSpanish ? "Gastos" : "Expenses"}: \$${fmt.format(m.expenses)}\n'
-                              '${isSpanish ? "Neto" : "Net"}: $sign\$${fmt.format(net.abs())}',
+                              '${isSpanish ? "Ingresos" : "Income"}: ${AmountFormatter.format(m.income, 'USD')}\n'
+                              '${isSpanish ? "Gastos" : "Expenses"}: ${AmountFormatter.format(m.expenses, 'USD')}\n'
+                              '${isSpanish ? "Neto" : "Net"}: $sign${AmountFormatter.format(net.abs(), 'USD')}',
                               const TextStyle(
                                   color: Colors.white,
                                   fontSize: AppTextSize.xs),
@@ -1061,13 +1054,11 @@ class _ExpenseCategoryChart extends StatelessWidget {
   final List<Property> properties;
   final Map<String, MonthlyExpense?> expenseMap;
   final bool isSpanish;
-  final NumberFormat fmt;
 
   const _ExpenseCategoryChart({
     required this.properties,
     required this.expenseMap,
     required this.isSpanish,
-    required this.fmt,
   });
 
   @override
@@ -1107,7 +1098,7 @@ class _ExpenseCategoryChart extends StatelessWidget {
 
     // Accessibility: build descriptive text summary for screen readers
     final _chartSummaryParts = activeIndices
-        .map((i) => '${labels[i]}: ${fmt.format(totals[i])}')
+        .map((i) => '${labels[i]}: ${AmountFormatter.format(totals[i], 'USD')}')
         .join(', ');
     final _chartSemanticLabel = isSpanish
         ? 'Gráfico de gastos por categoría: $_chartSummaryParts'
@@ -1205,7 +1196,7 @@ class _ExpenseCategoryChart extends StatelessWidget {
                             getTooltipItem: (group, groupIndex, rod, rodIndex) {
                               final catIdx = activeIndices[group.x];
                               return BarTooltipItem(
-                                '${labels[catIdx]}\n\$${fmt.format(rod.toY)}',
+                                '${labels[catIdx]}\n${AmountFormatter.format(rod.toY, 'USD')}',
                                 const TextStyle(
                                     color: Colors.white,
                                     fontSize: AppTextSize.xs),
@@ -1309,13 +1300,11 @@ class _SummaryTile extends StatelessWidget {
 class _PropertyRow extends StatelessWidget {
   final Property property;
   final MonthlyExpense? expense;
-  final NumberFormat fmt;
   final bool isSpanish;
   final bool isUnderperformer;
   const _PropertyRow({
     required this.property,
     required this.expense,
-    required this.fmt,
     required this.isSpanish,
     required this.isUnderperformer,
   });
@@ -1365,7 +1354,7 @@ class _PropertyRow extends StatelessWidget {
                   Text(property.name,
                       style: const TextStyle(fontWeight: FontWeight.w600)),
                   Text(
-                    '${isSpanish ? 'Alquiler' : 'Rent'}: \$${fmt.format(property.monthlyRent)}  •  ${ratio.toStringAsFixed(1)}%',
+                    '${isSpanish ? 'Alquiler' : 'Rent'}: ${AmountFormatter.format(property.monthlyRent, 'USD')}  •  ${ratio.toStringAsFixed(1)}%',
                     style: TextStyle(
                         fontSize: AppTextSize.sm,
                         color: CalcwiseTheme.of(context).textSecondary),
@@ -1377,7 +1366,7 @@ class _PropertyRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '${cf < 0 ? '-' : '+'}\$${fmt.format(cf.abs())}',
+                  '${cf < 0 ? '-' : '+'}${AmountFormatter.format(cf.abs(), 'USD')}',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: cfColor,
@@ -1405,13 +1394,11 @@ class _CashFlowTrendChart extends StatelessWidget {
   final List<_TrendPoint> points;
   final bool isPremium;
   final bool isSpanish;
-  final NumberFormat fmt;
 
   const _CashFlowTrendChart({
     required this.points,
     required this.isPremium,
     required this.isSpanish,
-    required this.fmt,
   });
 
   static const _freeMonths = 3;
@@ -1484,10 +1471,10 @@ class _CashFlowTrendChart extends StatelessWidget {
     final _totalExpenses =
         displayPoints.fold<double>(0, (s, p) => s + p.expenses);
     final _cashFlowLabel = isSpanish
-        ? 'Tendencia de flujo de caja: ingresos ${fmt.format(_totalIncome)}, '
-            'gastos ${fmt.format(_totalExpenses)}'
-        : 'Cash flow trend: income ${fmt.format(_totalIncome)}, '
-            'expenses ${fmt.format(_totalExpenses)}';
+        ? 'Tendencia de flujo de caja: ingresos ${AmountFormatter.format(_totalIncome, 'USD')}, '
+            'gastos ${AmountFormatter.format(_totalExpenses, 'USD')}'
+        : 'Cash flow trend: income ${AmountFormatter.format(_totalIncome, 'USD')}, '
+            'expenses ${AmountFormatter.format(_totalExpenses, 'USD')}';
 
     final barGroups = displayPoints.asMap().entries.map((entry) {
       final i = entry.key;
@@ -1638,9 +1625,9 @@ class _CashFlowTrendChart extends StatelessWidget {
                               final sign = cf >= 0 ? '+' : '-';
                               return BarTooltipItem(
                                 '${labels[pt.month - 1]} ${pt.year}\n'
-                                '${isSpanish ? "Alquiler" : "Rent"}: \$${fmt.format(pt.income)}\n'
-                                '${isSpanish ? "Gastos" : "Expenses"}: \$${fmt.format(pt.expenses)}\n'
-                                '${isSpanish ? "Flujo" : "Cash Flow"}: $sign\$${fmt.format(cf.abs())}',
+                                '${isSpanish ? "Alquiler" : "Rent"}: ${AmountFormatter.format(pt.income, 'USD')}\n'
+                                '${isSpanish ? "Gastos" : "Expenses"}: ${AmountFormatter.format(pt.expenses, 'USD')}\n'
+                                '${isSpanish ? "Flujo" : "Cash Flow"}: $sign${AmountFormatter.format(cf.abs(), 'USD')}',
                                 const TextStyle(
                                     color: Colors.white,
                                     fontSize: AppTextSize.xs),

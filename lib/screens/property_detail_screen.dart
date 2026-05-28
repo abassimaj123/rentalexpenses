@@ -1,6 +1,6 @@
 import 'package:calcwise_core/calcwise_core.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' show DateFormat;
 import '../core/freemium/freemium_service.dart';
 import '../core/theme/app_theme.dart';
 import '../main.dart';
@@ -21,7 +21,7 @@ class PropertyDetailScreen extends StatefulWidget {
 }
 
 class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
-  final _fmt = NumberFormat('#,##0.00', 'en_US');
+  // AmountFormatter replaces NumberFormat _fmt
   late Property _property;
   List<MonthlyExpense> _expenses = [];
   bool _loading = true;
@@ -309,7 +309,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                           label: isSpanish
                                               ? 'Alquiler mensual'
                                               : 'Monthly Rent',
-                                          value: '\$${_fmt.format(rent)}',
+                                          value: AmountFormatter.format(rent, 'USD'),
                                         ),
                                       ),
                                       if (_property.squareFootage > 0)
@@ -358,7 +358,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                         ? 'Flujo de caja'
                                         : 'Cash Flow',
                                     value:
-                                        '${curCF < 0 ? '-' : '+'}\$${_fmt.format(curCF.abs())}',
+                                        '${curCF < 0 ? '-' : '+'}${AmountFormatter.format(curCF.abs(), 'USD')}',
                                     color: curCF >= 0
                                         ? AppTheme.success
                                         : CalcwiseSemanticColors.errorDark,
@@ -390,7 +390,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                     label:
                                         isSpanish ? 'Flujo anual' : 'Annual CF',
                                     value:
-                                        '${annualCF < 0 ? '-' : '+'}\$${_fmt.format(annualCF.abs())}',
+                                        '${annualCF < 0 ? '-' : '+'}${AmountFormatter.format(annualCF.abs(), 'USD')}',
                                     color: annualCF >= 0
                                         ? AppTheme.success
                                         : CalcwiseSemanticColors.errorDark,
@@ -402,7 +402,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                   child: _StatCard(
                                     label: 'NOI',
                                     value:
-                                        '${noi < 0 ? '-' : ''}\$${_fmt.format(noi.abs())}',
+                                        '${noi < 0 ? '-' : ''}${AmountFormatter.format(noi.abs(), 'USD')}',
                                     color: noi >= 0
                                         ? AppTheme.success
                                         : CalcwiseSemanticColors.errorDark,
@@ -470,7 +470,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                                         FontWeight.w600),
                                               ),
                                               Text(
-                                                '\$${_fmt.format(e.totalExpenses)}  •  ${ratio.toStringAsFixed(1)}%',
+                                                '${AmountFormatter.format(e.totalExpenses, 'USD')}  •  ${ratio.toStringAsFixed(1)}%',
                                                 style: TextStyle(
                                                     fontSize: AppTextSize.sm,
                                                     color: CalcwiseTheme.of(
@@ -481,7 +481,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                           ),
                                         ),
                                         Text(
-                                          '${cf < 0 ? '-' : '+'}\$${_fmt.format(cf.abs())}',
+                                          '${cf < 0 ? '-' : '+'}${AmountFormatter.format(cf.abs(), 'USD')}',
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             color: cfColor,

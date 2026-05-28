@@ -1,6 +1,5 @@
-import 'package:calcwise_core/calcwise_core.dart';
+import 'package:calcwise_core/calcwise_core.dart' hide PaywallHard;
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../core/firebase/analytics_service.dart';
 import '../core/freemium/freemium_service.dart';
 import '../core/freemium/iap_service.dart';
@@ -23,7 +22,7 @@ class PropertyListScreen extends StatefulWidget {
 }
 
 class _PropertyListScreenState extends State<PropertyListScreen> {
-  final _fmt = NumberFormat('#,##0.00', 'en_US');
+  // AmountFormatter replaces NumberFormat _fmt
 
   List<Property> _properties = [];
   // latest expense per property id
@@ -506,7 +505,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                                         ? 'Alquiler'
                                                         : 'Rent',
                                                     value:
-                                                        '\$${_fmt.format(p.monthlyRent)}',
+                                                        AmountFormatter.format(p.monthlyRent, 'USD'),
                                                     color: CalcwiseTheme.of(
                                                             context)
                                                         .textSecondary,
@@ -519,7 +518,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                                           ? 'Flujo mensual'
                                                           : 'Monthly CF',
                                                       value:
-                                                          '${cf < 0 ? '-' : '+'}\$${_fmt.format(cf.abs())}',
+                                                          '${cf < 0 ? '-' : '+'}${AmountFormatter.format(cf.abs(), 'USD')}',
                                                       color: cfColor,
                                                     ),
                                                   ),

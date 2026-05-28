@@ -1,7 +1,7 @@
 import 'package:calcwise_core/calcwise_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' show DateFormat;
 import '../core/firebase/analytics_service.dart';
 import '../core/theme/app_theme.dart';
 import '../main.dart';
@@ -277,7 +277,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                               final daysLeft = t.daysRemaining;
                               final statusLabel =
                                   _statusLabel(t.status, isSpanish);
-                              final fmt = NumberFormat('#,##0.00', 'en_US');
+                              // AmountFormatter replaces local fmt
 
                               return Card(
                                 child: InkWell(
@@ -327,7 +327,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                                   ),
                                                   if (t.monthlyRent > 0)
                                                     Text(
-                                                      '\$${fmt.format(t.monthlyRent)}/mo',
+                                                      '${AmountFormatter.format(t.monthlyRent, 'USD')}/mo',
                                                       style: const TextStyle(
                                                           fontSize:
                                                               AppTextSize.sm,

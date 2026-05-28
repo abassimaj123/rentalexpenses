@@ -1,9 +1,9 @@
 import 'dart:io';
-import 'package:calcwise_core/calcwise_core.dart';
+import 'package:calcwise_core/calcwise_core.dart' hide PaywallHard;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' show DateFormat;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path_pkg;
 import '../core/firebase/analytics_service.dart';
@@ -34,7 +34,7 @@ class ExpenseEntryScreen extends StatefulWidget {
 
 class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
     with CalcwiseAutoCalcMixin {
-  final _fmt = NumberFormat('#,##0.00', 'en_US');
+  // AmountFormatter replaces NumberFormat _fmt
 
   late DateTime _selectedMonth;
 
@@ -627,7 +627,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
                             _ResultRow(
                               label:
                                   isSpanish ? 'Total gastos' : 'Total Expenses',
-                              value: '\$${_fmt.format(_totalExpenses)}',
+                              value: AmountFormatter.format(_totalExpenses, 'USD'),
                               bold: true,
                             ),
                             Divider(
@@ -638,7 +638,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
                                   ? 'Flujo de caja mensual'
                                   : 'Monthly Cash Flow',
                               value:
-                                  '${_monthlyCF < 0 ? '-' : ''}\$${_fmt.format(_monthlyCF.abs())}',
+                                  '${_monthlyCF < 0 ? '-' : ''}${AmountFormatter.format(_monthlyCF.abs(), 'USD')}',
                               valueColor: cfColor,
                               bold: true,
                             ),
@@ -654,7 +654,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
                               label: isSpanish
                                   ? 'Alquiler mínimo'
                                   : 'Break-Even Rent',
-                              value: '\$${_fmt.format(_breakEven)}',
+                              value: AmountFormatter.format(_breakEven, 'USD'),
                             ),
                           ],
                         ),
