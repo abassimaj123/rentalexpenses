@@ -302,26 +302,6 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                   : (isSpanish ? 'Detalle de cálculo' : 'Calculation Detail'),
             ),
             actions: [
-              // PDF export (Premium)
-              ValueListenableBuilder<bool>(
-                valueListenable: freemiumService.hasFullAccessNotifier,
-                builder: (_, isPremium, __) => IconButton(
-                  icon: _exporting
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white))
-                      : Icon(Icons.picture_as_pdf_rounded,
-                          color: isPremium
-                              ? Colors.white
-                              : Colors.white.withValues(alpha: 0.55)),
-                  tooltip: isPremium
-                      ? (isSpanish ? 'Exportar PDF' : 'Export PDF')
-                      : (isSpanish ? 'PDF — Premium' : 'PDF — Premium'),
-                  onPressed: () => _exportPdf(isPremium, isSpanish),
-                ),
-              ),
               // Premium badge / upsell
               ValueListenableBuilder<bool>(
                 valueListenable: freemiumService.hasFullAccessNotifier,
@@ -526,7 +506,40 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                   ],
                 ),
               ),
-              const CalcwiseAdFooter(),
+
+              // PDF export button
+              ValueListenableBuilder<bool>(
+                valueListenable: freemiumService.hasFullAccessNotifier,
+                builder: (_, isPremium, __) => Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.sm),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: isPremium ? AppTheme.primary : CalcwiseTheme.of(context).surfaceHigh,
+                            foregroundColor: isPremium ? Colors.white : CalcwiseTheme.of(context).textSecondary,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+                            side: isPremium ? BorderSide.none : BorderSide(color: CalcwiseTheme.of(context).cardBorder),
+                          ),
+                          icon: Icon(isPremium ? Icons.picture_as_pdf_rounded : Icons.lock_rounded, size: 20),
+                          label: Text(
+                            isSpanish ? 'Exportar PDF' : 'Export PDF',
+                            style: const TextStyle(fontSize: AppTextSize.body, fontWeight: FontWeight.w600),
+                          ),
+                          onPressed: _exporting
+                              ? null
+                              : () => _exportPdf(isPremium, isSpanish),
+                        ),
+                      ),
+                    ),
+                    if (!isPremium) const CalcwiseAdFooter(),
+                  ],
+                ),
+              ),
             ],
           ),
         );
