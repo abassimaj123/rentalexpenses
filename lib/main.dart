@@ -206,6 +206,7 @@ class _MainShellState extends State<MainShell> {
     // Paywall: record tab-switch as an action — triggers gate every N actions
     final trigger = await paywallSession.recordAction();
     if (trigger == PaywallTrigger.none || !mounted) return;
+    if (!(ModalRoute.of(context)?.isCurrent ?? false)) return;
     if (trigger == PaywallTrigger.hard) {
       AnalyticsService.instance.logPaywallShown('hard');
       PaywallHard.show(context);
