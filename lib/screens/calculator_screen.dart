@@ -356,7 +356,17 @@ class _CalculatorScreenState extends State<CalculatorScreen>
     final history = await loadHistory();
     if (!isPremium &&
         history.length >= MonetizationConfig.freeCalculationLimit) {
-      if (mounted) PaywallHard.show(context);
+      if (mounted) {
+        await PaywallSoft.show(
+          context,
+          isSpanish: isSpanish,
+          featureTitle:
+              isSpanish ? 'Historial ilimitado' : 'Unlimited History',
+          featureSubtitle: isSpanish
+              ? 'Guarda todas tus propiedades sin límite'
+              : 'Save all your properties without limit',
+        );
+      }
       return;
     }
     HapticFeedback.mediumImpact();
