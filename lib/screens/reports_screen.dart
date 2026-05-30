@@ -799,8 +799,8 @@ class _CashFlowNetChart extends StatelessWidget {
           BarChartRodData(
             toY: m.net.abs() < 0.01 ? 0.01 : m.net,
             color: isPositive
-                ? const Color(0xFF16A34A)
-                : const Color(0xFFDC2626),
+                ? CalcwiseSemanticColors.successDark
+                : CalcwiseSemanticColors.errorDark,
             width: 16,
             borderRadius: isPositive
                 ? const BorderRadius.only(
@@ -833,7 +833,7 @@ class _CashFlowNetChart extends StatelessWidget {
                     width: 10,
                     height: 10,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF16A34A),
+                      color: CalcwiseSemanticColors.successDark,
                       borderRadius: BorderRadius.circular(3),
                     ),
                   ),
@@ -848,7 +848,7 @@ class _CashFlowNetChart extends StatelessWidget {
                     width: 10,
                     height: 10,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFDC2626),
+                      color: CalcwiseSemanticColors.errorDark,
                       borderRadius: BorderRadius.circular(3),
                     ),
                   ),
@@ -996,7 +996,7 @@ class _CashFlowNetChart extends StatelessWidget {
                         '(${_compact(bestNet)})',
                         style: const TextStyle(
                           fontSize: AppTextSize.xs,
-                          color: Color(0xFF16A34A),
+                          color: CalcwiseSemanticColors.successDark,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -1040,7 +1040,9 @@ class _NetStat extends StatelessWidget {
           style: TextStyle(
             fontSize: AppTextSize.bodyMd,
             fontWeight: FontWeight.bold,
-            color: positive ? const Color(0xFF16A34A) : const Color(0xFFDC2626),
+            color: positive
+                ? CalcwiseSemanticColors.successDark
+                : CalcwiseSemanticColors.errorDark,
           ),
         ),
       ],

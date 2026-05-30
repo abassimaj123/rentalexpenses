@@ -610,7 +610,7 @@ class _DateRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg, vertical: AppSpacing.md),
         decoration: BoxDecoration(
-          color: const Color(0xFFF1F5F9),
+          color: CalcwiseTheme.of(context).surfaceHigh,
           borderRadius: BorderRadius.circular(AppRadius.lg),
         ),
         child: Row(
