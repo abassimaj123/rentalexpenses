@@ -528,10 +528,11 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                         Align(
                                           alignment: Alignment.centerRight,
                                           child: IconButton(
-                                            icon: const Icon(
+                                            icon: Icon(
                                                 Icons.delete_outline_rounded,
                                                 color: CalcwiseSemanticColors
-                                                    .errorDark,
+                                                    .error(Theme.of(context)
+                                                        .brightness),
                                                 size: 20),
                                             onPressed: () => _confirmDelete(
                                                 ctx, isSpanish, t),

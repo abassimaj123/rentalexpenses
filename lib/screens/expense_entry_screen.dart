@@ -312,7 +312,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
             .format(_selectedMonth);
         final cfColor = _monthlyCF >= 0
             ? AppTheme.success
-            : CalcwiseSemanticColors.errorDark;
+            : CalcwiseSemanticColors.error(Theme.of(context).brightness);
 
         return Scaffold(
           appBar: AppBar(

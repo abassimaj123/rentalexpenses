@@ -361,7 +361,8 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                         '${curCF < 0 ? '-' : '+'}${AmountFormatter.ui(curCF.abs(), 'USD')}',
                                     color: curCF >= 0
                                         ? AppTheme.success
-                                        : CalcwiseSemanticColors.errorDark,
+                                        : CalcwiseSemanticColors.error(
+                                            Theme.of(context).brightness),
                                     icon: curCF >= 0
                                         ? Icons.trending_up_rounded
                                         : Icons.trending_down_rounded,
@@ -393,7 +394,8 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                         '${annualCF < 0 ? '-' : '+'}${AmountFormatter.ui(annualCF.abs(), 'USD')}',
                                     color: annualCF >= 0
                                         ? AppTheme.success
-                                        : CalcwiseSemanticColors.errorDark,
+                                        : CalcwiseSemanticColors.error(
+                                            Theme.of(context).brightness),
                                     icon: Icons.calendar_today_rounded,
                                   ),
                                 ),
@@ -405,7 +407,8 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                         '${noi < 0 ? '-' : ''}${AmountFormatter.ui(noi.abs(), 'USD')}',
                                     color: noi >= 0
                                         ? AppTheme.success
-                                        : CalcwiseSemanticColors.errorDark,
+                                        : CalcwiseSemanticColors.error(
+                                            Theme.of(context).brightness),
                                     icon: Icons.account_balance_rounded,
                                   ),
                                 ),
@@ -440,7 +443,8 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                   : 0.0;
                               final cfColor = cf >= 0
                                   ? AppTheme.success
-                                  : CalcwiseSemanticColors.errorDark;
+                                  : CalcwiseSemanticColors.error(
+                                      Theme.of(context).brightness);
                               return Card(
                                 margin: const EdgeInsets.only(
                                     bottom: AppSpacing.sm),

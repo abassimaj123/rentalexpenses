@@ -541,7 +541,9 @@ class _ComparisonTable extends StatelessWidget {
         }).toList(),
         colors: properties.map((p) {
           final cf = cfFn(p);
-          return cf >= 0 ? AppTheme.success : CalcwiseSemanticColors.errorDark;
+          return cf >= 0
+              ? AppTheme.success
+              : CalcwiseSemanticColors.error(Theme.of(context).brightness);
         }).toList(),
         higherIsBetter: true,
         rawValues: properties.map(cfFn).toList(),
@@ -554,7 +556,9 @@ class _ComparisonTable extends StatelessWidget {
         }).toList(),
         colors: properties.map((p) {
           final cf = cfFn(p);
-          return cf >= 0 ? AppTheme.success : CalcwiseSemanticColors.errorDark;
+          return cf >= 0
+              ? AppTheme.success
+              : CalcwiseSemanticColors.error(Theme.of(context).brightness);
         }).toList(),
         higherIsBetter: true,
         rawValues: properties.map((p) => cfFn(p) * 12).toList(),
@@ -578,7 +582,9 @@ class _ComparisonTable extends StatelessWidget {
         }).toList(),
         colors: properties.map((p) {
           final n = noiFn(p);
-          return n >= 0 ? AppTheme.success : CalcwiseSemanticColors.errorDark;
+          return n >= 0
+              ? AppTheme.success
+              : CalcwiseSemanticColors.error(Theme.of(context).brightness);
         }).toList(),
         higherIsBetter: true,
         rawValues: properties.map(noiFn).toList(),

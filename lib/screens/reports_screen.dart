@@ -799,8 +799,8 @@ class _CashFlowNetChart extends StatelessWidget {
           BarChartRodData(
             toY: m.net.abs() < 0.01 ? 0.01 : m.net,
             color: isPositive
-                ? CalcwiseSemanticColors.successDark
-                : CalcwiseSemanticColors.errorDark,
+                ? CalcwiseSemanticColors.success(Theme.of(context).brightness)
+                : CalcwiseSemanticColors.error(Theme.of(context).brightness),
             width: 16,
             borderRadius: isPositive
                 ? const BorderRadius.only(
@@ -833,7 +833,8 @@ class _CashFlowNetChart extends StatelessWidget {
                     width: 10,
                     height: 10,
                     decoration: BoxDecoration(
-                      color: CalcwiseSemanticColors.successDark,
+                      color: CalcwiseSemanticColors.success(
+                          Theme.of(context).brightness),
                       borderRadius: BorderRadius.circular(3),
                     ),
                   ),
@@ -848,7 +849,8 @@ class _CashFlowNetChart extends StatelessWidget {
                     width: 10,
                     height: 10,
                     decoration: BoxDecoration(
-                      color: CalcwiseSemanticColors.errorDark,
+                      color: CalcwiseSemanticColors.error(
+                          Theme.of(context).brightness),
                       borderRadius: BorderRadius.circular(3),
                     ),
                   ),
@@ -994,9 +996,10 @@ class _CashFlowNetChart extends StatelessWidget {
                         '${isSpanish ? "Mejor mes" : "Best month"}: '
                         '${labels[bestMonth.month - 1]} ${bestMonth.year} '
                         '(${_compact(bestNet)})',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: AppTextSize.xs,
-                          color: CalcwiseSemanticColors.successDark,
+                          color: CalcwiseSemanticColors.success(
+                              Theme.of(context).brightness),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -1041,8 +1044,8 @@ class _NetStat extends StatelessWidget {
             fontSize: AppTextSize.bodyMd,
             fontWeight: FontWeight.bold,
             color: positive
-                ? CalcwiseSemanticColors.successDark
-                : CalcwiseSemanticColors.errorDark,
+                ? CalcwiseSemanticColors.success(Theme.of(context).brightness)
+                : CalcwiseSemanticColors.error(Theme.of(context).brightness),
           ),
         ),
       ],

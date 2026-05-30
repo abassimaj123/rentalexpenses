@@ -190,7 +190,8 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                   _load();
                 },
                 style: TextButton.styleFrom(
-                    foregroundColor: CalcwiseSemanticColors.errorDark),
+                    foregroundColor: CalcwiseSemanticColors.error(
+                        Theme.of(d).brightness)),
                 child: Text(isSpanish ? 'Eliminar' : 'Delete'),
               ),
             TextButton(
@@ -500,7 +501,8 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                           ? 'Total gastos'
                                           : 'Total Expenses',
                                       value: '\$${AmountFormatter.formatNumber(grandExpenses)}',
-                                      color: CalcwiseSemanticColors.errorDark,
+                                      color: CalcwiseSemanticColors.error(
+                                          Theme.of(context).brightness),
                                     ),
                                     Divider(
                                         height: 20,
@@ -803,7 +805,9 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                     color: net >= 0
                                                         ? AppTheme.success
                                                         : CalcwiseSemanticColors
-                                                            .errorDark,
+                                                            .error(Theme.of(
+                                                                    context)
+                                                                .brightness),
                                                   ),
                                                 ),
                                               ),
@@ -815,7 +819,9 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                   color: net >= 0
                                                       ? AppTheme.success
                                                       : CalcwiseSemanticColors
-                                                          .errorDark,
+                                                          .error(Theme.of(
+                                                                  context)
+                                                              .brightness),
                                                 ),
                                               ),
                                             ],
