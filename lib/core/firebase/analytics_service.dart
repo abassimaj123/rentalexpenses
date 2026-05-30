@@ -18,4 +18,10 @@ class AnalyticsService extends CalcwiseAnalytics {
   Future<void> logScheduleEExported() => log('schedule_e_exported');
   Future<void> logTenantAdded() => log('tenant_added');
   Future<void> logRecurringExpenseCreated() => log('recurring_expense_created');
+  Future<void> logDepreciationCalculated() => log('depreciation_calculated');
+  Future<void> logDepreciationAddedToScheduleE() =>
+      log('depreciation_added_schedule_e');
+  Future<void> logMileageTripAdded() => log('mileage_trip_added');
+  Future<void> logMileageAddedToScheduleE() =>
+      log('mileage_added_schedule_e');
 }

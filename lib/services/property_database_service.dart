@@ -4,6 +4,7 @@ import '../models/property_model.dart';
 import '../models/expense_model.dart';
 import '../models/tenant_model.dart';
 import '../models/schedule_e_entry_model.dart';
+import '../models/mileage_trip_model.dart';
 
 class PropertyDatabaseService {
   PropertyDatabaseService._();
@@ -14,7 +15,8 @@ class PropertyDatabaseService {
   // v2 → v3: added tenants table
   // v3 → v4: added schedule_e_entries table
   // v4 → v5: added receipt_path to monthly_expenses
-  static const _dbVersion = 5;
+  // v5 → v6: added mileage_trips table
+  static const _dbVersion = 6;
 
   Database? _db;
 
@@ -70,6 +72,7 @@ class PropertyDatabaseService {
     ''');
     await _createTenantsTable(db);
     await _createScheduleETable(db);
+    await _createMileageTable(db);
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -88,6 +91,9 @@ class PropertyDatabaseService {
     if (oldVersion < 5) {
       await db
           .execute('ALTER TABLE monthly_expenses ADD COLUMN receipt_path TEXT');
+    }
+    if (oldVersion < 6) {
+      await _createMileageTable(db);
     }
   }
 
@@ -124,6 +130,19 @@ class PropertyDatabaseService {
     ''');
   }
 
+  Future<void> _createMileageTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS mileage_trips (
+        id TEXT PRIMARY KEY,
+        property_id TEXT NOT NULL,
+        date TEXT NOT NULL,
+        miles REAL NOT NULL DEFAULT 0,
+        purpose TEXT NOT NULL DEFAULT '',
+        FOREIGN KEY (property_id) REFERENCES properties (id) ON DELETE CASCADE
+      )
+    ''');
+  }
+
   // ── Properties CRUD ──────────────────────────────────────────────────────────
 
   Future<void> insertProperty(Property property) async {
@@ -149,6 +168,7 @@ class PropertyDatabaseService {
     await db.delete('tenants', where: 'property_id = ?', whereArgs: [id]);
     await db.delete('schedule_e_entries',
         where: 'property_id = ?', whereArgs: [id]);
+    await db.delete('mileage_trips', where: 'property_id = ?', whereArgs: [id]);
     await db.delete('properties', where: 'id = ?', whereArgs: [id]);
   }
 
@@ -354,6 +374,31 @@ class PropertyDatabaseService {
       orderBy: 'category ASC',
     );
     return maps.map(ScheduleEEntry.fromMap).toList();
+  }
+
+  // ── Mileage Trips CRUD ───────────────────────────────────────────────────────
+
+  Future<void> insertMileageTrip(MileageTrip trip) async {
+    final db = await database;
+    await db.insert('mileage_trips', trip.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<void> deleteMileageTrip(String id) async {
+    final db = await database;
+    await db.delete('mileage_trips', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<List<MileageTrip>> getMileageTripsForProperty(
+      String propertyId, int year) async {
+    final db = await database;
+    final maps = await db.query(
+      'mileage_trips',
+      where: "property_id = ? AND date LIKE ?",
+      whereArgs: [propertyId, '$year-%'],
+      orderBy: 'date DESC',
+    );
+    return maps.map(MileageTrip.fromMap).toList();
   }
 
   Future<void> close() async {

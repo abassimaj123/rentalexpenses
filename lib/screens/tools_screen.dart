@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../main.dart' show isSpanishNotifier;
 import 'tax_summary_screen.dart';
 import 'compare_properties_screen.dart';
+import 'depreciation_screen.dart';
+import 'mileage_log_screen.dart';
 import 'settings_screen.dart';
 import 'history_screen.dart';
 import 'package:calcwise_core/calcwise_core.dart'
@@ -47,6 +49,42 @@ class ToolsScreen extends StatelessWidget {
                           PageRouteBuilder(
                             pageBuilder: (_, __, ___) =>
                                 const TaxSummaryScreen(),
+                            transitionsBuilder: (_, anim, __, child) =>
+                                FadeTransition(opacity: anim, child: child),
+                            transitionDuration: AppDuration.base,
+                          )),
+                    ),
+                    const SizedBox(height: _spMd),
+                    _ToolCard(
+                      icon: Icons.trending_down_rounded,
+                      title: isSpanish
+                          ? 'Depreciación (27.5 años)'
+                          : 'Depreciation (27.5 yr)',
+                      subtitle: isSpanish
+                          ? 'Calcula depreciación lineal residencial'
+                          : 'Straight-line residential depreciation',
+                      onTap: () => Navigator.push(
+                          context,
+                          PageRouteBuilder(
+                            pageBuilder: (_, __, ___) =>
+                                const DepreciationScreen(),
+                            transitionsBuilder: (_, anim, __, child) =>
+                                FadeTransition(opacity: anim, child: child),
+                            transitionDuration: AppDuration.base,
+                          )),
+                    ),
+                    const SizedBox(height: _spMd),
+                    _ToolCard(
+                      icon: Icons.directions_car_rounded,
+                      title: isSpanish ? 'Registro de Millaje' : 'Mileage Log',
+                      subtitle: isSpanish
+                          ? 'Registra trayectos y deduce millaje IRS'
+                          : 'Log trips & deduct IRS mileage',
+                      onTap: () => Navigator.push(
+                          context,
+                          PageRouteBuilder(
+                            pageBuilder: (_, __, ___) =>
+                                const MileageLogScreen(),
                             transitionsBuilder: (_, anim, __, child) =>
                                 FadeTransition(opacity: anim, child: child),
                             transitionDuration: AppDuration.base,
