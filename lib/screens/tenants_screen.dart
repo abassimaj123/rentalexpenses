@@ -263,7 +263,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
             children: [
               Expanded(
                 child: _loading
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const CalcwiseLoadingState(showHeroCard: false)
                     : _tenants.isEmpty
                         ? _EmptyTenantsState(isSpanish: isSpanish)
                         : ListView.separated(

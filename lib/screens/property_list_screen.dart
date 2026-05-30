@@ -331,7 +331,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
             children: [
               Expanded(
                 child: _loading
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const CalcwiseLoadingState(showHeroCard: false)
                     : _properties.isEmpty
                         ? _EmptyState(isSpanish: isSpanish)
                         : RefreshIndicator(

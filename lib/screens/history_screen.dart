@@ -86,7 +86,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             children: [
               Expanded(
                 child: _loading
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const CalcwiseLoadingState(showHeroCard: false)
                     : _entries.isEmpty
                         ? _EmptyState(isSpanish: isSpanish)
                         : _buildList(isSpanish),

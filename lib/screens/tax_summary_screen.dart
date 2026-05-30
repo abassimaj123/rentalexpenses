@@ -446,7 +446,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
             children: [
               Expanded(
                 child: _loading
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const CalcwiseLoadingState()
                     : ListView(
                         padding: const EdgeInsets.all(AppSpacing.lg),
                         children: [

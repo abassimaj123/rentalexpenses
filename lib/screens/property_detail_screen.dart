@@ -243,7 +243,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
             children: [
               Expanded(
                 child: _loading
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const CalcwiseLoadingState()
                     : ListView(
                         padding: const EdgeInsets.fromLTRB(
                             AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 100),

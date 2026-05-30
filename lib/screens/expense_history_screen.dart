@@ -92,7 +92,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
             children: [
               Expanded(
                 child: _loading
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const CalcwiseLoadingState(showHeroCard: false)
                     : _expenses.isEmpty
                         ? _EmptyState(isSpanish: isSpanish)
                         : ListView.builder(
