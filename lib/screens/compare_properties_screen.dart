@@ -172,10 +172,12 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                     runSpacing: 8,
                     children: List.generate(12, (i) {
                       final sel = (i + 1) == pickedMonth;
-                      return GestureDetector(
+                      return InkWell(
                         onTap: () => setLocal(() => pickedMonth = i + 1),
+                        borderRadius: BorderRadius.circular(AppRadius.md),
                         child: Container(
                           width: 62,
+                          constraints: const BoxConstraints(minHeight: 48),
                           padding: const EdgeInsets.symmetric(
                               vertical: AppSpacing.sm),
                           decoration: BoxDecoration(
@@ -374,9 +376,13 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                             padding: const EdgeInsets.all(AppSpacing.lg),
                             children: [
                               // Month badge
-                              GestureDetector(
+                              InkWell(
                                 onTap: () => _pickMonth(isSpanish),
+                                borderRadius:
+                                    BorderRadius.circular(AppRadius.lg),
                                 child: Container(
+                                  constraints:
+                                      const BoxConstraints(minHeight: 48),
                                   padding: const EdgeInsets.symmetric(
                                       vertical: 10, horizontal: 16),
                                   decoration: BoxDecoration(
