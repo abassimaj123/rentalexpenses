@@ -801,7 +801,7 @@ class _CashFlowNetChart extends StatelessWidget {
             color: isPositive
                 ? CalcwiseSemanticColors.success(Theme.of(context).brightness)
                 : CalcwiseSemanticColors.error(Theme.of(context).brightness),
-            width: 16,
+            width: CalcwiseChartTokens.barWidth,
             borderRadius: isPositive
                 ? const BorderRadius.only(
                     topLeft: Radius.circular(4),
@@ -952,6 +952,7 @@ class _CashFlowNetChart extends StatelessWidget {
                         ),
                       ),
                     ),
+                    swapAnimationDuration: CalcwiseChartTokens.swapDuration,
                   ),
                 );
               }),
@@ -1118,7 +1119,7 @@ class _ExpenseCategoryChart extends StatelessWidget {
           BarChartRodData(
             toY: totals[catIdx],
             color: _chartColors[catIdx % _chartColors.length],
-            width: 14,
+            width: CalcwiseChartTokens.barWidth,
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(4),
               topRight: Radius.circular(4),
@@ -1210,6 +1211,7 @@ class _ExpenseCategoryChart extends StatelessWidget {
                           ),
                         ),
                       ),
+                      swapAnimationDuration: CalcwiseChartTokens.swapDuration,
                     ),
                   );
                 },
@@ -1440,6 +1442,9 @@ class _CashFlowTrendChart extends StatelessWidget {
   @override
   Widget build(BuildContext outerCtx) {
     final theme = CalcwiseTheme.of(outerCtx);
+    final brightness = Theme.of(outerCtx).brightness;
+    final successColor = CalcwiseSemanticColors.success(brightness);
+    final errorColor = CalcwiseSemanticColors.error(brightness);
     final displayPoints = isPremium
         ? points
         : points.sublist(
@@ -1469,7 +1474,9 @@ class _CashFlowTrendChart extends StatelessWidget {
             .reduce((a, b) => a > b ? a : b) *
         1.25;
 
-    final barWidth = isPremium ? 18.0 : 28.0;
+    final barWidth = isPremium
+        ? CalcwiseChartTokens.barWidth
+        : CalcwiseChartTokens.barWidthTouched;
 
     // Accessibility: build summary label
     final _totalIncome = displayPoints.fold<double>(0, (s, p) => s + p.income);
@@ -1491,18 +1498,18 @@ class _CashFlowTrendChart extends StatelessWidget {
 
       if (pt.expenses > 0 && pt.income > 0) {
         // Red portion = expenses
-        stack.add(BarChartRodStackItem(0, pt.expenses, AppTheme.dangerRed));
+        stack.add(BarChartRodStackItem(0, pt.expenses, errorColor));
         if (cf > 0) {
           // Green portion = cash flow above expenses
           stack.add(
-              BarChartRodStackItem(pt.expenses, pt.income, AppTheme.success));
+              BarChartRodStackItem(pt.expenses, pt.income, successColor));
         }
       } else if (pt.income > 0) {
         // Only rent, no expenses tracked → subtle green
         stack.add(BarChartRodStackItem(
-            0, pt.income, AppTheme.success.withValues(alpha: 0.45)));
+            0, pt.income, successColor.withValues(alpha: 0.45)));
       } else if (pt.expenses > 0) {
-        stack.add(BarChartRodStackItem(0, pt.expenses, AppTheme.dangerRed));
+        stack.add(BarChartRodStackItem(0, pt.expenses, errorColor));
       }
 
       if (stack.isEmpty) {
@@ -1538,7 +1545,7 @@ class _CashFlowTrendChart extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(left: 8, bottom: 12),
                 child: Row(children: [
-                  const _LegendDot(color: AppTheme.success),
+                  _LegendDot(color: successColor),
                   const SizedBox(width: 4),
                   Text(
                     isSpanish ? 'Flujo de caja' : 'Cash Flow',
@@ -1546,7 +1553,7 @@ class _CashFlowTrendChart extends StatelessWidget {
                         fontSize: AppTextSize.xs, color: theme.textSecondary),
                   ),
                   const SizedBox(width: 14),
-                  const _LegendDot(color: AppTheme.dangerRed),
+                  _LegendDot(color: errorColor),
                   const SizedBox(width: 4),
                   Text(
                     isSpanish ? 'Gastos' : 'Expenses',
@@ -1641,6 +1648,7 @@ class _CashFlowTrendChart extends StatelessWidget {
                           ),
                         ),
                       ),
+                      swapAnimationDuration: CalcwiseChartTokens.swapDuration,
                     ),
                   );
                 },
