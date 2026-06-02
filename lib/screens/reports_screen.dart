@@ -860,6 +860,20 @@ class _CashFlowNetChart extends StatelessWidget {
                     style: TextStyle(
                         fontSize: AppTextSize.xs, color: theme.textSecondary),
                   ),
+                  const SizedBox(width: 14),
+                  SizedBox(
+                    width: 18,
+                    child: CustomPaint(
+                      painter: _DashedLinePainter(
+                          color: theme.textSecondary.withValues(alpha: 0.55)),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    isSpanish ? 'Promedio' : 'Average',
+                    style: TextStyle(
+                        fontSize: AppTextSize.xs, color: theme.textSecondary),
+                  ),
                 ]),
               ),
 
@@ -874,6 +888,19 @@ class _CashFlowNetChart extends StatelessWidget {
                       minY: -chartMax,
                       maxY: chartMax,
                       barGroups: barGroups,
+                      extraLinesData: ExtraLinesData(
+                        horizontalLines: [
+                          HorizontalLine(
+                            y: avgNet,
+                            color: theme.textSecondary.withValues(alpha: 0.55),
+                            strokeWidth: 1.5,
+                            dashArray: [6, 3],
+                            label: HorizontalLineLabel(
+                              show: false,
+                            ),
+                          ),
+                        ],
+                      ),
                       gridData: FlGridData(
                         show: true,
                         drawVerticalLine: false,
@@ -1719,6 +1746,32 @@ class _LegendDot extends StatelessWidget {
           borderRadius: BorderRadius.circular(3),
         ),
       );
+}
+
+// ── Dashed legend line painter ────────────────────────────────────────────────
+
+class _DashedLinePainter extends CustomPainter {
+  final Color color;
+  const _DashedLinePainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke;
+    const dashLen = 4.0;
+    const gapLen = 2.0;
+    double x = 0;
+    final y = size.height / 2;
+    while (x < size.width) {
+      canvas.drawLine(Offset(x, y), Offset((x + dashLen).clamp(0, size.width), y), paint);
+      x += dashLen + gapLen;
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DashedLinePainter old) => old.color != color;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

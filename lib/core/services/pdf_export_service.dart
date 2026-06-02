@@ -165,6 +165,13 @@ class PdfExportService {
           ]),
         ])),
       ]),
+      pw.SizedBox(height: 14),
+      _buildIncomeChart(
+        monthlyRent: monthlyRent,
+        totalMonthlyExpenses: totalMonthlyExpenses,
+        netMonthlyIncome: netMonthlyIncome,
+        isSpanish: isSpanish,
+      ),
       pw.Spacer(),
       pw.Column(children: [
         pw.Divider(color: PdfColors.grey300, height: 12),
@@ -176,6 +183,147 @@ class PdfExportService {
       ]),
     ]);
   }
+
+  // ── Income Breakdown donut chart ──────────────────────────────────────────
+
+  static const _green = PdfColor(0.133, 0.545, 0.133);      // gross revenue
+  static const _red = PdfColor(0.780, 0.118, 0.118);        // expenses
+  static const _darkGreen = PdfColor(0.047, 0.365, 0.047);  // net income
+
+  static pw.Widget _buildIncomeChart({
+    required double monthlyRent,
+    required double totalMonthlyExpenses,
+    required double netMonthlyIncome,
+    required bool isSpanish,
+  }) {
+    final chartTitle =
+        isSpanish ? 'Répartition des revenus' : 'Income Breakdown';
+
+    final grossVal = monthlyRent.clamp(0.0, double.infinity);
+    final expVal = totalMonthlyExpenses.clamp(0.0, double.infinity);
+    final netVal = netMonthlyIncome.clamp(0.0, double.infinity);
+    final total = grossVal + expVal + netVal;
+
+    // Guard: nothing to show
+    if (total < 0.01) return pw.SizedBox();
+
+    // Compute the donut inner radius in absolute points (90pt chart = 45pt
+    // nominal radius; inner ring = 55% of radius).
+    const chartSize = 90.0;
+    const innerR = chartSize / 2 * 0.55;
+
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Container(
+          width: double.infinity,
+          padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          color: _navy,
+          child: pw.Text(
+            chartTitle,
+            style: pw.TextStyle(
+              fontSize: 8,
+              fontWeight: pw.FontWeight.bold,
+              color: PdfColors.white,
+            ),
+          ),
+        ),
+        pw.Container(
+          padding: const pw.EdgeInsets.all(10),
+          decoration: pw.BoxDecoration(
+            border: pw.Border.all(color: PdfColors.grey300, width: 0.5),
+          ),
+          child: pw.Row(
+            crossAxisAlignment: pw.CrossAxisAlignment.center,
+            children: [
+              // Donut chart — one PieDataSet per slice
+              pw.SizedBox(
+                width: chartSize,
+                height: chartSize,
+                child: pw.Chart(
+                  grid: pw.PieGrid(),
+                  datasets: [
+                    pw.PieDataSet(
+                      value: grossVal,
+                      color: _green,
+                      legendPosition: pw.PieLegendPosition.none,
+                      borderWidth: 1,
+                      borderColor: PdfColors.white,
+                      innerRadius: innerR,
+                    ),
+                    pw.PieDataSet(
+                      value: expVal > 0 ? expVal : 0.001,
+                      color: _red,
+                      legendPosition: pw.PieLegendPosition.none,
+                      borderWidth: 1,
+                      borderColor: PdfColors.white,
+                      innerRadius: innerR,
+                    ),
+                    pw.PieDataSet(
+                      value: netVal > 0 ? netVal : 0.001,
+                      color: _darkGreen,
+                      legendPosition: pw.PieLegendPosition.none,
+                      borderWidth: 1,
+                      borderColor: PdfColors.white,
+                      innerRadius: innerR,
+                    ),
+                  ],
+                ),
+              ),
+              pw.SizedBox(width: 16),
+              // Manual legend
+              pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  _legendRow(
+                    color: _green,
+                    label: isSpanish ? 'Ingresos brutos' : 'Gross Revenue',
+                    value: _cur0.format(monthlyRent),
+                  ),
+                  pw.SizedBox(height: 6),
+                  _legendRow(
+                    color: _red,
+                    label:
+                        isSpanish ? 'Total de gastos' : 'Total Expenses',
+                    value: _cur0.format(totalMonthlyExpenses),
+                  ),
+                  pw.SizedBox(height: 6),
+                  _legendRow(
+                    color: _darkGreen,
+                    label: isSpanish ? 'Ingreso neto' : 'Net Income',
+                    value: _cur0.format(netMonthlyIncome),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  static pw.Widget _legendRow({
+    required PdfColor color,
+    required String label,
+    required String value,
+  }) =>
+      pw.Padding(
+        padding: const pw.EdgeInsets.only(bottom: 1),
+        child: pw.Row(children: [
+          pw.Container(
+            width: 10,
+            height: 10,
+            decoration: pw.BoxDecoration(color: color),
+          ),
+          pw.SizedBox(width: 6),
+          pw.Text(
+            '$label: $value',
+            style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey800),
+          ),
+        ]),
+      );
+
+  // ─────────────────────────────────────────────────────────────────────────────
 
   static pw.Widget _sectionBox(String title, List<pw.Widget> rows) => pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
