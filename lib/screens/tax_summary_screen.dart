@@ -60,11 +60,14 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
       map[p.id] = await PropertyDatabaseService.instance
           .getScheduleEEntriesForProperty(p.id, _selectedYear);
     }
-    // Initialize income controllers if needed
+    // Initialize income controllers if needed, and reset text on year change
     for (final p in props) {
       if (!_incomeControllers.containsKey(p.id)) {
         _incomeControllers[p.id] = TextEditingController(
             text: (p.monthlyRent * 12).toStringAsFixed(2));
+      } else {
+        _incomeControllers[p.id]?.text =
+            (p.monthlyRent * 12).toStringAsFixed(2);
       }
     }
     if (mounted) {
@@ -78,12 +81,17 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
 
   double _totalIncome(Property p) {
     final raw = _incomeControllers[p.id]?.text ?? '';
-    return double.tryParse(raw.replaceAll(',', '.')) ?? (p.monthlyRent * 12);
+    return double.tryParse(raw.replaceAll(',', '')) ?? (p.monthlyRent * 12);
   }
 
   double _totalExpensesForProperty(String propertyId) {
     final entries = _entriesMap[propertyId] ?? [];
-    return entries.fold(0.0, (sum, e) => sum + e.amount);
+    return entries.fold(0.0, (sum, e) {
+      final annual = e.isRecurring && e.recurrenceType == 'monthly'
+          ? e.amount * 12
+          : e.amount;
+      return sum + annual;
+    });
   }
 
   double _netForProperty(Property p) =>
@@ -93,7 +101,10 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
     final entries = _entriesMap[propertyId] ?? [];
     final map = <String, double>{};
     for (final e in entries) {
-      map[e.category] = (map[e.category] ?? 0) + e.amount;
+      final annual = (e.isRecurring && e.recurrenceType == 'monthly')
+          ? e.amount * 12
+          : e.amount;
+      map[e.category] = (map[e.category] ?? 0) + annual;
     }
     return map;
   }
@@ -202,11 +213,11 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
               style: ElevatedButton.styleFrom(minimumSize: const Size(80, 40)),
               onPressed: () async {
                 final amount =
-                    double.tryParse(amountCtrl.text.replaceAll(',', '.')) ??
+                    double.tryParse(amountCtrl.text.replaceAll(',', '')) ??
                         0.0;
                 if (amount <= 0) return;
                 final id = existing?.id ??
-                    'sche_${property.id}_${_selectedYear}_${selectedCategory.hashCode}_${DateTime.now().millisecondsSinceEpoch}';
+                    'sche_${property.id}_${_selectedYear}_${DateTime.now().millisecondsSinceEpoch}';
                 final entry = ScheduleEEntry(
                   id: id,
                   propertyId: property.id,
@@ -222,6 +233,9 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                 } else {
                   await PropertyDatabaseService.instance
                       .insertScheduleEEntry(entry);
+                }
+                if (isRecurring) {
+                  AnalyticsService.instance.logRecurringExpenseCreated();
                 }
                 if (d.mounted) Navigator.pop(d);
                 _load();
@@ -568,10 +582,10 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                         child: Text(
                                           grandNet >= 0
                                               ? (isSpanish
-                                                  ? 'Net Income'
+                                                  ? 'Ingreso neto'
                                                   : 'Net Income')
                                               : (isSpanish
-                                                  ? 'Net Loss'
+                                                  ? 'Pérdida neta'
                                                   : 'Net Loss'),
                                           style: TextStyle(
                                             fontSize: AppTextSize.xs,
@@ -702,26 +716,42 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                               ),
                                             )
                                           else
-                                            ...IrsCategories.all
-                                                .where((c) =>
-                                                    catTotals.containsKey(c) &&
-                                                    catTotals[c]! > 0)
-                                                .map((c) {
-                                              final entries =
+                                            // One row per category (aggregated),
+                                            // matching IRS Schedule E and PDF export.
+                                            // Sorted by IrsCategories.all order for consistency.
+                                            // Tap opens the first entry for editing.
+                                            ...(catTotals.entries
+                                                .where((e) => e.value > 0)
+                                                .toList()
+                                              ..sort((a, b) {
+                                                final ai = IrsCategories.all.indexOf(a.key);
+                                                final bi = IrsCategories.all.indexOf(b.key);
+                                                return (ai < 0 ? 999 : ai)
+                                                    .compareTo(bi < 0 ? 999 : bi);
+                                              }))
+                                                .map((cat) {
+                                              final firstEntry =
                                                   (_entriesMap[p.id] ?? [])
-                                                      .where((e) =>
-                                                          e.category == c)
-                                                      .toList();
+                                                      .firstWhere(
+                                                (e) => e.category == cat.key,
+                                                orElse: () => ScheduleEEntry(
+                                                  id: '',
+                                                  propertyId: p.id,
+                                                  year: _selectedYear,
+                                                  category: cat.key,
+                                                  amount: 0,
+                                                ),
+                                              );
                                               return InkWell(
-                                                onTap: entries.isNotEmpty
-                                                    ? () => _addOrEditEntry(
-                                                          context,
-                                                          isSpanish,
-                                                          p,
-                                                          existing:
-                                                              entries.first,
-                                                        )
-                                                    : null,
+                                                onTap: () => _addOrEditEntry(
+                                                  context,
+                                                  isSpanish,
+                                                  p,
+                                                  existing: firstEntry.id
+                                                          .isEmpty
+                                                      ? null
+                                                      : firstEntry,
+                                                ),
                                                 borderRadius:
                                                     BorderRadius.circular(
                                                         AppRadius.md),
@@ -742,7 +772,8 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                         child: Text(
                                                           IrsCategories
                                                               .translate(
-                                                                  c, isSpanish),
+                                                                  cat.key,
+                                                                  isSpanish),
                                                           style: const TextStyle(
                                                               fontSize:
                                                                   AppTextSize
@@ -750,7 +781,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                         ),
                                                       ),
                                                       Text(
-                                                        '\$${AmountFormatter.formatNumber(catTotals[c]!)}',
+                                                        '\$${AmountFormatter.formatNumber(cat.value)}',
                                                         style: const TextStyle(
                                                             fontSize:
                                                                 AppTextSize.md,

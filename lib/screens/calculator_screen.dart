@@ -649,8 +649,10 @@ class _CalculatorScreenState extends State<CalculatorScreen>
                                     labelA: '%',
                                     labelB: '\$',
                                     isA: _mgmtIsPercent,
-                                    onChanged: (v) =>
-                                        setState(() => _mgmtIsPercent = v),
+                                    onChanged: (v) {
+                                      setState(() => _mgmtIsPercent = v);
+                                      _debouncedCalculate();
+                                    },
                                   ),
                                 ],
                               ),
@@ -703,8 +705,10 @@ class _CalculatorScreenState extends State<CalculatorScreen>
                                     labelA: '%',
                                     labelB: '\$',
                                     isA: _vacIsPercent,
-                                    onChanged: (v) =>
-                                        setState(() => _vacIsPercent = v),
+                                    onChanged: (v) {
+                                      setState(() => _vacIsPercent = v);
+                                      _debouncedCalculate();
+                                    },
                                   ),
                                 ],
                               ),

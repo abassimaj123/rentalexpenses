@@ -426,6 +426,15 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                       title: isSpanish ? 'Métricas clave' : 'Key Metrics',
                       rows: [
                         _Row(
+                          isSpanish ? 'Alquiler anual' : 'Annual Rent',
+                          AmountFormatter.ui(c.rentIncome * 12, 'USD'),
+                        ),
+                        _Row(
+                          isSpanish ? 'Gastos anuales' : 'Annual Expenses',
+                          AmountFormatter.ui(c.totalExpenses * 12, 'USD'),
+                          valueColor: AppTheme.dangerRed,
+                        ),
+                        _Row(
                           isSpanish ? 'Flujo anual' : 'Annual Cash Flow',
                           '${c.annualCashFlow < 0 ? '-' : ''}${AmountFormatter.ui(c.annualCashFlow.abs(), 'USD')}',
                           valueColor: cfColor,
