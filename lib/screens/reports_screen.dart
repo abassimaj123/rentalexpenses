@@ -17,7 +17,6 @@ import '../models/property_model.dart';
 import '../services/property_database_service.dart';
 import '../widgets/paywall_hard.dart';
 import '../widgets/paywall_soft.dart';
-import '../widgets/premium_cta_widget.dart';
 import 'tax_summary_screen.dart';
 
 // ── Palette cycling for bar chart ─────────────────────────────────────────────
@@ -686,10 +685,12 @@ class _ReportsScreenState extends State<ReportsScreen> {
                               ),
                               if (!showFullChart) ...[
                                 const SizedBox(height: 10),
-                                PremiumCtaWidget(
+                                CalcwisePremiumCta(
                                   feature: isSpanish
                                       ? 'el gráfico completo'
                                       : 'full category chart',
+                                  onTap: () => IAPService.instance.buy(),
+                                  price: IAPService.instance.localizedPrice,
                                 ),
                               ],
                               const SizedBox(height: 20),
