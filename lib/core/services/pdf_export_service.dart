@@ -496,8 +496,8 @@ class _PdfUnlockSheetState extends State<_PdfUnlockSheet> {
               icon: const Icon(Icons.workspace_premium, size: 18),
               label: Text(
                   isEs
-                      ? 'Premium — \$3.99 (ilimitado)'
-                      : 'Premium — \$3.99 (unlimited)',
+                      ? 'Premium (ilimitado)'
+                      : 'Premium (unlimited)',
                   style: const TextStyle(fontWeight: FontWeight.bold)),
               style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primary,

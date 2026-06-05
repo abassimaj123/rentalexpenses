@@ -315,8 +315,8 @@ class _UpgradeCTA extends StatelessWidget {
                 ),
                 child: Text(
                   isSpanish
-                      ? 'Desbloquear — \$2.99'
-                      : 'Unlock Premium — \$2.99',
+                      ? 'Desbloquear Premium'
+                      : 'Unlock Premium',
                 ),
               ),
             ),
