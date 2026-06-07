@@ -1,6 +1,7 @@
 import 'package:calcwise_core/calcwise_core.dart' hide PaywallHard;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' show DateFormat;
+import '../core/firebase/analytics_service.dart';
 import '../core/freemium/freemium_service.dart';
 import '../core/theme/app_theme.dart';
 import '../main.dart';
@@ -28,6 +29,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView('expense_history');
     _load();
   }
 

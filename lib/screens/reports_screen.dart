@@ -123,6 +123,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView('reports');
     AnalyticsService.instance.logReportViewed();
     _load();
   }
@@ -589,7 +590,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                               _SectionLabel(isSpanish
                                   ? 'RESUMEN DEL PORTAFOLIO'
                                   : 'PORTFOLIO SUMMARY'),
-                              Card(
+                              CalcwisePageEntrance(child: Card(
                                 child: Padding(
                                   padding: const EdgeInsets.all(AppSpacing.lg),
                                   child: Column(
@@ -658,7 +659,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                                     ],
                                   ),
                                 ),
-                              ),
+                              )), // CalcwisePageEntrance closes
                               const SizedBox(height: 20),
 
                               // ── 12-Month Cash-Flow Trend ───────────────────
@@ -685,11 +686,14 @@ class _ReportsScreenState extends State<ReportsScreen> {
                               ),
                               if (!showFullChart) ...[
                                 const SizedBox(height: 10),
-                                CalcwisePremiumCta(
-                                  feature: isSpanish
-                                      ? 'el gráfico completo'
-                                      : 'full category chart',
-                                  onTap: () => IAPService.instance.buy(),
+                                CalcwisePremiumGate(
+                                  title: isSpanish
+                                      ? 'Gráfico completo'
+                                      : 'Full Category Chart',
+                                  description: isSpanish
+                                      ? 'Desbloquea el desglose de gastos de todas tus propiedades'
+                                      : 'Unlock the expense breakdown for all your properties',
+                                  onUnlock: () => IAPService.instance.buy(),
                                   price: IAPService.instance.localizedPrice,
                                 ),
                               ],

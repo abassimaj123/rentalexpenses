@@ -28,6 +28,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView('tenants');
     _load();
   }
 

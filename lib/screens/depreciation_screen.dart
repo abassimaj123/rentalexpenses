@@ -39,6 +39,7 @@ class _DepreciationScreenState extends State<DepreciationScreen> {
     super.initState();
     _inServiceMonth = _now.month;
     _inServiceYear = _now.year;
+    AnalyticsService.instance.logScreenView('depreciation');
     _load();
   }
 
@@ -251,7 +252,7 @@ class _DepreciationScreenState extends State<DepreciationScreen> {
                           else ...[
                             _SectionLabel(
                                 isSpanish ? 'RESULTADO' : 'RESULT'),
-                            Card(
+                            CalcwisePageEntrance(child: Card(
                               child: Padding(
                                 padding: const EdgeInsets.all(AppSpacing.lg),
                                 child: Column(
@@ -287,7 +288,7 @@ class _DepreciationScreenState extends State<DepreciationScreen> {
                                   ],
                                 ),
                               ),
-                            ),
+                            )), // CalcwisePageEntrance closes
                             const SizedBox(height: AppSpacing.lg),
 
                             if (_properties.isEmpty)

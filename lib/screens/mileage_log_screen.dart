@@ -36,6 +36,7 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
   void initState() {
     super.initState();
     _selectedYear = _now.year;
+    AnalyticsService.instance.logScreenView('mileage_log');
     _load();
   }
 

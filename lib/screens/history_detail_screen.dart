@@ -26,6 +26,12 @@ class HistoryDetailScreen extends StatefulWidget {
 class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
   bool _exporting = false;
 
+  @override
+  void initState() {
+    super.initState();
+    AnalyticsService.instance.logScreenView('history_detail');
+  }
+
   Future<void> _exportPdf(bool isPremium, bool isSpanish) async {
     if (!isPremium) {
       await PaywallSoft.show(context);

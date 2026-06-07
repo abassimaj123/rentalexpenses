@@ -31,6 +31,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView('compare_properties');
     _loadProperties();
   }
 
@@ -445,7 +446,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                               if (selected.length >= 2) ...[
                                 _SectionLabel(
                                     isSpanish ? 'COMPARACIÓN' : 'COMPARISON'),
-                                Card(
+                                CalcwisePageEntrance(child: Card(
                                   child: Padding(
                                     padding:
                                         const EdgeInsets.all(AppSpacing.lg),
@@ -458,7 +459,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                                       noiFn: _noi,
                                     ),
                                   ),
-                                ),
+                                )), // CalcwisePageEntrance closes
                               ] else
                                 Container(
                                   padding: const EdgeInsets.all(AppSpacing.xl),

@@ -42,6 +42,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
     super.initState();
     _selectedYear = _now.year;
     _years = List.generate(4, (i) => _now.year - i);
+    AnalyticsService.instance.logScreenView('tax_summary');
     AnalyticsService.instance.logTaxSummaryViewed();
     _load();
   }
@@ -497,7 +498,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                             _SectionLabel(isSpanish
                                 ? 'RESUMEN PORTAFOLIO'
                                 : 'PORTFOLIO NET'),
-                            Card(
+                            CalcwisePageEntrance(child: Card(
                               child: Padding(
                                 padding: const EdgeInsets.all(AppSpacing.lg),
                                 child: Column(
@@ -601,7 +602,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                   ],
                                 ),
                               ),
-                            ),
+                            )), // CalcwisePageEntrance closes
                             const SizedBox(height: AppSpacing.xl),
                           ],
 

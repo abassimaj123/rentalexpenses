@@ -1,6 +1,7 @@
 import 'package:calcwise_core/calcwise_core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' show DateFormat;
+import '../core/firebase/analytics_service.dart';
 import '../core/freemium/freemium_service.dart';
 import '../core/theme/app_theme.dart';
 import '../main.dart';
@@ -30,6 +31,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
   void initState() {
     super.initState();
     _property = widget.property;
+    AnalyticsService.instance.logScreenView('property_detail');
     _load();
   }
 
