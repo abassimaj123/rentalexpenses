@@ -13,6 +13,7 @@ import '../models/property_model.dart';
 import '../models/schedule_e_entry_model.dart';
 import '../services/property_database_service.dart';
 import '../widgets/paywall_hard.dart';
+import '../widgets/save_scenario_button.dart';
 
 class TaxSummaryScreen extends StatefulWidget {
   const TaxSummaryScreen({super.key});
@@ -36,6 +37,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
 
   bool _loading = true;
   bool _exporting = false;
+  String? _currentHash;
 
   @override
   void initState() {
@@ -49,6 +51,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
 
   @override
   void dispose() {
+    smartHistoryService.cancelPendingSave('rentalexpenses', 'tax_summary');
     for (final c in _incomeControllers.values) c.dispose();
     super.dispose();
   }
@@ -77,7 +80,91 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
         _entriesMap = map;
         _loading = false;
       });
+      // Schedule SmartHistory auto-save after data is loaded
+      if (props.isNotEmpty) {
+        double grossIncome = 0;
+        double totalExpenses = 0;
+        for (final p in props) {
+          grossIncome += (p.monthlyRent * 12);
+          totalExpenses += (map[p.id] ?? []).fold(0.0, (sum, e) {
+            final annual = e.isRecurring && e.recurrenceType == 'monthly'
+                ? e.amount * 12
+                : e.amount;
+            return sum + annual;
+          });
+        }
+        _scheduleSmartHistorySave(grossIncome, totalExpenses);
+      }
     }
+  }
+
+  // ── SmartHistory helpers ────────────────────────────────────────────────────
+
+  double _roundTo(double v, double step) => (v / step).round() * step;
+
+  void _scheduleSmartHistorySave(
+      double grossIncome, double totalExpenses) {
+    final taxableIncome = grossIncome - totalExpenses;
+    final hash = ResultHasher.hashInputs({
+      'year': _selectedYear.toDouble(),
+      'gross': _roundTo(grossIncome, 500),
+      'expenses': _roundTo(totalExpenses, 500),
+    });
+    _currentHash = hash;
+    smartHistoryService.scheduleAutoSave(
+      appKey: 'rentalexpenses',
+      screenId: 'tax_summary',
+      inputHash: hash,
+      l1: {
+        'year': _selectedYear,
+        'gross_income': grossIncome,
+        'total_expenses': totalExpenses,
+        'taxable_income': taxableIncome,
+        'net_income': taxableIncome,
+      },
+      l2: {
+        'year': _selectedYear,
+        'property_count': _properties.length,
+        'gross_income': grossIncome,
+        'total_expenses': totalExpenses,
+        'taxable_income': taxableIncome,
+        'net_income': taxableIncome,
+      },
+    );
+  }
+
+  Future<void> _saveScenario(String? label) async {
+    final hash = _currentHash;
+    if (hash == null) return;
+    double grossIncome = 0;
+    double totalExpenses = 0;
+    for (final p in _properties) {
+      grossIncome += _totalIncome(p);
+      totalExpenses += _totalExpensesForProperty(p.id);
+    }
+    final taxableIncome = grossIncome - totalExpenses;
+    await smartHistoryService.saveScenario(
+      appKey: 'rentalexpenses',
+      screenId: 'tax_summary',
+      inputHash: hash,
+      l1: {
+        'year': _selectedYear,
+        'gross_income': grossIncome,
+        'total_expenses': totalExpenses,
+        'taxable_income': taxableIncome,
+        'net_income': taxableIncome,
+      },
+      l2: {
+        'year': _selectedYear,
+        'property_count': _properties.length,
+        'gross_income': grossIncome,
+        'total_expenses': totalExpenses,
+        'taxable_income': taxableIncome,
+        'net_income': taxableIncome,
+      },
+      label: label,
+    );
+    historyRefreshNotifier.value++;
   }
 
   double _totalIncome(Property p) {
@@ -916,6 +1003,8 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                       CalcwiseTheme.of(context).textSecondary),
                               textAlign: TextAlign.center,
                             ),
+                            const SizedBox(height: AppSpacing.md),
+                            SaveScenarioButton(onSave: _saveScenario),
                             const SizedBox(height: AppSpacing.xxl),
                           ],
                         ],

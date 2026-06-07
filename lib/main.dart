@@ -14,6 +14,7 @@ import 'core/freemium/freemium_service.dart';
 import 'core/freemium/iap_service.dart';
 import 'core/services/crashlytics_service.dart';
 import 'core/theme/app_theme.dart';
+import 'data/history_database_adapter.dart';
 import 'screens/calculator_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/property_list_screen.dart';
@@ -26,6 +27,16 @@ import 'widgets/paywall_hard.dart';
 import 'widgets/paywall_soft.dart';
 
 final ValueNotifier<bool> isSpanishNotifier = ValueNotifier<bool>(false);
+
+/// SmartHistory ring buffer + pinned scenarios service (SQLite — separate DB
+/// from SharedPreferences used by the main calculator history).
+final smartHistoryService = SmartHistoryService(
+  db: HistoryDatabaseAdapter(),
+  freemium: freemiumService,
+);
+
+/// Bumped to trigger a silent reload after a SmartHistory save.
+final historyRefreshNotifier = ValueNotifier<int>(0);
 
 /// Centralized paywall session service
 final paywallSession = PaywallSessionService(

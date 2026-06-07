@@ -11,6 +11,7 @@ import '../models/property_model.dart';
 import '../models/schedule_e_entry_model.dart';
 import '../services/property_database_service.dart';
 import '../widgets/paywall_hard.dart';
+import '../widgets/save_scenario_button.dart';
 
 /// Straight-line depreciation calculator for US residential rental property
 /// (27.5-year MACRS GDS, mid-month convention). See [DepreciationCalc].
@@ -33,6 +34,7 @@ class _DepreciationScreenState extends State<DepreciationScreen> {
   late int _inServiceMonth;
   late int _inServiceYear;
   bool _loading = true;
+  String? _currentHash;
 
   @override
   void initState() {
@@ -41,14 +43,22 @@ class _DepreciationScreenState extends State<DepreciationScreen> {
     _inServiceYear = _now.year;
     AnalyticsService.instance.logScreenView('depreciation');
     _load();
+    _purchaseCtrl.addListener(_onInputChanged);
+    _landCtrl.addListener(_onInputChanged);
+    _improvementsCtrl.addListener(_onInputChanged);
   }
 
   @override
   void dispose() {
+    smartHistoryService.cancelPendingSave('rentalexpenses', 'depreciation');
     _purchaseCtrl.dispose();
     _landCtrl.dispose();
     _improvementsCtrl.dispose();
     super.dispose();
+  }
+
+  void _onInputChanged() {
+    if (_basis > 0) _scheduleAutoSave();
   }
 
   Future<void> _load() async {
@@ -88,6 +98,69 @@ class _DepreciationScreenState extends State<DepreciationScreen> {
         inServiceMonth: _inServiceMonth,
         improvements: _improvements,
       );
+
+  // ── SmartHistory helpers ────────────────────────────────────────────────────
+
+  double _roundTo(double v, double step) => (v / step).round() * step;
+
+  void _scheduleAutoSave() {
+    final hash = ResultHasher.hashInputs({
+      'purchase': _roundTo(_purchase, 5000),
+      'land': _roundTo(_land, 5000),
+      'improvements': _roundTo(_improvements, 5000),
+      'in_service_year': _inServiceYear.toDouble(),
+    });
+    _currentHash = hash;
+    smartHistoryService.scheduleAutoSave(
+      appKey: 'rentalexpenses',
+      screenId: 'depreciation',
+      inputHash: hash,
+      l1: {
+        'purchase_price': _purchase,
+        'land_value': _land,
+        'annual_depreciation': _annual,
+        'accumulated_depreciation': _firstYear,
+      },
+      l2: {
+        'purchase_price': _purchase,
+        'land_value': _land,
+        'improvements': _improvements,
+        'depreciable_basis': _basis,
+        'annual_depreciation': _annual,
+        'first_year_depreciation': _firstYear,
+        'in_service_month': _inServiceMonth,
+        'in_service_year': _inServiceYear,
+      },
+    );
+  }
+
+  Future<void> _saveScenario(String? label) async {
+    final hash = _currentHash;
+    if (hash == null || _basis <= 0) return;
+    await smartHistoryService.saveScenario(
+      appKey: 'rentalexpenses',
+      screenId: 'depreciation',
+      inputHash: hash,
+      l1: {
+        'purchase_price': _purchase,
+        'land_value': _land,
+        'annual_depreciation': _annual,
+        'accumulated_depreciation': _firstYear,
+      },
+      l2: {
+        'purchase_price': _purchase,
+        'land_value': _land,
+        'improvements': _improvements,
+        'depreciable_basis': _basis,
+        'annual_depreciation': _annual,
+        'first_year_depreciation': _firstYear,
+        'in_service_month': _inServiceMonth,
+        'in_service_year': _inServiceYear,
+      },
+      label: label,
+    );
+    historyRefreshNotifier.value++;
+  }
 
   Future<void> _addToScheduleE(bool isSpanish) async {
     if (!freemiumService.hasFullAccess) {
@@ -200,9 +273,11 @@ class _DepreciationScreenState extends State<DepreciationScreen> {
                                                         TextOverflow.ellipsis),
                                               ),
                                           ],
-                                          onChanged: (v) => setState(() =>
-                                              _inServiceMonth =
-                                                  v ?? _inServiceMonth),
+                                          onChanged: (v) {
+                                            setState(() => _inServiceMonth =
+                                                v ?? _inServiceMonth);
+                                            if (_basis > 0) _scheduleAutoSave();
+                                          },
                                         ),
                                       ),
                                       const SizedBox(width: AppSpacing.md),
@@ -219,9 +294,11 @@ class _DepreciationScreenState extends State<DepreciationScreen> {
                                                     child: Text('$y'),
                                                   ))
                                               .toList(),
-                                          onChanged: (v) => setState(() =>
-                                              _inServiceYear =
-                                                  v ?? _inServiceYear),
+                                          onChanged: (v) {
+                                            setState(() => _inServiceYear =
+                                                v ?? _inServiceYear);
+                                            if (_basis > 0) _scheduleAutoSave();
+                                          },
                                         ),
                                       ),
                                     ],
@@ -336,6 +413,10 @@ class _DepreciationScreenState extends State<DepreciationScreen> {
                                         const Size(double.infinity, 48)),
                               ),
                             ],
+                          ],
+                          if (_basis > 0) ...[
+                            const SizedBox(height: AppSpacing.md),
+                            SaveScenarioButton(onSave: _saveScenario),
                           ],
                           const SizedBox(height: AppSpacing.lg),
                           Text(

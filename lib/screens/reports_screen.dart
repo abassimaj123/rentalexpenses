@@ -17,6 +17,7 @@ import '../models/property_model.dart';
 import '../services/property_database_service.dart';
 import '../widgets/paywall_hard.dart';
 import '../widgets/paywall_soft.dart';
+import '../widgets/save_scenario_button.dart';
 import 'tax_summary_screen.dart';
 
 // ── Palette cycling for bar chart ─────────────────────────────────────────────
@@ -119,6 +120,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
   List<_TrendPoint> _trendData = [];
   List<_CashFlowMonth> _cashFlowData = [];
   bool _loading = true;
+  String? _currentHash;
 
   @override
   void initState() {
@@ -126,6 +128,12 @@ class _ReportsScreenState extends State<ReportsScreen> {
     AnalyticsService.instance.logScreenView('reports');
     AnalyticsService.instance.logReportViewed();
     _load();
+  }
+
+  @override
+  void dispose() {
+    smartHistoryService.cancelPendingSave('rentalexpenses', 'reports');
+    super.dispose();
   }
 
   Future<void> _load() async {
@@ -182,7 +190,84 @@ class _ReportsScreenState extends State<ReportsScreen> {
         _cashFlowData = cashFlow;
         _loading = false;
       });
+      if (props.isNotEmpty) {
+        _scheduleSmartHistorySave(props, map);
+      }
     }
+  }
+
+  // ── SmartHistory helpers ────────────────────────────────────────────────────
+
+  void _scheduleSmartHistorySave(
+      List<Property> props, Map<String, MonthlyExpense?> expMap) {
+    final year = _selectedMonth.year;
+    final propCount = props.length;
+    double totalIncome = 0;
+    double totalExpenses = 0;
+    for (final p in props) {
+      totalIncome += p.monthlyRent;
+      totalExpenses += expMap[p.id]?.totalExpenses ?? 0;
+    }
+    final netProfit = totalIncome - totalExpenses;
+    final hash = ResultHasher.hashInputs({
+      'year': year.toDouble(),
+      'prop_count': propCount.toDouble(),
+    });
+    _currentHash = hash;
+    smartHistoryService.scheduleAutoSave(
+      appKey: 'rentalexpenses',
+      screenId: 'reports',
+      inputHash: hash,
+      l1: {
+        'year': year,
+        'property_count': propCount,
+        'total_income': totalIncome,
+        'total_expenses': totalExpenses,
+        'net_profit': netProfit,
+      },
+      l2: {
+        'year': year,
+        'month': _selectedMonth.month,
+        'property_count': propCount,
+        'total_income': totalIncome,
+        'total_expenses': totalExpenses,
+        'net_profit': netProfit,
+      },
+    );
+  }
+
+  Future<void> _saveScenario(String? label) async {
+    final hash = _currentHash;
+    if (hash == null || _properties.isEmpty) return;
+    double totalIncome = 0;
+    double totalExpenses = 0;
+    for (final p in _properties) {
+      totalIncome += p.monthlyRent;
+      totalExpenses += _expenseMap[p.id]?.totalExpenses ?? 0;
+    }
+    final netProfit = totalIncome - totalExpenses;
+    await smartHistoryService.saveScenario(
+      appKey: 'rentalexpenses',
+      screenId: 'reports',
+      inputHash: hash,
+      l1: {
+        'year': _selectedMonth.year,
+        'property_count': _properties.length,
+        'total_income': totalIncome,
+        'total_expenses': totalExpenses,
+        'net_profit': netProfit,
+      },
+      l2: {
+        'year': _selectedMonth.year,
+        'month': _selectedMonth.month,
+        'property_count': _properties.length,
+        'total_income': totalIncome,
+        'total_expenses': totalExpenses,
+        'net_profit': netProfit,
+      },
+      label: label,
+    );
+    historyRefreshNotifier.value++;
   }
 
   double _cf(Property p) {
@@ -725,6 +810,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
                                       isUnderperformer: true,
                                     )),
                               ],
+                              const SizedBox(height: AppSpacing.lg),
+                              SaveScenarioButton(onSave: _saveScenario),
+                              const SizedBox(height: AppSpacing.xxl),
                             ],
                           ),
               ),

@@ -13,6 +13,7 @@ import '../main.dart';
 import '../widgets/insight_card.dart';
 import '../widgets/paywall_hard.dart';
 import '../widgets/paywall_soft.dart';
+import '../widgets/save_scenario_button.dart';
 import '../core/insight_engine.dart';
 
 // ── Data model ────────────────────────────────────────────────────────────────
@@ -230,6 +231,9 @@ class _CalculatorScreenState extends State<CalculatorScreen>
 
   Timer? _saveDebounce;
 
+  // SmartHistory
+  String? _currentHash;
+
   @override
   void initState() {
     super.initState();
@@ -303,6 +307,74 @@ class _CalculatorScreenState extends State<CalculatorScreen>
     return double.tryParse(s) ?? 0.0;
   }
 
+  // ── SmartHistory helpers ────────────────────────────────────────────────────
+
+  double _roundTo(double v, double step) => (v / step).round() * step;
+
+  Map<String, dynamic> _buildL1(ExpenseCalc c) => {
+        'property_value': c.propertyValue,
+        'monthly_rent': c.rentIncome,
+        'monthly_cashflow': c.monthlyCashFlow,
+        'cap_rate': c.capRate ?? 0.0,
+        'coc_return': c.cocRoi ?? 0.0,
+      };
+
+  Map<String, dynamic> _buildL2(ExpenseCalc c) => {
+        'property_name': c.propertyName,
+        'property_value': c.propertyValue,
+        'cash_invested': c.cashInvested,
+        'monthly_rent': c.rentIncome,
+        'mortgage': c.mortgage,
+        'property_taxes': c.propertyTaxes,
+        'insurance': c.insurance,
+        'hoa_fees': c.hoaFees,
+        'property_mgmt': c.propertyMgmt,
+        'maintenance': c.maintenance,
+        'vacancy_loss': c.vacancyLoss,
+        'utilities': c.utilities,
+        'landscaping': c.landscaping,
+        'other_expenses': c.otherExpenses,
+        'total_expenses': c.totalExpenses,
+        'monthly_cashflow': c.monthlyCashFlow,
+        'annual_cashflow': c.annualCashFlow,
+        'noi': c.noi,
+        'cap_rate': c.capRate ?? 0.0,
+        'gross_yield': c.grossYield ?? 0.0,
+        'coc_return': c.cocRoi ?? 0.0,
+      };
+
+  void _scheduleAutoSave(ExpenseCalc c) {
+    final hash = ResultHasher.hashInputs({
+      'rent': _roundTo(c.rentIncome, 100),
+      'expenses': _roundTo(c.totalExpenses, 100),
+      'prop_value': _roundTo(c.propertyValue, 5000),
+      'cash_invested': _roundTo(c.cashInvested, 5000),
+    });
+    _currentHash = hash;
+    smartHistoryService.scheduleAutoSave(
+      appKey: 'rentalexpenses',
+      screenId: 'calculator',
+      inputHash: hash,
+      l1: _buildL1(c),
+      l2: _buildL2(c),
+    );
+  }
+
+  Future<void> _saveScenario(String? label) async {
+    final c = _result;
+    final hash = _currentHash;
+    if (c == null || hash == null) return;
+    await smartHistoryService.saveScenario(
+      appKey: 'rentalexpenses',
+      screenId: 'calculator',
+      inputHash: hash,
+      l1: _buildL1(c),
+      l2: _buildL2(c),
+      label: label,
+    );
+    historyRefreshNotifier.value++;
+  }
+
   Future<void> _calculate(bool isSpanish) async {
     final rent = _parseD(_rentCtrl);
     final mortgage = _parseD(_mortCtrl);
@@ -345,6 +417,7 @@ class _CalculatorScreenState extends State<CalculatorScreen>
       _saved = false;
     });
 
+    _scheduleAutoSave(calc);
     adService.onAction();
     final trigger = await paywallSession.recordAction();
     if (trigger != PaywallTrigger.none && mounted) PaywallHard.show(context);
@@ -458,6 +531,7 @@ class _CalculatorScreenState extends State<CalculatorScreen>
   @override
   void dispose() {
     _saveDebounce?.cancel();
+    smartHistoryService.cancelPendingSave('rentalexpenses', 'calculator');
     for (final c in _allControllers) c.dispose();
     super.dispose();
   }
@@ -889,6 +963,9 @@ class _CalculatorScreenState extends State<CalculatorScreen>
                                               ),
                                             ],
                                           ),
+                                          const SizedBox(height: AppSpacing.sm),
+                                          SaveScenarioButton(
+                                              onSave: _saveScenario),
                                           const SizedBox(
                                               height: AppSpacing.xxl),
                                         ],

@@ -10,6 +10,7 @@ import '../models/property_model.dart';
 import '../services/property_database_service.dart';
 import '../widgets/paywall_hard.dart';
 import '../widgets/paywall_soft.dart';
+import '../widgets/save_scenario_button.dart';
 
 class ComparePropertiesScreen extends StatefulWidget {
   const ComparePropertiesScreen({super.key});
@@ -27,12 +28,19 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
   final Set<String> _selectedIds = {};
   Map<String, MonthlyExpense?> _expenseMap = {};
   bool _loading = true;
+  String? _currentHash;
 
   @override
   void initState() {
     super.initState();
     AnalyticsService.instance.logScreenView('compare_properties');
     _loadProperties();
+  }
+
+  @override
+  void dispose() {
+    smartHistoryService.cancelPendingSave('rentalexpenses', 'compare_properties');
+    super.dispose();
   }
 
   Future<void> _loadProperties() async {
@@ -104,7 +112,10 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
       map[id] = await PropertyDatabaseService.instance
           .getExpenseForMonth(id, _selectedMonth.year, _selectedMonth.month);
     }
-    if (mounted) setState(() => _expenseMap = map);
+    if (mounted) {
+      setState(() => _expenseMap = map);
+      if (_selectedIds.length >= 2) _scheduleAutoSave();
+    }
   }
 
   Future<void> _pickMonth(bool isSpanish) async {
@@ -255,6 +266,106 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
         }
       }
     }
+  }
+
+  // ── SmartHistory helpers ────────────────────────────────────────────────────
+
+  double _roundTo(double v, double step) => (v / step).round() * step;
+
+  void _scheduleAutoSave() {
+    final selected = _selectedProperties;
+    if (selected.length < 2) return;
+    // Use first two selected properties for hash (sorted by id for stability)
+    final sorted = List<Property>.from(selected)..sort((a, b) => a.id.compareTo(b.id));
+    final p1 = sorted[0];
+    final p2 = sorted[1];
+    final e1 = _expenseMap[p1.id];
+    final e2 = _expenseMap[p2.id];
+
+    final hash = ResultHasher.hashInputs({
+      'p1_value': _roundTo(p1.monthlyRent * 12 * 10, 5000), // proxy for property value
+      'p1_rent': _roundTo(p1.monthlyRent, 100),
+      'p2_value': _roundTo(p2.monthlyRent * 12 * 10, 5000),
+      'p2_rent': _roundTo(p2.monthlyRent, 100),
+    });
+    _currentHash = hash;
+
+    final cf1 = _cf(p1);
+    final cf2 = _cf(p2);
+    final winner = cf1 >= cf2 ? p1.name : p2.name;
+
+    final l1 = <String, dynamic>{
+      'prop1_value': p1.monthlyRent * 12 * 10,
+      'prop2_value': p2.monthlyRent * 12 * 10,
+      'winner': winner,
+      'winner_coc_return': cf1 >= cf2 ? (cf1 * 12) : (cf2 * 12),
+    };
+    final l2 = <String, dynamic>{
+      'prop1_name': p1.name,
+      'prop1_rent': p1.monthlyRent,
+      'prop1_expenses': e1?.totalExpenses ?? 0,
+      'prop1_cashflow': cf1,
+      'prop1_annual_cf': cf1 * 12,
+      'prop2_name': p2.name,
+      'prop2_rent': p2.monthlyRent,
+      'prop2_expenses': e2?.totalExpenses ?? 0,
+      'prop2_cashflow': cf2,
+      'prop2_annual_cf': cf2 * 12,
+      'winner': winner,
+      'month': _selectedMonth.month,
+      'year': _selectedMonth.year,
+    };
+    smartHistoryService.scheduleAutoSave(
+      appKey: 'rentalexpenses',
+      screenId: 'compare_properties',
+      inputHash: hash,
+      l1: l1,
+      l2: l2,
+    );
+  }
+
+  Future<void> _saveScenario(String? label) async {
+    final hash = _currentHash;
+    if (hash == null) return;
+    final selected = _selectedProperties;
+    if (selected.length < 2) return;
+    final sorted = List<Property>.from(selected)..sort((a, b) => a.id.compareTo(b.id));
+    final p1 = sorted[0];
+    final p2 = sorted[1];
+    final e1 = _expenseMap[p1.id];
+    final e2 = _expenseMap[p2.id];
+    final cf1 = _cf(p1);
+    final cf2 = _cf(p2);
+    final winner = cf1 >= cf2 ? p1.name : p2.name;
+
+    await smartHistoryService.saveScenario(
+      appKey: 'rentalexpenses',
+      screenId: 'compare_properties',
+      inputHash: hash,
+      l1: {
+        'prop1_value': p1.monthlyRent * 12 * 10,
+        'prop2_value': p2.monthlyRent * 12 * 10,
+        'winner': winner,
+        'winner_coc_return': cf1 >= cf2 ? (cf1 * 12) : (cf2 * 12),
+      },
+      l2: {
+        'prop1_name': p1.name,
+        'prop1_rent': p1.monthlyRent,
+        'prop1_expenses': e1?.totalExpenses ?? 0,
+        'prop1_cashflow': cf1,
+        'prop1_annual_cf': cf1 * 12,
+        'prop2_name': p2.name,
+        'prop2_rent': p2.monthlyRent,
+        'prop2_expenses': e2?.totalExpenses ?? 0,
+        'prop2_cashflow': cf2,
+        'prop2_annual_cf': cf2 * 12,
+        'winner': winner,
+        'month': _selectedMonth.month,
+        'year': _selectedMonth.year,
+      },
+      label: label,
+    );
+    historyRefreshNotifier.value++;
   }
 
   List<Property> get _selectedProperties =>
@@ -460,6 +571,8 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                                     ),
                                   ),
                                 )), // CalcwisePageEntrance closes
+                                const SizedBox(height: AppSpacing.md),
+                                SaveScenarioButton(onSave: _saveScenario),
                               ] else
                                 Container(
                                   padding: const EdgeInsets.all(AppSpacing.xl),
