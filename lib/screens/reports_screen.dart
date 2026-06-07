@@ -132,7 +132,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
   @override
   void dispose() {
-    smartHistoryService.cancelPendingSave('rentalexpenses', 'reports');
+    smartHistoryService.cancelPendingSave('rentalexpenses', 'income');
     super.dispose();
   }
 
@@ -216,7 +216,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
     _currentHash = hash;
     smartHistoryService.scheduleAutoSave(
       appKey: 'rentalexpenses',
-      screenId: 'reports',
+      screenId: 'income',
       inputHash: hash,
       l1: {
         'year': year,
@@ -226,12 +226,16 @@ class _ReportsScreenState extends State<ReportsScreen> {
         'net_profit': netProfit,
       },
       l2: {
-        'year': year,
-        'month': _selectedMonth.month,
-        'property_count': propCount,
-        'total_income': totalIncome,
-        'total_expenses': totalExpenses,
-        'net_profit': netProfit,
+        'inputs': {
+          'year': year,
+          'month': _selectedMonth.month,
+          'property_count': propCount,
+        },
+        'results': {
+          'total_income': totalIncome,
+          'total_expenses': totalExpenses,
+          'net_profit': netProfit,
+        },
       },
     );
   }
@@ -248,7 +252,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
     final netProfit = totalIncome - totalExpenses;
     await smartHistoryService.saveScenario(
       appKey: 'rentalexpenses',
-      screenId: 'reports',
+      screenId: 'income',
       inputHash: hash,
       l1: {
         'year': _selectedMonth.year,
@@ -258,12 +262,16 @@ class _ReportsScreenState extends State<ReportsScreen> {
         'net_profit': netProfit,
       },
       l2: {
-        'year': _selectedMonth.year,
-        'month': _selectedMonth.month,
-        'property_count': _properties.length,
-        'total_income': totalIncome,
-        'total_expenses': totalExpenses,
-        'net_profit': netProfit,
+        'inputs': {
+          'year': _selectedMonth.year,
+          'month': _selectedMonth.month,
+          'property_count': _properties.length,
+        },
+        'results': {
+          'total_income': totalIncome,
+          'total_expenses': totalExpenses,
+          'net_profit': netProfit,
+        },
       },
       label: label,
     );

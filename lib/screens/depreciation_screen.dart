@@ -122,14 +122,18 @@ class _DepreciationScreenState extends State<DepreciationScreen> {
         'accumulated_depreciation': _firstYear,
       },
       l2: {
-        'purchase_price': _purchase,
-        'land_value': _land,
-        'improvements': _improvements,
-        'depreciable_basis': _basis,
-        'annual_depreciation': _annual,
-        'first_year_depreciation': _firstYear,
-        'in_service_month': _inServiceMonth,
-        'in_service_year': _inServiceYear,
+        'inputs': {
+          'purchase_price': _purchase,
+          'land_value': _land,
+          'improvements': _improvements,
+          'in_service_month': _inServiceMonth,
+          'in_service_year': _inServiceYear,
+        },
+        'results': {
+          'depreciable_basis': _basis,
+          'annual_depreciation': _annual,
+          'first_year_depreciation': _firstYear,
+        },
       },
     );
   }
@@ -148,14 +152,18 @@ class _DepreciationScreenState extends State<DepreciationScreen> {
         'accumulated_depreciation': _firstYear,
       },
       l2: {
-        'purchase_price': _purchase,
-        'land_value': _land,
-        'improvements': _improvements,
-        'depreciable_basis': _basis,
-        'annual_depreciation': _annual,
-        'first_year_depreciation': _firstYear,
-        'in_service_month': _inServiceMonth,
-        'in_service_year': _inServiceYear,
+        'inputs': {
+          'purchase_price': _purchase,
+          'land_value': _land,
+          'improvements': _improvements,
+          'in_service_month': _inServiceMonth,
+          'in_service_year': _inServiceYear,
+        },
+        'results': {
+          'depreciable_basis': _basis,
+          'annual_depreciation': _annual,
+          'first_year_depreciation': _firstYear,
+        },
       },
       label: label,
     );

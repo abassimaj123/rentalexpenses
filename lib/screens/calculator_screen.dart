@@ -320,27 +320,31 @@ class _CalculatorScreenState extends State<CalculatorScreen>
       };
 
   Map<String, dynamic> _buildL2(ExpenseCalc c) => {
-        'property_name': c.propertyName,
-        'property_value': c.propertyValue,
-        'cash_invested': c.cashInvested,
-        'monthly_rent': c.rentIncome,
-        'mortgage': c.mortgage,
-        'property_taxes': c.propertyTaxes,
-        'insurance': c.insurance,
-        'hoa_fees': c.hoaFees,
-        'property_mgmt': c.propertyMgmt,
-        'maintenance': c.maintenance,
-        'vacancy_loss': c.vacancyLoss,
-        'utilities': c.utilities,
-        'landscaping': c.landscaping,
-        'other_expenses': c.otherExpenses,
-        'total_expenses': c.totalExpenses,
-        'monthly_cashflow': c.monthlyCashFlow,
-        'annual_cashflow': c.annualCashFlow,
-        'noi': c.noi,
-        'cap_rate': c.capRate ?? 0.0,
-        'gross_yield': c.grossYield ?? 0.0,
-        'coc_return': c.cocRoi ?? 0.0,
+        'inputs': {
+          'property_name': c.propertyName,
+          'property_value': c.propertyValue,
+          'cash_invested': c.cashInvested,
+          'monthly_rent': c.rentIncome,
+          'mortgage': c.mortgage,
+          'property_taxes': c.propertyTaxes,
+          'insurance': c.insurance,
+          'hoa_fees': c.hoaFees,
+          'property_mgmt': c.propertyMgmt,
+          'maintenance': c.maintenance,
+          'vacancy_loss': c.vacancyLoss,
+          'utilities': c.utilities,
+          'landscaping': c.landscaping,
+          'other_expenses': c.otherExpenses,
+        },
+        'results': {
+          'total_expenses': c.totalExpenses,
+          'monthly_cashflow': c.monthlyCashFlow,
+          'annual_cashflow': c.annualCashFlow,
+          'noi': c.noi,
+          'cap_rate': c.capRate ?? 0.0,
+          'gross_yield': c.grossYield ?? 0.0,
+          'coc_return': c.cocRoi ?? 0.0,
+        },
       };
 
   void _scheduleAutoSave(ExpenseCalc c) {
@@ -353,7 +357,7 @@ class _CalculatorScreenState extends State<CalculatorScreen>
     _currentHash = hash;
     smartHistoryService.scheduleAutoSave(
       appKey: 'rentalexpenses',
-      screenId: 'calculator',
+      screenId: 'expenses',
       inputHash: hash,
       l1: _buildL1(c),
       l2: _buildL2(c),
@@ -366,7 +370,7 @@ class _CalculatorScreenState extends State<CalculatorScreen>
     if (c == null || hash == null) return;
     await smartHistoryService.saveScenario(
       appKey: 'rentalexpenses',
-      screenId: 'calculator',
+      screenId: 'expenses',
       inputHash: hash,
       l1: _buildL1(c),
       l2: _buildL2(c),
@@ -531,7 +535,7 @@ class _CalculatorScreenState extends State<CalculatorScreen>
   @override
   void dispose() {
     _saveDebounce?.cancel();
-    smartHistoryService.cancelPendingSave('rentalexpenses', 'calculator');
+    smartHistoryService.cancelPendingSave('rentalexpenses', 'expenses');
     for (final c in _allControllers) c.dispose();
     super.dispose();
   }

@@ -39,7 +39,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
 
   @override
   void dispose() {
-    smartHistoryService.cancelPendingSave('rentalexpenses', 'compare_properties');
+    smartHistoryService.cancelPendingSave('rentalexpenses', 'roi');
     super.dispose();
   }
 
@@ -301,23 +301,27 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
       'winner_coc_return': cf1 >= cf2 ? (cf1 * 12) : (cf2 * 12),
     };
     final l2 = <String, dynamic>{
-      'prop1_name': p1.name,
-      'prop1_rent': p1.monthlyRent,
-      'prop1_expenses': e1?.totalExpenses ?? 0,
-      'prop1_cashflow': cf1,
-      'prop1_annual_cf': cf1 * 12,
-      'prop2_name': p2.name,
-      'prop2_rent': p2.monthlyRent,
-      'prop2_expenses': e2?.totalExpenses ?? 0,
-      'prop2_cashflow': cf2,
-      'prop2_annual_cf': cf2 * 12,
-      'winner': winner,
-      'month': _selectedMonth.month,
-      'year': _selectedMonth.year,
+      'inputs': {
+        'prop1_name': p1.name,
+        'prop1_rent': p1.monthlyRent,
+        'prop1_expenses': e1?.totalExpenses ?? 0,
+        'prop2_name': p2.name,
+        'prop2_rent': p2.monthlyRent,
+        'prop2_expenses': e2?.totalExpenses ?? 0,
+        'month': _selectedMonth.month,
+        'year': _selectedMonth.year,
+      },
+      'results': {
+        'prop1_cashflow': cf1,
+        'prop1_annual_cf': cf1 * 12,
+        'prop2_cashflow': cf2,
+        'prop2_annual_cf': cf2 * 12,
+        'winner': winner,
+      },
     };
     smartHistoryService.scheduleAutoSave(
       appKey: 'rentalexpenses',
-      screenId: 'compare_properties',
+      screenId: 'roi',
       inputHash: hash,
       l1: l1,
       l2: l2,
@@ -340,7 +344,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
 
     await smartHistoryService.saveScenario(
       appKey: 'rentalexpenses',
-      screenId: 'compare_properties',
+      screenId: 'roi',
       inputHash: hash,
       l1: {
         'prop1_value': p1.monthlyRent * 12 * 10,
@@ -349,19 +353,23 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
         'winner_coc_return': cf1 >= cf2 ? (cf1 * 12) : (cf2 * 12),
       },
       l2: {
-        'prop1_name': p1.name,
-        'prop1_rent': p1.monthlyRent,
-        'prop1_expenses': e1?.totalExpenses ?? 0,
-        'prop1_cashflow': cf1,
-        'prop1_annual_cf': cf1 * 12,
-        'prop2_name': p2.name,
-        'prop2_rent': p2.monthlyRent,
-        'prop2_expenses': e2?.totalExpenses ?? 0,
-        'prop2_cashflow': cf2,
-        'prop2_annual_cf': cf2 * 12,
-        'winner': winner,
-        'month': _selectedMonth.month,
-        'year': _selectedMonth.year,
+        'inputs': {
+          'prop1_name': p1.name,
+          'prop1_rent': p1.monthlyRent,
+          'prop1_expenses': e1?.totalExpenses ?? 0,
+          'prop2_name': p2.name,
+          'prop2_rent': p2.monthlyRent,
+          'prop2_expenses': e2?.totalExpenses ?? 0,
+          'month': _selectedMonth.month,
+          'year': _selectedMonth.year,
+        },
+        'results': {
+          'prop1_cashflow': cf1,
+          'prop1_annual_cf': cf1 * 12,
+          'prop2_cashflow': cf2,
+          'prop2_annual_cf': cf2 * 12,
+          'winner': winner,
+        },
       },
       label: label,
     );

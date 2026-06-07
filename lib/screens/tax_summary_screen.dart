@@ -123,12 +123,16 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
         'net_income': taxableIncome,
       },
       l2: {
-        'year': _selectedYear,
-        'property_count': _properties.length,
-        'gross_income': grossIncome,
-        'total_expenses': totalExpenses,
-        'taxable_income': taxableIncome,
-        'net_income': taxableIncome,
+        'inputs': {
+          'year': _selectedYear,
+          'property_count': _properties.length,
+          'gross_income': grossIncome,
+          'total_expenses': totalExpenses,
+        },
+        'results': {
+          'taxable_income': taxableIncome,
+          'net_income': taxableIncome,
+        },
       },
     );
   }
@@ -155,12 +159,16 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
         'net_income': taxableIncome,
       },
       l2: {
-        'year': _selectedYear,
-        'property_count': _properties.length,
-        'gross_income': grossIncome,
-        'total_expenses': totalExpenses,
-        'taxable_income': taxableIncome,
-        'net_income': taxableIncome,
+        'inputs': {
+          'year': _selectedYear,
+          'property_count': _properties.length,
+          'gross_income': grossIncome,
+          'total_expenses': totalExpenses,
+        },
+        'results': {
+          'taxable_income': taxableIncome,
+          'net_income': taxableIncome,
+        },
       },
       label: label,
     );
