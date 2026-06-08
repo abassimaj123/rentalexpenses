@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../core/firebase/analytics_service.dart';
 import '../core/freemium/freemium_service.dart';
 import '../core/freemium/iap_service.dart';
+import '../core/services/pdf_export_service.dart';
 import '../core/theme/app_theme.dart';
 import '../main.dart';
 import '../widgets/insight_card.dart';
@@ -524,6 +525,56 @@ class _CalculatorScreenState extends State<CalculatorScreen>
     }
   }
 
+  Future<void> _exportPdf(bool isSpanish) async {
+    final c = _result;
+    if (c == null) return;
+    HapticFeedback.mediumImpact();
+
+    Future<void> doExport() => PdfExportService.exportReport(
+          context: context,
+          propertyName: c.propertyName,
+          monthlyRent: c.rentIncome,
+          annualRent: c.rentIncome * 12,
+          expenses: [
+            if (c.mortgage > 0)
+              {'name': isSpanish ? 'Hipoteca' : 'Mortgage', 'monthly': c.mortgage},
+            if (c.propertyTaxes > 0)
+              {'name': isSpanish ? 'Impuestos' : 'Property Taxes', 'monthly': c.propertyTaxes},
+            if (c.insurance > 0)
+              {'name': isSpanish ? 'Seguro' : 'Insurance', 'monthly': c.insurance},
+            if (c.hoaFees > 0)
+              {'name': isSpanish ? 'HOA' : 'HOA Fees', 'monthly': c.hoaFees},
+            if (c.propertyMgmt > 0)
+              {'name': isSpanish ? 'Adm. propiedad' : 'Property Mgmt', 'monthly': c.propertyMgmt},
+            if (c.maintenance > 0)
+              {'name': isSpanish ? 'Mantenimiento' : 'Maintenance', 'monthly': c.maintenance},
+            if (c.vacancyLoss > 0)
+              {'name': isSpanish ? 'Vacante' : 'Vacancy Loss', 'monthly': c.vacancyLoss},
+            if (c.utilities > 0)
+              {'name': isSpanish ? 'Servicios' : 'Utilities', 'monthly': c.utilities},
+            if (c.landscaping > 0)
+              {'name': isSpanish ? 'Jardinería' : 'Landscaping', 'monthly': c.landscaping},
+            if (c.otherExpenses > 0)
+              {'name': isSpanish ? 'Otros' : 'Other', 'monthly': c.otherExpenses},
+          ],
+          totalMonthlyExpenses: c.totalExpenses,
+          netMonthlyIncome: c.monthlyCashFlow,
+          netAnnualIncome: c.annualCashFlow,
+          expenseRatio: c.expenseRatio / 100,
+          noi: c.noi,
+          capRate: c.capRate,
+          cashOnCashRoi: c.cocRoi,
+          isSpanish: isSpanish,
+        );
+
+    if (freemiumService.hasFullAccess) {
+      await doExport();
+      await AnalyticsService.instance.logPdfExported();
+    } else {
+      await PdfExportService.showUnlockOrPay(context, doExport);
+    }
+  }
+
   void _reset() {
     for (final c in _allControllers) c.clear();
     setState(() {
@@ -928,6 +979,20 @@ class _CalculatorScreenState extends State<CalculatorScreen>
                                               Expanded(
                                                 child: SaveScenarioButton(
                                                     onSave: _saveScenario),
+                                              ),
+                                              const SizedBox(
+                                                  width: AppSpacing.sm),
+                                              OutlinedButton.icon(
+                                                onPressed: () =>
+                                                    _exportPdf(isSpanish),
+                                                icon: const Icon(
+                                                    Icons.picture_as_pdf_rounded),
+                                                label: Text(isSpanish
+                                                    ? 'PDF'
+                                                    : 'PDF'),
+                                                style: OutlinedButton.styleFrom(
+                                                    minimumSize:
+                                                        const Size(0, 44)),
                                               ),
                                               const SizedBox(
                                                   width: AppSpacing.sm),

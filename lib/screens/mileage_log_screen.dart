@@ -6,6 +6,7 @@ import '../core/constants/irs_categories.dart';
 import '../core/constants/mileage_rates.dart';
 import '../core/firebase/analytics_service.dart';
 import '../core/freemium/freemium_service.dart';
+import '../core/services/pdf_export_service.dart';
 import '../core/theme/app_theme.dart';
 import '../main.dart';
 import '../models/mileage_trip_model.dart';
@@ -139,6 +140,35 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
       label: label,
     );
     historyRefreshNotifier.value++;
+  }
+
+  Future<void> _exportPdf(bool isSpanish) async {
+    if (_deduction <= 0) return;
+    HapticFeedback.mediumImpact();
+
+    Future<void> doExport() => PdfExportService.exportMileageLog(
+          context: context,
+          propertyName: _selectedProperty?.name ?? '',
+          year: _selectedYear,
+          totalMiles: _totalMiles,
+          rate: _rate,
+          deduction: _deduction,
+          trips: _trips
+              .map((t) => <String, dynamic>{
+                    'date': t.date,
+                    'miles': t.miles,
+                    'purpose': t.purpose,
+                  })
+              .toList(),
+          isSpanish: isSpanish,
+        );
+
+    if (freemiumService.hasFullAccess) {
+      await doExport();
+      await AnalyticsService.instance.logPdfExported();
+    } else {
+      await PdfExportService.showUnlockOrPay(context, doExport);
+    }
   }
 
   @override
@@ -416,6 +446,14 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
                               if (_deduction > 0) ...[
                                 const SizedBox(height: AppSpacing.sm),
                                 SaveScenarioButton(onSave: _saveScenario),
+                                const SizedBox(height: AppSpacing.sm),
+                                OutlinedButton.icon(
+                                  onPressed: () => _exportPdf(isSpanish),
+                                  icon: const Icon(Icons.picture_as_pdf_rounded),
+                                  label: Text(isSpanish ? 'Exportar PDF' : 'Export PDF'),
+                                  style: OutlinedButton.styleFrom(
+                                      minimumSize: const Size(double.infinity, 44)),
+                                ),
                               ],
                               const SizedBox(height: AppSpacing.xl),
 

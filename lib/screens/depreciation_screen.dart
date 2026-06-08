@@ -5,6 +5,7 @@ import '../core/calc/depreciation_calc.dart';
 import '../core/constants/irs_categories.dart';
 import '../core/firebase/analytics_service.dart';
 import '../core/freemium/freemium_service.dart';
+import '../core/services/pdf_export_service.dart';
 import '../core/theme/app_theme.dart';
 import '../main.dart';
 import '../models/property_model.dart';
@@ -168,6 +169,32 @@ class _DepreciationScreenState extends State<DepreciationScreen> {
       label: label,
     );
     historyRefreshNotifier.value++;
+  }
+
+  Future<void> _exportPdf(bool isSpanish) async {
+    if (_basis <= 0) return;
+    HapticFeedback.mediumImpact();
+
+    Future<void> doExport() => PdfExportService.exportDepreciation(
+          context: context,
+          purchasePrice: _purchase,
+          landValue: _land,
+          improvements: _improvements,
+          depreciableBasis: _basis,
+          annualDepreciation: _annual,
+          firstYearDepreciation: _firstYear,
+          inServiceMonth: _inServiceMonth,
+          inServiceYear: _inServiceYear,
+          propertyName: _selectedProperty?.name ?? '',
+          isSpanish: isSpanish,
+        );
+
+    if (freemiumService.hasFullAccess) {
+      await doExport();
+      await AnalyticsService.instance.logPdfExported();
+    } else {
+      await PdfExportService.showUnlockOrPay(context, doExport);
+    }
   }
 
   Future<void> _addToScheduleE(bool isSpanish) async {
@@ -425,6 +452,14 @@ class _DepreciationScreenState extends State<DepreciationScreen> {
                           if (_basis > 0) ...[
                             const SizedBox(height: AppSpacing.md),
                             SaveScenarioButton(onSave: _saveScenario),
+                            const SizedBox(height: AppSpacing.sm),
+                            OutlinedButton.icon(
+                              onPressed: () => _exportPdf(isSpanish),
+                              icon: const Icon(Icons.picture_as_pdf_rounded),
+                              label: Text(isSpanish ? 'Exportar PDF' : 'Export PDF'),
+                              style: OutlinedButton.styleFrom(
+                                  minimumSize: const Size(double.infinity, 44)),
+                            ),
                           ],
                           const SizedBox(height: AppSpacing.lg),
                           Text(

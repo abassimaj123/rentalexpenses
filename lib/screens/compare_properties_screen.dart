@@ -1,8 +1,10 @@
 import 'package:calcwise_core/calcwise_core.dart' hide PaywallHard;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import '../core/firebase/analytics_service.dart';
 import '../core/freemium/freemium_service.dart';
+import '../core/services/pdf_export_service.dart';
 import '../core/theme/app_theme.dart';
 import '../main.dart';
 import '../models/expense_model.dart';
@@ -376,6 +378,40 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
     historyRefreshNotifier.value++;
   }
 
+  Future<void> _exportPdf(bool isSpanish) async {
+    final selected = _selectedProperties;
+    if (selected.length < 2) return;
+    HapticFeedback.mediumImpact();
+
+    Future<void> doExport() => PdfExportService.exportComparison(
+          context: context,
+          properties: selected.map((p) {
+            final e = _expenseMap[p.id];
+            final cf = _cf(p);
+            final ratio = _ratio(p);
+            final noi = _noi(p);
+            return <String, dynamic>{
+              'name': p.name,
+              'address': p.address,
+              'rent': p.monthlyRent,
+              'expenses': e?.totalExpenses ?? 0.0,
+              'netIncome': cf,
+              'expenseRatio': ratio,
+              'noi': noi,
+            };
+          }).toList(),
+          selectedMonth: _selectedMonth,
+          isSpanish: isSpanish,
+        );
+
+    if (freemiumService.hasFullAccess) {
+      await doExport();
+      await AnalyticsService.instance.logPdfExported();
+    } else {
+      await PdfExportService.showUnlockOrPay(context, doExport);
+    }
+  }
+
   List<Property> get _selectedProperties =>
       _allProperties.where((p) => _selectedIds.contains(p.id)).toList();
 
@@ -581,6 +617,14 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                                 )), // CalcwisePageEntrance closes
                                 const SizedBox(height: AppSpacing.md),
                                 SaveScenarioButton(onSave: _saveScenario),
+                                const SizedBox(height: AppSpacing.sm),
+                                OutlinedButton.icon(
+                                  onPressed: () => _exportPdf(isSpanish),
+                                  icon: const Icon(Icons.picture_as_pdf_rounded),
+                                  label: Text(isSpanish ? 'Exportar PDF' : 'Export PDF'),
+                                  style: OutlinedButton.styleFrom(
+                                      minimumSize: const Size(double.infinity, 44)),
+                                ),
                               ] else
                                 Container(
                                   padding: const EdgeInsets.all(AppSpacing.xl),
