@@ -926,30 +926,8 @@ class _CalculatorScreenState extends State<CalculatorScreen>
                                           Row(
                                             children: [
                                               Expanded(
-                                                child: ElevatedButton.icon(
-                                                  onPressed: _saved
-                                                      ? null
-                                                      : () => _save(isSpanish),
-                                                  icon: Icon(_saved
-                                                      ? Icons
-                                                          .check_circle_rounded
-                                                      : Icons.save_rounded),
-                                                  label: Text(_saved
-                                                      ? (isSpanish
-                                                          ? 'Guardado'
-                                                          : 'Saved')
-                                                      : (isSpanish
-                                                          ? 'Guardar'
-                                                          : 'Save')),
-                                                  style:
-                                                      ElevatedButton.styleFrom(
-                                                    backgroundColor: _saved
-                                                        ? AppTheme.success
-                                                        : AppTheme.primary,
-                                                    minimumSize:
-                                                        const Size(0, 44),
-                                                  ),
-                                                ),
+                                                child: SaveScenarioButton(
+                                                    onSave: _saveScenario),
                                               ),
                                               const SizedBox(
                                                   width: AppSpacing.sm),
@@ -967,9 +945,6 @@ class _CalculatorScreenState extends State<CalculatorScreen>
                                               ),
                                             ],
                                           ),
-                                          const SizedBox(height: AppSpacing.sm),
-                                          SaveScenarioButton(
-                                              onSave: _saveScenario),
                                           const SizedBox(
                                               height: AppSpacing.xxl),
                                         ],
