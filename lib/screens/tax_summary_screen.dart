@@ -369,19 +369,21 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
 
               widgets.addAll([
                 pw.Text(
-                  'Schedule E — Rental Income and Expenses $_selectedYear',
+                  isSpanish
+                      ? 'Anexo E — Ingresos y Gastos de Alquiler $_selectedYear'
+                      : 'Schedule E — Rental Income and Expenses $_selectedYear',
                   style: pw.TextStyle(
                       fontSize: AppTextSize.bodyLg,
                       fontWeight: pw.FontWeight.bold),
                 ),
                 pw.SizedBox(height: 4),
                 pw.Text(
-                  'Property: ${property.name}',
+                  '${isSpanish ? 'Propiedad' : 'Property'}: ${property.name}',
                   style: pw.TextStyle(
                       fontSize: AppTextSize.md, fontWeight: pw.FontWeight.bold),
                 ),
                 pw.Text(
-                  'Address: ${property.address}',
+                  '${isSpanish ? 'Dirección' : 'Address'}: ${property.address}',
                   style: const pw.TextStyle(fontSize: AppTextSize.xs),
                 ),
                 pw.SizedBox(height: 14),
@@ -393,7 +395,9 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                     color: PdfColors.grey200,
                   ),
                   child: pw.Text(
-                    'Part I — Income or Loss From Rental Real Estate and Royalties',
+                    isSpanish
+                        ? 'Parte I — Ingresos o Pérdidas de Bienes Raíces'
+                        : 'Part I — Income or Loss From Rental Real Estate and Royalties',
                     style: pw.TextStyle(
                         fontSize: AppTextSize.xs,
                         fontWeight: pw.FontWeight.bold),
@@ -403,9 +407,15 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
 
                 // Income row
                 pw.TableHelper.fromTextArray(
-                  headers: ['Item', 'Amount'],
+                  headers: [
+                    isSpanish ? 'Artículo' : 'Item',
+                    isSpanish ? 'Monto' : 'Amount',
+                  ],
                   data: [
-                    ['Rental Income', '\$${AmountFormatter.formatNumber(totalInc)}'],
+                    [
+                      isSpanish ? 'Ingresos de Alquiler' : 'Rental Income',
+                      '\$${AmountFormatter.formatNumber(totalInc)}',
+                    ],
                   ],
                   border: pw.TableBorder.all(color: PdfColors.grey300),
                   headerStyle: pw.TextStyle(
@@ -419,19 +429,25 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
 
                 // Expenses by category
                 pw.Text(
-                  'Expenses',
+                  isSpanish ? 'Gastos' : 'Expenses',
                   style: pw.TextStyle(
                       fontSize: AppTextSize.xs, fontWeight: pw.FontWeight.bold),
                 ),
                 pw.SizedBox(height: 4),
                 pw.TableHelper.fromTextArray(
-                  headers: ['Category', 'Amount'],
+                  headers: [
+                    isSpanish ? 'Categoría' : 'Category',
+                    isSpanish ? 'Monto' : 'Amount',
+                  ],
                   data: [
                     ...IrsCategories.all
                         .where((c) =>
                             catTotals.containsKey(c) && catTotals[c]! > 0)
                         .map((c) => [c, '\$${AmountFormatter.formatNumber(catTotals[c]!)}']),
-                    ['Total Expenses', '\$${AmountFormatter.formatNumber(totalExp)}'],
+                    [
+                      isSpanish ? 'Gastos Totales' : 'Total Expenses',
+                      '\$${AmountFormatter.formatNumber(totalExp)}',
+                    ],
                   ],
                   border: pw.TableBorder.all(color: PdfColors.grey300),
                   headerStyle: pw.TextStyle(
@@ -456,7 +472,11 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                     children: [
                       pw.Text(
-                        net >= 0 ? 'Net Rental Income' : 'Net Rental Loss',
+                        net >= 0
+                            ? (isSpanish
+                                ? 'Ingreso Neto de Alquiler'
+                                : 'Net Rental Income')
+                            : (isSpanish ? 'Pérdida Neta' : 'Net Rental Loss'),
                         style: pw.TextStyle(
                             fontSize: AppTextSize.sm,
                             fontWeight: pw.FontWeight.bold,
@@ -485,12 +505,14 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
               pw.Divider(),
               pw.SizedBox(height: 6),
               pw.Text(
-                'Generated: $genDate',
+                isSpanish ? 'Generado: $genDate' : 'Generated: $genDate',
                 style:
                     const pw.TextStyle(fontSize: 9, color: PdfColors.grey600),
               ),
               pw.Text(
-                'Generated by RentalExpenses app. Consult a tax professional before filing.',
+                isSpanish
+                    ? 'Generado por RentalExpenses. Consulte a un profesional fiscal.'
+                    : 'Generated by RentalExpenses app. Consult a tax professional before filing.',
                 style:
                     const pw.TextStyle(fontSize: 9, color: PdfColors.grey600),
               ),

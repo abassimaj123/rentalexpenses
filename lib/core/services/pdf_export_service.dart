@@ -197,7 +197,7 @@ class PdfExportService {
     required bool isSpanish,
   }) {
     final chartTitle =
-        isSpanish ? 'Répartition des revenus' : 'Income Breakdown';
+        isSpanish ? 'Distribución de ingresos' : 'Income Breakdown';
 
     final grossVal = monthlyRent.clamp(0.0, double.infinity);
     final expVal = totalMonthlyExpenses.clamp(0.0, double.infinity);
