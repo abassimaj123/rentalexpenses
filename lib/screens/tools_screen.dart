@@ -111,7 +111,7 @@ class ToolsScreen extends StatelessWidget {
                       onTap: () => Navigator.push(
                           context,
                           PageRouteBuilder(
-                            pageBuilder: (_, __, ___) => const HistoryScreen(),
+                            pageBuilder: (_, __, ___) => const HistoryScreen(showAppBar: true),
                             transitionsBuilder: (_, anim, __, child) =>
                                 FadeTransition(opacity: anim, child: child),
                             transitionDuration: AppDuration.base,

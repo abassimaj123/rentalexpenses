@@ -11,7 +11,8 @@ import '../screens/history_detail_screen.dart';
 import '../widgets/paywall_hard.dart';
 
 class HistoryScreen extends StatefulWidget {
-  const HistoryScreen({super.key});
+  const HistoryScreen({super.key, this.showAppBar = false});
+  final bool showAppBar;
 
   @override
   State<HistoryScreen> createState() => _HistoryScreenState();
@@ -72,31 +73,34 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (_, isSpanish, __) {
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(isSpanish ? 'Historial' : 'History'),
-            actions: [
-              if (_entries.isNotEmpty)
-                IconButton(
-                  icon: const Icon(Icons.delete_sweep_rounded),
-                  tooltip: isSpanish ? 'Borrar todo' : 'Clear all',
-                  onPressed: () => _confirmClearAll(isSpanish),
-                ),
-            ],
-          ),
-          body: Column(
-            children: [
-              Expanded(
-                child: _loading
-                    ? const CalcwiseLoadingState(showHeroCard: false)
-                    : _entries.isEmpty
-                        ? _EmptyState(isSpanish: isSpanish)
-                        : _buildList(isSpanish),
-              ),
-              const CalcwiseAdFooter(),
-            ],
-          ),
+        final bodyContent = Column(
+          children: [
+            Expanded(
+              child: _loading
+                  ? const CalcwiseLoadingState(showHeroCard: false)
+                  : _entries.isEmpty
+                      ? _EmptyState(isSpanish: isSpanish)
+                      : _buildList(isSpanish),
+            ),
+            const CalcwiseAdFooter(),
+          ],
         );
+        return widget.showAppBar
+            ? Scaffold(
+                appBar: AppBar(
+                  title: Text(isSpanish ? 'Historial' : 'History'),
+                  actions: [
+                    if (_entries.isNotEmpty)
+                      IconButton(
+                        icon: const Icon(Icons.delete_sweep_rounded),
+                        tooltip: isSpanish ? 'Borrar todo' : 'Clear all',
+                        onPressed: () => _confirmClearAll(isSpanish),
+                      ),
+                  ],
+                ),
+                body: bodyContent,
+              )
+            : bodyContent;
       },
     );
   }
