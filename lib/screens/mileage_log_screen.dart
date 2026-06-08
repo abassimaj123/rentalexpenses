@@ -13,6 +13,7 @@ import '../models/property_model.dart';
 import '../models/schedule_e_entry_model.dart';
 import '../services/property_database_service.dart';
 import '../widgets/paywall_hard.dart';
+import '../widgets/save_scenario_button.dart';
 
 /// Business-mileage log (IRS standard mileage method → Schedule E line 6,
 /// "Auto and travel"). Deduction = Σ(miles) × rate-for-year.
@@ -31,6 +32,9 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
   late int _selectedYear;
   List<MileageTrip> _trips = [];
   bool _loading = true;
+
+  // SmartHistory
+  String? _currentHash;
 
   @override
   void initState() {
@@ -59,12 +63,89 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
         _trips = trips;
         _loading = false;
       });
+      _scheduleAutoSave();
     }
   }
 
   double get _totalMiles => _trips.fold(0.0, (s, t) => s + t.miles);
   double get _rate => MileageRates.rateForYear(_selectedYear);
   double get _deduction => _totalMiles * _rate;
+
+  // ── SmartHistory helpers ────────────────────────────────────────────────────
+
+  void _scheduleAutoSave() {
+    if (_deduction <= 0) return;
+    final hash = ResultHasher.hashMixed({
+      'miles': _totalMiles,
+      'rate': _rate,
+      'year': _selectedYear,
+      'property': _selectedProperty?.id ?? '',
+    });
+    _currentHash = hash;
+    smartHistoryService.scheduleAutoSave(
+      appKey: 'rentalexpenses',
+      screenId: 'mileage_log',
+      inputHash: hash,
+      l1: {
+        'total_miles': _totalMiles,
+        'irs_rate': _rate,
+        'deduction': _deduction,
+        'year': _selectedYear,
+        'property_name': _selectedProperty?.name ?? '',
+      },
+      l2: {
+        'inputs': {
+          'total_miles': _totalMiles,
+          'irs_rate': _rate,
+          'year': _selectedYear,
+          'property_id': _selectedProperty?.id ?? '',
+          'property_name': _selectedProperty?.name ?? '',
+          'trip_count': _trips.length,
+        },
+        'results': {
+          'deduction': _deduction,
+        },
+      },
+    );
+  }
+
+  Future<void> _saveScenario(String? label) async {
+    final hash = _currentHash;
+    if (hash == null || _deduction <= 0) return;
+    await smartHistoryService.saveScenario(
+      appKey: 'rentalexpenses',
+      screenId: 'mileage_log',
+      inputHash: hash,
+      l1: {
+        'total_miles': _totalMiles,
+        'irs_rate': _rate,
+        'deduction': _deduction,
+        'year': _selectedYear,
+        'property_name': _selectedProperty?.name ?? '',
+      },
+      l2: {
+        'inputs': {
+          'total_miles': _totalMiles,
+          'irs_rate': _rate,
+          'year': _selectedYear,
+          'property_id': _selectedProperty?.id ?? '',
+          'property_name': _selectedProperty?.name ?? '',
+          'trip_count': _trips.length,
+        },
+        'results': {
+          'deduction': _deduction,
+        },
+      },
+      label: label,
+    );
+    historyRefreshNotifier.value++;
+  }
+
+  @override
+  void dispose() {
+    smartHistoryService.cancelPendingSave('rentalexpenses', 'mileage_log');
+    super.dispose();
+  }
 
   Future<void> _addTripDialog(bool isSpanish) async {
     final property = _selectedProperty;
@@ -332,6 +413,10 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
                                     minimumSize:
                                         const Size(double.infinity, 48)),
                               ),
+                              if (_deduction > 0) ...[
+                                const SizedBox(height: AppSpacing.sm),
+                                SaveScenarioButton(onSave: _saveScenario),
+                              ],
                               const SizedBox(height: AppSpacing.xl),
 
                               _SectionLabel(
