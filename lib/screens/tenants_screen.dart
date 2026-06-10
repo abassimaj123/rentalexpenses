@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import '../core/firebase/analytics_service.dart';
 import '../core/theme/app_theme.dart';
+import '../l10n/strings_en.dart';
+import '../l10n/strings_es.dart';
 import '../main.dart';
 import '../models/property_model.dart';
 import '../models/tenant_model.dart';
@@ -46,19 +48,21 @@ class _TenantsScreenState extends State<TenantsScreen> {
   String _fmt(DateTime dt, bool isSpanish) =>
       isSpanish ? _dateFmtEs.format(dt) : _dateFmt.format(dt);
 
-  String _statusLabel(LeaseStatus s, bool isSpanish) {
-    switch (s) {
+  String _statusLabel(LeaseStatus status, bool isSpanish) {
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
+    switch (status) {
       case LeaseStatus.active:
-        return isSpanish ? 'Activo' : 'Active';
+        return s.leaseStatusActive;
       case LeaseStatus.expiringSoon:
-        return isSpanish ? 'Por vencer' : 'Expiring Soon';
+        return s.leaseStatusExpiringSoon;
       case LeaseStatus.expired:
-        return isSpanish ? 'Vencido' : 'Expired';
+        return s.leaseStatusExpired;
     }
   }
 
   Future<void> _showTenantDialog(BuildContext ctx, bool isSpanish,
       {Tenant? existing}) async {
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     final nameCtrl = TextEditingController(text: existing?.name ?? '');
     final emailCtrl = TextEditingController(text: existing?.email ?? '');
     final phoneCtrl = TextEditingController(text: existing?.phone ?? '');
@@ -77,9 +81,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
       context: ctx,
       builder: (d) => StatefulBuilder(
         builder: (d, setLocal) => AlertDialog(
-          title: Text(existing != null
-              ? (isSpanish ? 'Editar Locatario' : 'Edit Tenant')
-              : (isSpanish ? 'Agregar Locatario' : 'Add Tenant')),
+          title: Text(existing != null ? s.editTenant : s.addTenant),
           scrollable: true,
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -87,7 +89,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
               TextField(
                 controller: nameCtrl,
                 decoration: InputDecoration(
-                  labelText: isSpanish ? 'Nombre *' : 'Name *',
+                  labelText: s.tenantNameRequired,
                   prefixIcon: const Icon(Icons.person_rounded),
                 ),
               ),
@@ -96,8 +98,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                 controller: emailCtrl,
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
-                  labelText:
-                      isSpanish ? 'Email (opcional)' : 'Email (optional)',
+                  labelText: s.emailOptional,
                   prefixIcon: const Icon(Icons.email_rounded),
                 ),
               ),
@@ -106,8 +107,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                 controller: phoneCtrl,
                 keyboardType: TextInputType.phone,
                 decoration: InputDecoration(
-                  labelText:
-                      isSpanish ? 'Teléfono (opcional)' : 'Phone (optional)',
+                  labelText: s.phoneOptional,
                   prefixIcon: const Icon(Icons.phone_rounded),
                 ),
               ),
@@ -120,14 +120,13 @@ class _TenantsScreenState extends State<TenantsScreen> {
                   FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))
                 ],
                 decoration: InputDecoration(
-                  labelText:
-                      isSpanish ? 'Alquiler mensual (\$)' : 'Monthly Rent (\$)',
+                  labelText: '${s.monthlyRentTenant} (\$)',
                   prefixText: '\$',
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
               _DateRow(
-                label: isSpanish ? 'Inicio del bail' : 'Lease Start',
+                label: s.leaseStartLabel,
                 date: leaseStart,
                 isSpanish: isSpanish,
                 onTap: () async {
@@ -142,7 +141,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
               ),
               const SizedBox(height: AppSpacing.sm),
               _DateRow(
-                label: isSpanish ? 'Fin del bail' : 'Lease End',
+                label: s.leaseEndLabel,
                 date: leaseEnd,
                 isSpanish: isSpanish,
                 onTap: () async {
@@ -160,7 +159,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                 controller: notesCtrl,
                 maxLines: 2,
                 decoration: InputDecoration(
-                  labelText: isSpanish ? 'Notas' : 'Notes',
+                  labelText: s.notes,
                   prefixIcon: const Icon(Icons.notes_rounded),
                 ),
               ),
@@ -169,7 +168,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(d),
-              child: Text(isSpanish ? 'Cancelar' : 'Cancel'),
+              child: Text(s.cancel),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(minimumSize: const Size(80, 40)),
@@ -201,7 +200,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                 if (d.mounted) Navigator.pop(d);
                 _load();
               },
-              child: Text(isSpanish ? 'Guardar' : 'Save'),
+              child: Text(s.save),
             ),
           ],
         ),
@@ -211,23 +210,23 @@ class _TenantsScreenState extends State<TenantsScreen> {
 
   Future<void> _confirmDelete(
       BuildContext ctx, bool isSpanish, Tenant t) async {
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     final confirmed = await showDialog<bool>(
       context: ctx,
       builder: (d) => AlertDialog(
-        title: Text(isSpanish ? 'Eliminar locatario' : 'Delete tenant'),
-        content:
-            Text(isSpanish ? '¿Eliminar a ${t.name}?' : 'Delete ${t.name}?'),
+        title: Text(s.deleteTenant),
+        content: Text(s.deleteTenantConfirm(t.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(d, false),
-            child: Text(isSpanish ? 'Cancelar' : 'Cancel'),
+            child: Text(s.cancel),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
                 backgroundColor: CalcwiseSemanticColors.errorDark,
                 minimumSize: const Size(80, 40)),
             onPressed: () => Navigator.pop(d, true),
-            child: Text(isSpanish ? 'Eliminar' : 'Delete'),
+            child: Text(s.delete),
           ),
         ],
       ),
@@ -243,9 +242,10 @@ class _TenantsScreenState extends State<TenantsScreen> {
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (_, isSpanish, __) {
+        final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
         return Scaffold(
           appBar: AppBar(
-            title: Text(isSpanish ? 'Locatarios' : 'Tenants'),
+            title: Text(s.tenants),
             actions: [
               IconButton(
                 icon: const Icon(Icons.refresh_rounded),
@@ -258,7 +258,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
             backgroundColor: AppTheme.primary,
             foregroundColor: Colors.white,
             icon: const Icon(Icons.person_add_rounded),
-            label: Text(isSpanish ? 'Agregar' : 'Add Tenant'),
+            label: Text(s.addTenant),
           ),
           body: Column(
             children: [
@@ -379,9 +379,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                               child: _LeaseDateTile(
                                                 icon: Icons
                                                     .calendar_today_rounded,
-                                                label: isSpanish
-                                                    ? 'Inicio'
-                                                    : 'Start',
+                                                label: s.leaseStartLabel,
                                                 value: _fmt(
                                                     t.leaseStart, isSpanish),
                                               ),
@@ -390,9 +388,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                               child: _LeaseDateTile(
                                                 icon: Icons
                                                     .event_available_rounded,
-                                                label: isSpanish
-                                                    ? 'Vencimiento'
-                                                    : 'End',
+                                                label: s.leaseEndLabel,
                                                 value:
                                                     _fmt(t.leaseEnd, isSpanish),
                                               ),
@@ -424,9 +420,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                                 ),
                                                 const SizedBox(width: 6),
                                                 Text(
-                                                  isSpanish
-                                                      ? 'Vence en $daysLeft días'
-                                                      : 'Expires in $daysLeft days',
+                                                  s.expiresInDays(daysLeft),
                                                   style: const TextStyle(
                                                     fontSize: AppTextSize.sm,
                                                     color: AppTheme.warning,
@@ -461,9 +455,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                                 ),
                                                 const SizedBox(width: 6),
                                                 Text(
-                                                  isSpanish
-                                                      ? 'Bail vencido hace ${(-daysLeft)} días'
-                                                      : 'Lease expired ${(-daysLeft)} days ago',
+                                                  s.leaseExpiredDaysAgo(-daysLeft),
                                                   style: const TextStyle(
                                                     fontSize: AppTextSize.sm,
                                                     color:
@@ -649,6 +641,7 @@ class _EmptyTenantsState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40),
@@ -662,16 +655,14 @@ class _EmptyTenantsState extends StatelessWidget {
                     .withValues(alpha: 0.35)),
             const SizedBox(height: AppSpacing.lg),
             Text(
-              isSpanish ? 'Sin locatarios' : 'No tenants yet',
+              s.noTenantsYet,
               style: const TextStyle(
                   fontSize: AppTextSize.subtitle, fontWeight: FontWeight.w600),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              isSpanish
-                  ? 'Toca el botón + para agregar un locatario a esta propiedad.'
-                  : 'Tap the + button to add a tenant to this property.',
+              s.noTenantsSubtitle,
               style: TextStyle(color: CalcwiseTheme.of(context).textSecondary),
               textAlign: TextAlign.center,
             ),

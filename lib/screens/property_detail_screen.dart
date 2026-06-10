@@ -4,6 +4,8 @@ import 'package:intl/intl.dart' show DateFormat;
 import '../core/firebase/analytics_service.dart';
 import '../core/freemium/freemium_service.dart';
 import '../core/theme/app_theme.dart';
+import '../l10n/strings_en.dart';
+import '../l10n/strings_es.dart';
 import '../main.dart';
 import '../models/expense_model.dart';
 import '../models/property_model.dart';
@@ -52,6 +54,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
 
   Future<void> _showPropertyDialog(BuildContext ctx, bool isSpanish,
       {Property? existing}) async {
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     final nameCtrl = TextEditingController(text: existing?.name ?? '');
     final addrCtrl = TextEditingController(text: existing?.address ?? '');
     final rentCtrl = TextEditingController(
@@ -66,21 +69,19 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
     await showDialog<void>(
       context: ctx,
       builder: (d) => AlertDialog(
-        title: Text(isSpanish ? 'Editar Propiedad' : 'Edit Property'),
+        title: Text(s.editProperty),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: nameCtrl,
-                decoration:
-                    InputDecoration(labelText: isSpanish ? 'Nombre' : 'Name'),
+                decoration: InputDecoration(labelText: s.propertyName),
               ),
               const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: addrCtrl,
-                decoration: InputDecoration(
-                    labelText: isSpanish ? 'Dirección' : 'Address'),
+                decoration: InputDecoration(labelText: s.address),
               ),
               const SizedBox(height: AppSpacing.md),
               TextField(
@@ -88,9 +89,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
                 decoration: InputDecoration(
-                    labelText: isSpanish
-                        ? 'Alquiler mensual (\$)'
-                        : 'Monthly Rent (\$)',
+                    labelText: s.monthlyRent,
                     prefixText: '\$'),
               ),
               const SizedBox(height: AppSpacing.md),
@@ -98,10 +97,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                 controller: sqftCtrl,
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(
-                    labelText: isSpanish
-                        ? 'Metros cuadrados (ft²)'
-                        : 'Square Footage (ft²)'),
+                decoration: InputDecoration(labelText: s.squareFootageOptional),
               ),
             ],
           ),
@@ -109,7 +105,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(d),
-            child: Text(isSpanish ? 'Cancelar' : 'Cancel'),
+            child: Text(s.cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -128,7 +124,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
               if (d.mounted) Navigator.pop(d);
             },
             style: ElevatedButton.styleFrom(minimumSize: const Size(80, 40)),
-            child: Text(isSpanish ? 'Guardar' : 'Save'),
+            child: Text(s.save),
           ),
         ],
       ),
@@ -170,6 +166,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (_, isSpanish, __) {
+        final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
         final isPremium = freemiumService.hasFullAccess;
         final visibleExpenses =
             isPremium ? _expenses : _expenses.take(12).toList();
@@ -197,12 +194,12 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
             actions: [
               IconButton(
                 icon: const Icon(Icons.edit_rounded),
-                tooltip: isSpanish ? 'Editar' : 'Edit',
+                tooltip: s.edit,
                 onPressed: () => _editProperty(isSpanish),
               ),
               IconButton(
                 icon: const Icon(Icons.history_rounded),
-                tooltip: isSpanish ? 'Historial completo' : 'Full history',
+                tooltip: s.expenseHistory,
                 onPressed: () => Navigator.of(context)
                     .push(
                       PageRouteBuilder(
@@ -217,7 +214,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
               ),
               IconButton(
                 icon: const Icon(Icons.people_rounded),
-                tooltip: isSpanish ? 'Locatarios' : 'Tenants',
+                tooltip: s.tenants,
                 onPressed: () => Navigator.of(context).push(
                   PageRouteBuilder(
                     pageBuilder: (_, __, ___) =>
@@ -235,9 +232,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
             backgroundColor: AppTheme.primary,
             foregroundColor: Colors.white,
             icon: const Icon(Icons.add_rounded),
-            label: Text(isSpanish
-                ? 'Agregar Gastos — ${dateFmt.format(DateTime(now.year, now.month))}'
-                : 'Add Expenses — ${dateFmt.format(DateTime(now.year, now.month))}'),
+            label: Text('${s.addExpenses} — ${dateFmt.format(DateTime(now.year, now.month))}'),
           ),
           floatingActionButtonLocation:
               FloatingActionButtonLocation.centerFloat,
@@ -308,9 +303,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                       Expanded(
                                         child: _InfoTile(
                                           icon: Icons.attach_money_rounded,
-                                          label: isSpanish
-                                              ? 'Alquiler mensual'
-                                              : 'Monthly Rent',
+                                          label: s.monthlyRent,
                                           value: AmountFormatter.ui(rent, 'USD'),
                                         ),
                                       ),
@@ -318,9 +311,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                         Expanded(
                                           child: _InfoTile(
                                             icon: Icons.straighten_rounded,
-                                            label: isSpanish
-                                                ? 'Superficie'
-                                                : 'Square Footage',
+                                            label: s.sqFt,
                                             value:
                                                 '${_property.squareFootage.toStringAsFixed(0)} ft²',
                                           ),
@@ -342,9 +333,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                               child: Padding(
                                 padding: const EdgeInsets.all(AppSpacing.lg),
                                 child: Text(
-                                  isSpanish
-                                      ? 'Sin gastos registrados para este mes. Usa el botón + para agregar.'
-                                      : 'No expenses recorded for this month. Tap + to add.',
+                                  s.noExpensesRecorded,
                                   style: TextStyle(
                                       color: CalcwiseTheme.of(context)
                                           .textSecondary),
@@ -356,9 +345,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                               children: [
                                 Expanded(
                                   child: _StatCard(
-                                    label: isSpanish
-                                        ? 'Flujo de caja'
-                                        : 'Cash Flow',
+                                    label: s.monthlyCashFlow,
                                     value:
                                         '${curCF < 0 ? '-' : '+'}${AmountFormatter.ui(curCF.abs(), 'USD')}',
                                     color: curCF >= 0
@@ -373,9 +360,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                 const SizedBox(width: AppSpacing.smPlus),
                                 Expanded(
                                   child: _StatCard(
-                                    label: isSpanish
-                                        ? 'Ratio gastos'
-                                        : 'Expense Ratio',
+                                    label: s.expenseRatio,
                                     value: '${curRatio.toStringAsFixed(1)}%',
                                     color: curRatio < 80
                                         ? AppTheme.success
@@ -390,8 +375,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                               children: [
                                 Expanded(
                                   child: _StatCard(
-                                    label:
-                                        isSpanish ? 'Flujo anual' : 'Annual CF',
+                                    label: s.annualCF,
                                     value:
                                         '${annualCF < 0 ? '-' : '+'}${AmountFormatter.ui(annualCF.abs(), 'USD')}',
                                     color: annualCF >= 0
@@ -428,9 +412,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                               child: Padding(
                                 padding: const EdgeInsets.all(AppSpacing.lg),
                                 child: Text(
-                                  isSpanish
-                                      ? 'Sin entradas aún.'
-                                      : 'No entries yet.',
+                                  s.noExpenseEntriesYet,
                                   style: TextStyle(
                                       color: CalcwiseTheme.of(context)
                                           .textSecondary),

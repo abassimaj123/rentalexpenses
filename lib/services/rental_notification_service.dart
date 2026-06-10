@@ -2,6 +2,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz_data;
+import '../l10n/strings_en.dart';
+import '../l10n/strings_es.dart';
 
 class RentalNotificationService {
   static final FlutterLocalNotificationsPlugin _plugin =
@@ -22,6 +24,7 @@ class RentalNotificationService {
 
   /// Schedule on the 28th of each month at 10:00 AM — reminds before month-end.
   static Future<void> scheduleMonthlyReminder(bool isSpanish) async {
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     await _plugin.cancel(_notifId);
     final now = tz.TZDateTime.now(tz.local);
     // next 28th at 10:00
@@ -31,6 +34,9 @@ class RentalNotificationService {
       scheduled =
           tz.TZDateTime(tz.local, now.year, now.month + 1, 28, 10, 0);
     }
+    final monthName = isSpanish
+        ? _monthNameEs(now.month)
+        : _monthNameEn(now.month);
     const androidDetails = AndroidNotificationDetails(
       _channelId,
       'Monthly Expense Reminder',
@@ -41,12 +47,8 @@ class RentalNotificationService {
     );
     await _plugin.zonedSchedule(
       _notifId,
-      isSpanish
-          ? '¡Registra tus gastos de renta!'
-          : 'Log your rental expenses!',
-      isSpanish
-          ? 'Registra tus gastos de ${_monthNameEs(now.month)} antes de fin de mes.'
-          : 'Log your ${_monthNameEn(now.month)} expenses before month end.',
+      s.notifTitle,
+      s.notifBody(monthName),
       scheduled,
       const NotificationDetails(android: androidDetails),
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,

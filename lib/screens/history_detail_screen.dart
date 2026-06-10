@@ -9,6 +9,8 @@ import '../core/firebase/analytics_service.dart';
 import '../core/freemium/freemium_service.dart';
 import '../core/freemium/iap_service.dart';
 import '../core/theme/app_theme.dart';
+import '../l10n/strings_en.dart';
+import '../l10n/strings_es.dart';
 import '../main.dart';
 import '../screens/calculator_screen.dart';
 import '../widgets/paywall_soft.dart';
@@ -33,6 +35,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
   }
 
   Future<void> _exportPdf(bool isPremium, bool isSpanish) async {
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     if (!isPremium) {
       await PaywallSoft.show(context);
       return;
@@ -69,7 +72,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                   pw.Text(
                     c.propertyName.isNotEmpty
                         ? c.propertyName
-                        : (isSpanish ? 'Mi Propiedad' : 'My Property'),
+                        : s.myProperty,
                     style: pw.TextStyle(
                       fontSize: AppTextSize.subtitle,
                       fontWeight: pw.FontWeight.bold,
@@ -78,7 +81,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                   ),
                   pw.SizedBox(height: 4),
                   pw.Text(
-                    '${isSpanish ? "Guardado" : "Saved"}: ${dateFmt.format(c.savedAt)}',
+                    '${s.savedLabel}: ${dateFmt.format(c.savedAt)}',
                     style: const pw.TextStyle(
                         fontSize: AppTextSize.xs, color: PdfColors.white),
                   ),
@@ -90,13 +93,13 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
             // ── Cash-flow hero row ────────────────────────────────────────
             pw.Row(children: [
               _pdfMetric(
-                label: isSpanish ? 'Flujo mensual' : 'Monthly Cash Flow',
+                label: s.monthlyCashFlow,
                 value: '$cfSign${AmountFormatter.ui(cf.abs(), 'USD')}',
                 color: cf >= 0 ? green : red,
               ),
               pw.SizedBox(width: 12),
               _pdfMetric(
-                label: isSpanish ? 'Flujo anual' : 'Annual Cash Flow',
+                label: s.annualCashFlow,
                 value:
                     '${c.annualCashFlow >= 0 ? '+' : '-'}${AmountFormatter.ui(c.annualCashFlow.abs(), 'USD')}',
                 color: c.annualCashFlow >= 0 ? green : red,
@@ -112,7 +115,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
 
             // ── Income / Expenses table ───────────────────────────────────
             pw.Text(
-              isSpanish ? 'Desglose' : 'Breakdown',
+              s.breakdown,
               style: pw.TextStyle(
                   fontWeight: pw.FontWeight.bold,
                   fontSize: AppTextSize.md,
@@ -120,65 +123,29 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
             ),
             pw.SizedBox(height: 6),
             pw.TableHelper.fromTextArray(
-              headers: [
-                isSpanish ? 'Categoría' : 'Category',
-                isSpanish ? 'Monto' : 'Amount',
-              ],
+              headers: [s.category, s.amount],
               data: [
-                [
-                  isSpanish ? 'Alquiler mensual' : 'Monthly Rent',
-                  AmountFormatter.ui(c.rentIncome, 'USD')
-                ],
+                [s.monthlyRent, AmountFormatter.ui(c.rentIncome, 'USD')],
                 if (c.mortgage > 0)
-                  [
-                    isSpanish ? 'Hipoteca' : 'Mortgage',
-                    AmountFormatter.ui(c.mortgage, 'USD')
-                  ],
+                  [s.mortgage, AmountFormatter.ui(c.mortgage, 'USD')],
                 if (c.propertyTaxes > 0)
-                  [
-                    isSpanish ? 'Impuestos' : 'Property Taxes',
-                    AmountFormatter.ui(c.propertyTaxes, 'USD')
-                  ],
+                  [s.propertyTaxesLabel, AmountFormatter.ui(c.propertyTaxes, 'USD')],
                 if (c.insurance > 0)
-                  [
-                    isSpanish ? 'Seguro' : 'Insurance',
-                    AmountFormatter.ui(c.insurance, 'USD')
-                  ],
+                  [s.insurance, AmountFormatter.ui(c.insurance, 'USD')],
                 if (c.hoaFees > 0) ['HOA', AmountFormatter.ui(c.hoaFees, 'USD')],
                 if (c.propertyMgmt > 0)
-                  [
-                    isSpanish ? 'Administración' : 'Property Mgmt',
-                    AmountFormatter.ui(c.propertyMgmt, 'USD')
-                  ],
+                  [s.administration, AmountFormatter.ui(c.propertyMgmt, 'USD')],
                 if (c.maintenance > 0)
-                  [
-                    isSpanish ? 'Mantenimiento' : 'Maintenance',
-                    AmountFormatter.ui(c.maintenance, 'USD')
-                  ],
+                  [s.maintenance, AmountFormatter.ui(c.maintenance, 'USD')],
                 if (c.vacancyLoss > 0)
-                  [
-                    isSpanish ? 'Vacancia' : 'Vacancy',
-                    AmountFormatter.ui(c.vacancyLoss, 'USD')
-                  ],
+                  [s.vacancy, AmountFormatter.ui(c.vacancyLoss, 'USD')],
                 if (c.utilities > 0)
-                  [
-                    isSpanish ? 'Servicios' : 'Utilities',
-                    AmountFormatter.ui(c.utilities, 'USD')
-                  ],
+                  [s.utilities, AmountFormatter.ui(c.utilities, 'USD')],
                 if (c.landscaping > 0)
-                  [
-                    isSpanish ? 'Jardinería' : 'Landscaping',
-                    AmountFormatter.ui(c.landscaping, 'USD')
-                  ],
+                  [s.landscapingLabel, AmountFormatter.ui(c.landscaping, 'USD')],
                 if (c.otherExpenses > 0)
-                  [
-                    isSpanish ? 'Otros' : 'Other',
-                    AmountFormatter.ui(c.otherExpenses, 'USD')
-                  ],
-                [
-                  isSpanish ? 'TOTAL GASTOS' : 'TOTAL EXPENSES',
-                  AmountFormatter.ui(c.totalExpenses, 'USD')
-                ],
+                  [s.other, AmountFormatter.ui(c.otherExpenses, 'USD')],
+                [s.totalExpenses, AmountFormatter.ui(c.totalExpenses, 'USD')],
               ],
               border: pw.TableBorder.all(color: PdfColors.grey300),
               headerStyle: pw.TextStyle(
@@ -194,7 +161,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
             // ── Investor metrics (if available) ───────────────────────────
             if (c.capRate != null || c.cocRoi != null) ...[
               pw.Text(
-                isSpanish ? 'Métricas de Inversión' : 'Investment Metrics',
+                s.investmentMetrics,
                 style: pw.TextStyle(
                     fontWeight: pw.FontWeight.bold,
                     fontSize: AppTextSize.md,
@@ -212,7 +179,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                 ],
                 if (c.grossYield != null) ...[
                   _pdfMetric(
-                    label: isSpanish ? 'Rend. bruto' : 'Gross Yield',
+                    label: s.grossYield,
                     value: '${c.grossYield!.toStringAsFixed(2)}%',
                     color: c.grossYield! >= 8 ? green : red,
                   ),
@@ -247,10 +214,9 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
       );
     } catch (e) {
       if (mounted) {
+        final s2 = isSpanishNotifier.value ? const AppStringsEs() : const AppStringsEn();
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(isSpanishNotifier.value
-              ? 'Error al exportar PDF'
-              : 'PDF export failed'),
+          content: Text(s2.pdfExportFailed),
         ));
       }
     } finally {
@@ -300,12 +266,13 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (_, isSpanish, __) {
+        final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
         return Scaffold(
           appBar: AppBar(
             title: Text(
               c.propertyName.isNotEmpty
                   ? c.propertyName
-                  : (isSpanish ? 'Detalle de cálculo' : 'Calculation Detail'),
+                  : s.calculationDetail,
             ),
             actions: [
               // Premium badge / upsell
@@ -321,7 +288,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                   }
                   return IconButton(
                     icon: const Icon(Icons.star_outline, color: Colors.amber),
-                    tooltip: isSpanish ? 'Obtener Premium' : 'Go Premium',
+                    tooltip: s.goPremium,
                     onPressed: () => IAPService.instance.buy(),
                   );
                 },
@@ -329,7 +296,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
               // Share
               IconButton(
                 icon: const Icon(Icons.share_rounded),
-                tooltip: isSpanish ? 'Compartir' : 'Share',
+                tooltip: s.share,
                 onPressed: () => _share(context, isSpanish),
               ),
             ],
@@ -361,9 +328,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
 
                     // ── Cash-flow hero ──────────────────────────────────
                     _HeroCard(
-                      label: isSpanish
-                          ? 'Flujo de caja mensual'
-                          : 'Monthly Cash Flow',
+                      label: s.monthlyCashFlow,
                       value:
                           '${c.monthlyCashFlow < 0 ? '-' : ''}${AmountFormatter.ui(c.monthlyCashFlow.abs(), 'USD')}',
                       color: cfColor,
@@ -372,10 +337,10 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
 
                     // ── Income ──────────────────────────────────────────
                     _SectionCard(
-                      title: isSpanish ? 'Ingresos' : 'Income',
+                      title: s.income,
                       rows: [
                         _Row(
-                          isSpanish ? 'Ingreso por renta' : 'Rent Income',
+                          s.rentIncome,
                           AmountFormatter.ui(c.rentIncome, 'USD'),
                         ),
                       ],
@@ -384,41 +349,39 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
 
                     // ── Expenses breakdown ──────────────────────────────
                     _SectionCard(
-                      title:
-                          isSpanish ? 'Gastos mensuales' : 'Monthly Expenses',
+                      title: s.monthlyExpensesSection,
                       rows: [
                         if (c.mortgage > 0)
-                          _Row(isSpanish ? 'Hipoteca' : 'Mortgage',
+                          _Row(s.mortgage,
                               AmountFormatter.ui(c.mortgage, 'USD')),
                         if (c.propertyTaxes > 0)
-                          _Row(
-                              isSpanish ? 'Impuesto predial' : 'Property Taxes',
+                          _Row(s.propertyTaxesLabel,
                               AmountFormatter.ui(c.propertyTaxes, 'USD')),
                         if (c.insurance > 0)
-                          _Row(isSpanish ? 'Seguro' : 'Insurance',
+                          _Row(s.insurance,
                               AmountFormatter.ui(c.insurance, 'USD')),
                         if (c.hoaFees > 0)
                           _Row('HOA', AmountFormatter.ui(c.hoaFees, 'USD')),
                         if (c.propertyMgmt > 0)
-                          _Row(isSpanish ? 'Administración' : 'Property Mgmt',
+                          _Row(s.administration,
                               AmountFormatter.ui(c.propertyMgmt, 'USD')),
                         if (c.maintenance > 0)
-                          _Row(isSpanish ? 'Mantenimiento' : 'Maintenance',
+                          _Row(s.maintenance,
                               AmountFormatter.ui(c.maintenance, 'USD')),
                         if (c.vacancyLoss > 0)
-                          _Row(isSpanish ? 'Vacancia' : 'Vacancy Loss',
+                          _Row(s.vacancy,
                               AmountFormatter.ui(c.vacancyLoss, 'USD')),
                         if (c.utilities > 0)
-                          _Row(isSpanish ? 'Servicios' : 'Utilities',
+                          _Row(s.utilities,
                               AmountFormatter.ui(c.utilities, 'USD')),
                         if (c.landscaping > 0)
-                          _Row(isSpanish ? 'Jardinería' : 'Landscaping',
+                          _Row(s.landscapingLabel,
                               AmountFormatter.ui(c.landscaping, 'USD')),
                         if (c.otherExpenses > 0)
-                          _Row(isSpanish ? 'Otros gastos' : 'Other Expenses',
+                          _Row(s.other,
                               AmountFormatter.ui(c.otherExpenses, 'USD')),
                         _Row(
-                          isSpanish ? 'Total gastos' : 'Total Expenses',
+                          s.totalExpensesLabel,
                           AmountFormatter.ui(c.totalExpenses, 'USD'),
                           bold: true,
                           valueColor: AppTheme.dangerRed,
@@ -429,24 +392,24 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
 
                     // ── Summary metrics ─────────────────────────────────
                     _SectionCard(
-                      title: isSpanish ? 'Métricas clave' : 'Key Metrics',
+                      title: s.keyMetrics,
                       rows: [
                         _Row(
-                          isSpanish ? 'Alquiler anual' : 'Annual Rent',
+                          s.annualRent,
                           AmountFormatter.ui(c.rentIncome * 12, 'USD'),
                         ),
                         _Row(
-                          isSpanish ? 'Gastos anuales' : 'Annual Expenses',
+                          s.annualExpenses,
                           AmountFormatter.ui(c.totalExpenses * 12, 'USD'),
                           valueColor: AppTheme.dangerRed,
                         ),
                         _Row(
-                          isSpanish ? 'Flujo anual' : 'Annual Cash Flow',
+                          s.annualCashFlow,
                           '${c.annualCashFlow < 0 ? '-' : ''}${AmountFormatter.ui(c.annualCashFlow.abs(), 'USD')}',
                           valueColor: cfColor,
                         ),
                         _Row(
-                          isSpanish ? 'Ratio de gastos' : 'Expense Ratio',
+                          s.expenseRatio,
                           '${c.expenseRatio.toStringAsFixed(1)}%',
                           valueColor: c.expenseRatio < 70
                               ? AppTheme.success
@@ -455,11 +418,11 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                                   : AppTheme.dangerRed,
                         ),
                         _Row(
-                          isSpanish ? 'Renta mínima' : 'Break-even Rent',
+                          s.breakEvenRentLabel,
                           '${AmountFormatter.ui(c.breakEvenRent, 'USD')}/mo',
                         ),
                         _Row(
-                          'NOI (anual)',
+                          s.annualNOI,
                           '${c.noi < 0 ? '-' : ''}${AmountFormatter.ui(c.noi.abs(), 'USD')}',
                           valueColor: c.noi >= 0
                               ? AppTheme.success
@@ -472,9 +435,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                     if (c.capRate != null || c.cocRoi != null) ...[
                       const SizedBox(height: 12),
                       _SectionCard(
-                        title: isSpanish
-                            ? 'Métricas de Inversión'
-                            : 'Investment Metrics',
+                        title: s.investmentMetrics,
                         rows: [
                           if (c.capRate != null)
                             _Row(
@@ -488,7 +449,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                             ),
                           if (c.grossYield != null)
                             _Row(
-                              isSpanish ? 'Rendimiento bruto' : 'Gross Yield',
+                              s.grossYield,
                               '${c.grossYield!.toStringAsFixed(2)}%',
                               valueColor: c.grossYield! >= 8
                                   ? AppTheme.success
@@ -505,12 +466,8 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                                       : AppTheme.dangerRed,
                             ),
                           _Row(
-                            isSpanish
-                                ? 'Cap Rate > 6% = bueno'
-                                : 'Cap Rate > 6% = good',
-                            isSpanish
-                                ? 'CoC ROI > 8% = excelente'
-                                : 'CoC ROI > 8% = excellent',
+                            s.capRateGood,
+                            s.cocRoiExcellent,
                             valueColor: CalcwiseTheme.of(context).textSecondary,
                           ),
                         ],
@@ -542,7 +499,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                           ),
                           icon: Icon(isPremium ? Icons.picture_as_pdf_rounded : Icons.lock_rounded, size: 20),
                           label: Text(
-                            isSpanish ? 'Exportar PDF' : 'Export PDF',
+                            s.exportPdf,
                             style: const TextStyle(fontSize: AppTextSize.body, fontWeight: FontWeight.w600),
                           ),
                           onPressed: _exporting
@@ -563,32 +520,25 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
   }
 
   void _share(BuildContext context, bool isSpanish) {
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     final c = widget.calc;
-    final name = c.propertyName.isNotEmpty
-        ? c.propertyName
-        : (isSpanish ? 'Mi propiedad' : 'My Property');
+    final name = c.propertyName.isNotEmpty ? c.propertyName : s.myProperty;
     final cf =
         '${c.monthlyCashFlow < 0 ? '-' : ''}${AmountFormatter.ui(c.monthlyCashFlow.abs(), 'USD')}';
-    final text = isSpanish
-        ? '$name\n'
-            'Renta: ${AmountFormatter.ui(c.rentIncome, 'USD')}/mes\n'
-            'Gastos: ${AmountFormatter.ui(c.totalExpenses, 'USD')}/mes\n'
-            'Flujo mensual: $cf\n'
-            'Flujo anual: ${AmountFormatter.ui(c.annualCashFlow, 'USD')}\n'
-            'Ratio de gastos: ${c.expenseRatio.toStringAsFixed(1)}%\n'
-            '\nRental Expenses Tracker\n\n'
-            '📄 Exporta el reporte completo en PDF →'
-        : '$name\n'
-            'Rent: ${AmountFormatter.ui(c.rentIncome, 'USD')}/mo\n'
-            'Expenses: ${AmountFormatter.ui(c.totalExpenses, 'USD')}/mo\n'
-            'Monthly CF: $cf\n'
-            'Annual CF: ${AmountFormatter.ui(c.annualCashFlow, 'USD')}\n'
-            'Expense Ratio: ${c.expenseRatio.toStringAsFixed(1)}%\n'
-            '\nRental Expenses Tracker\n\n'
-            '📄 Export the full PDF report in the app →';
+    final text = [
+      s.shareTitle(name),
+      s.shareMonthlyRent(AmountFormatter.ui(c.rentIncome, 'USD')),
+      s.shareTotalExpenses(AmountFormatter.ui(c.totalExpenses, 'USD')),
+      s.shareMonthlyCashFlow(c.monthlyCashFlow < 0 ? '-' : '', AmountFormatter.ui(c.monthlyCashFlow.abs(), 'USD')),
+      s.shareAnnualCashFlow(c.annualCashFlow < 0 ? '-' : '', AmountFormatter.ui(c.annualCashFlow.abs(), 'USD')),
+      s.shareAnnualNOI(AmountFormatter.ui(c.noi, 'USD')),
+      '',
+      s.shareCalculatedWith,
+      '',
+      s.shareExportPdfCTA,
+    ].join('\n');
 
-    Share.share(text,
-        subject: isSpanish ? 'Cálculo — $name' : 'Calculation — $name');
+    Share.share(text, subject: s.shareTitle(name));
   }
 }
 

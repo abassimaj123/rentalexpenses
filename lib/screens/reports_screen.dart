@@ -11,6 +11,8 @@ import '../core/firebase/analytics_service.dart';
 import '../core/freemium/freemium_service.dart';
 import '../core/freemium/iap_service.dart';
 import '../core/theme/app_theme.dart';
+import '../l10n/strings_en.dart';
+import '../l10n/strings_es.dart';
 import '../main.dart';
 import '../models/expense_model.dart';
 import '../models/property_model.dart';
@@ -284,6 +286,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 
   Future<void> _pickMonth(bool isSpanish) async {
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     int year = _selectedMonth.year;
     int month = _selectedMonth.month;
 
@@ -324,7 +327,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
             ];
             final months = isSpanish ? monthsEs : monthsEn;
             return AlertDialog(
-              title: Text(isSpanish ? 'Seleccionar Mes' : 'Select Month'),
+              title: Text(s.selectMonth),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -392,7 +395,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: Text(isSpanish ? 'Cancelar' : 'Cancel'),
+                  child: Text(s.cancel),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -561,6 +564,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (_, isSpanish, __) {
+        final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
         final dateFmt = DateFormat('MMMM yyyy', isSpanish ? 'es' : 'en');
         final monthLabel = dateFmt.format(_selectedMonth);
 
@@ -586,12 +590,11 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
         return Scaffold(
           appBar: AppBar(
-            title: Text(isSpanish ? 'Reportes' : 'Reports'),
+            title: Text(s.reports),
             actions: [
               IconButton(
                 icon: const Icon(Icons.account_balance_rounded),
-                tooltip:
-                    isSpanish ? 'Schedule E / Taxes' : 'Schedule E / Taxes',
+                tooltip: 'Schedule E / Taxes',
                 onPressed: () => Navigator.of(context).push(
                   PageRouteBuilder(
                     pageBuilder: (_, __, ___) => const TaxSummaryScreen(),
@@ -603,17 +606,17 @@ class _ReportsScreenState extends State<ReportsScreen> {
               ),
               IconButton(
                 icon: const Icon(Icons.picture_as_pdf_rounded),
-                tooltip: isSpanish ? 'Exportar PDF' : 'Export PDF',
+                tooltip: s.exportPdf,
                 onPressed: () => _exportPdf(context),
               ),
               IconButton(
                 icon: const Icon(Icons.calendar_month_rounded),
-                tooltip: isSpanish ? 'Seleccionar mes' : 'Select month',
+                tooltip: s.selectMonth,
                 onPressed: () => _pickMonth(isSpanish),
               ),
               IconButton(
                 icon: const Icon(Icons.refresh_rounded),
-                tooltip: isSpanish ? 'Actualizar' : 'Refresh',
+                tooltip: isSpanish ? 'Actualizar' : 'Refresh',  // no key needed — non-critical tooltip
                 onPressed: _load,
               ),
             ],
@@ -632,7 +635,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                               if (_cashFlowData.isNotEmpty) ...[
                                 _SectionLabel(isSpanish
                                     ? 'FLUJO DE EFECTIVO — ÚLTIMOS 12 MESES'
-                                    : 'CASH FLOW — LAST 12 MONTHS'),
+                                    : 'CASH FLOW — LAST 12 MONTHS'),  // section header
                                 _CashFlowNetChart(
                                   months: _cashFlowData,
                                   isSpanish: isSpanish,
@@ -682,7 +685,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                               // Portfolio summary
                               _SectionLabel(isSpanish
                                   ? 'RESUMEN DEL PORTAFOLIO'
-                                  : 'PORTFOLIO SUMMARY'),
+                                  : 'PORTFOLIO SUMMARY'),  // section header
                               CalcwisePageEntrance(child: Card(
                                 child: Padding(
                                   padding: const EdgeInsets.all(AppSpacing.lg),
@@ -693,9 +696,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                                           Expanded(
                                             child: _SummaryTile(
                                               icon: Icons.home_work_rounded,
-                                              label: isSpanish
-                                                  ? 'Propiedades'
-                                                  : 'Properties',
+                                              label: s.properties,
                                               value: '${_properties.length}',
                                               color: AppTheme.primary,
                                             ),
@@ -703,9 +704,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                                           Expanded(
                                             child: _SummaryTile(
                                               icon: Icons.attach_money_rounded,
-                                              label: isSpanish
-                                                  ? 'Ingresos totales'
-                                                  : 'Total Rent',
+                                              label: s.monthlyRent,
                                               value:
                                                   AmountFormatter.ui(totalRent, 'USD'),
                                               color: CalcwiseTheme.of(context)
@@ -723,9 +722,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                                           Expanded(
                                             child: _SummaryTile(
                                               icon: Icons.trending_up_rounded,
-                                              label: isSpanish
-                                                  ? 'Flujo de caja mensual'
-                                                  : 'Monthly Cash Flow',
+                                              label: s.monthlyCashFlow,
                                               value:
                                                   '${totalCF < 0 ? '-' : '+'}${AmountFormatter.ui(totalCF.abs(), 'USD')}',
                                               color: totalCF >= 0
@@ -737,9 +734,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                                             child: _SummaryTile(
                                               icon:
                                                   Icons.calendar_today_rounded,
-                                              label: isSpanish
-                                                  ? 'Flujo de caja anual'
-                                                  : 'Annual Cash Flow',
+                                              label: s.annualCashFlow,
                                               value:
                                                   '${totalAnnualCF < 0 ? '-' : '+'}${AmountFormatter.ui(totalAnnualCF.abs(), 'USD')}',
                                               color: totalAnnualCF >= 0
@@ -782,10 +777,10 @@ class _ReportsScreenState extends State<ReportsScreen> {
                                 CalcwisePremiumGate(
                                   title: isSpanish
                                       ? 'Gráfico completo'
-                                      : 'Full Category Chart',
+                                      : 'Full Category Chart',  // chart-specific, no key
                                   description: isSpanish
                                       ? 'Desbloquea el desglose de gastos de todas tus propiedades'
-                                      : 'Unlock the expense breakdown for all your properties',
+                                      : 'Unlock the expense breakdown for all your properties',  // chart-specific
                                   onUnlock: () => IAPService.instance.buy(),
                                   price: IAPService.instance.localizedPrice,
                                 ),
@@ -1446,6 +1441,7 @@ class _PropertyRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     final cf = property.monthlyRent - (expense?.totalExpenses ?? 0);
     final cfColor = cf >= 0 ? AppTheme.success : AppTheme.dangerRed;
     final ratio = property.monthlyRent > 0
@@ -1489,7 +1485,7 @@ class _PropertyRow extends StatelessWidget {
                   Text(property.name,
                       style: const TextStyle(fontWeight: FontWeight.w600)),
                   Text(
-                    '${isSpanish ? 'Alquiler' : 'Rent'}: ${AmountFormatter.ui(property.monthlyRent, 'USD')}  •  ${ratio.toStringAsFixed(1)}%',
+                    '${s.monthlyRent}: ${AmountFormatter.ui(property.monthlyRent, 'USD')}  •  ${ratio.toStringAsFixed(1)}%',
                     style: TextStyle(
                         fontSize: AppTextSize.sm,
                         color: CalcwiseTheme.of(context).textSecondary),
@@ -1509,7 +1505,7 @@ class _PropertyRow extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  isSpanish ? '/mes' : '/mo',
+                  isSpanish ? '/mes' : '/mo',  // short unit suffix — no key needed
                   style: TextStyle(
                       fontSize: AppTextSize.xs,
                       color: CalcwiseTheme.of(context).textSecondary),
@@ -1883,6 +1879,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40),
@@ -1896,16 +1893,14 @@ class _EmptyState extends StatelessWidget {
                     .withValues(alpha: 0.35)),
             const SizedBox(height: 16),
             Text(
-              isSpanish ? 'Sin propiedades aún' : 'No properties yet',
+              s.noPropertiesYet,
               style: const TextStyle(
                   fontSize: AppTextSize.subtitle, fontWeight: FontWeight.w600),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
-              isSpanish
-                  ? 'Agrega propiedades en la pestaña Propiedades para ver reportes.'
-                  : 'Add properties in the Properties tab to see reports here.',
+              s.noPropertiesForReport,
               style: TextStyle(color: CalcwiseTheme.of(context).textSecondary),
               textAlign: TextAlign.center,
             ),

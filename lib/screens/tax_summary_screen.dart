@@ -8,6 +8,8 @@ import '../core/constants/irs_categories.dart';
 import '../core/firebase/analytics_service.dart';
 import '../core/freemium/freemium_service.dart';
 import '../core/theme/app_theme.dart';
+import '../l10n/strings_en.dart';
+import '../l10n/strings_es.dart';
 import '../main.dart';
 import '../models/property_model.dart';
 import '../models/schedule_e_entry_model.dart';
@@ -208,6 +210,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
   Future<void> _addOrEditEntry(
       BuildContext ctx, bool isSpanish, Property property,
       {ScheduleEEntry? existing}) async {
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     String selectedCategory = existing?.category ?? IrsCategories.all.first;
     final amountCtrl = TextEditingController(
         text: existing != null && existing.amount > 0
@@ -220,9 +223,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
       context: ctx,
       builder: (d) => StatefulBuilder(
         builder: (d, setLocal) => AlertDialog(
-          title: Text(existing != null
-              ? (isSpanish ? 'Editar gasto' : 'Edit Expense')
-              : (isSpanish ? 'Agregar gasto' : 'Add Expense')),
+          title: Text(existing != null ? s.editExpense : s.addExpense),
           scrollable: true,
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -231,7 +232,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                 initialValue: selectedCategory,
                 isExpanded: true,
                 decoration: InputDecoration(
-                  labelText: isSpanish ? 'Categoría IRS' : 'IRS Category',
+                  labelText: s.irsCategory,
                 ),
                 items: IrsCategories.all.map((c) {
                   return DropdownMenuItem(
@@ -251,7 +252,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
                 decoration: InputDecoration(
-                  labelText: isSpanish ? 'Monto (\$)' : 'Amount (\$)',
+                  labelText: '${s.amount} (\$)',
                   prefixText: '\$',
                 ),
               ),
@@ -259,7 +260,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(
-                  isSpanish ? 'Gasto recurrente' : 'Recurring expense',
+                  s.recurringExpense,
                   style: const TextStyle(fontSize: AppTextSize.body),
                 ),
                 value: isRecurring,
@@ -270,16 +271,16 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                 DropdownButtonFormField<String>(
                   initialValue: recurrenceType,
                   decoration: InputDecoration(
-                    labelText: isSpanish ? 'Frecuencia' : 'Frequency',
+                    labelText: s.frequency,
                   ),
                   items: [
                     DropdownMenuItem(
                       value: 'monthly',
-                      child: Text(isSpanish ? 'Mensual' : 'Monthly'),
+                      child: Text(s.monthly),
                     ),
                     DropdownMenuItem(
                       value: 'annual',
-                      child: Text(isSpanish ? 'Anual' : 'Annual'),
+                      child: Text(s.annual),
                     ),
                   ],
                   onChanged: (v) =>
@@ -299,11 +300,11 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                 style: TextButton.styleFrom(
                     foregroundColor: CalcwiseSemanticColors.error(
                         Theme.of(d).brightness)),
-                child: Text(isSpanish ? 'Eliminar' : 'Delete'),
+                child: Text(s.delete),
               ),
             TextButton(
               onPressed: () => Navigator.pop(d),
-              child: Text(isSpanish ? 'Cancelar' : 'Cancel'),
+              child: Text(s.cancel),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(minimumSize: const Size(80, 40)),
@@ -336,7 +337,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                 if (d.mounted) Navigator.pop(d);
                 _load();
               },
-              child: Text(isSpanish ? 'Guardar' : 'Save'),
+              child: Text(s.save),
             ),
           ],
         ),
@@ -349,6 +350,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
       await PaywallHard.show(ctx);
       return;
     }
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     setState(() => _exporting = true);
     try {
       final doc = pw.Document();
@@ -378,12 +380,12 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                 ),
                 pw.SizedBox(height: 4),
                 pw.Text(
-                  '${isSpanish ? 'Propiedad' : 'Property'}: ${property.name}',
+                  '${s.property}: ${property.name}',
                   style: pw.TextStyle(
                       fontSize: AppTextSize.md, fontWeight: pw.FontWeight.bold),
                 ),
                 pw.Text(
-                  '${isSpanish ? 'Dirección' : 'Address'}: ${property.address}',
+                  '${s.address}: ${property.address}',
                   style: const pw.TextStyle(fontSize: AppTextSize.xs),
                 ),
                 pw.SizedBox(height: 14),
@@ -409,7 +411,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                 pw.TableHelper.fromTextArray(
                   headers: [
                     isSpanish ? 'Artículo' : 'Item',
-                    isSpanish ? 'Monto' : 'Amount',
+                    s.amount,
                   ],
                   data: [
                     [
@@ -436,8 +438,8 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                 pw.SizedBox(height: 4),
                 pw.TableHelper.fromTextArray(
                   headers: [
-                    isSpanish ? 'Categoría' : 'Category',
-                    isSpanish ? 'Monto' : 'Amount',
+                    s.category,
+                    s.amount,
                   ],
                   data: [
                     ...IrsCategories.all
@@ -445,7 +447,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                             catTotals.containsKey(c) && catTotals[c]! > 0)
                         .map((c) => [c, '\$${AmountFormatter.formatNumber(catTotals[c]!)}']),
                     [
-                      isSpanish ? 'Gastos Totales' : 'Total Expenses',
+                      s.totalExpensesLabel,
                       '\$${AmountFormatter.formatNumber(totalExp)}',
                     ],
                   ],
@@ -472,11 +474,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                     children: [
                       pw.Text(
-                        net >= 0
-                            ? (isSpanish
-                                ? 'Ingreso Neto de Alquiler'
-                                : 'Net Rental Income')
-                            : (isSpanish ? 'Pérdida Neta' : 'Net Rental Loss'),
+                        net >= 0 ? s.netRentalIncome : s.netRentalLoss,
                         style: pw.TextStyle(
                             fontSize: AppTextSize.sm,
                             fontWeight: pw.FontWeight.bold,
@@ -535,6 +533,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (_, isSpanish, __) {
+        final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
         // Portfolio totals
         double grandIncome = 0;
         double grandExpenses = 0;
@@ -546,9 +545,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
 
         return Scaffold(
           appBar: AppBar(
-            title: Text(isSpanish
-                ? 'Resumen Fiscal Schedule E'
-                : 'Tax Summary — Schedule E'),
+            title: Text(s.taxSummaryTitle),
             actions: [
               if (_exporting)
                 const Padding(
@@ -563,9 +560,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
               else
                 IconButton(
                   icon: const Icon(Icons.picture_as_pdf_rounded),
-                  tooltip: isSpanish
-                      ? 'Exportar Schedule E PDF'
-                      : 'Export Schedule E PDF',
+                  tooltip: s.exportScheduleE,
                   onPressed: () => _exportPdf(context, isSpanish),
                 ),
               IconButton(
@@ -583,14 +578,14 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                         padding: const EdgeInsets.all(AppSpacing.lg),
                         children: [
                           // Year selector
-                          _SectionLabel(isSpanish ? 'AÑO FISCAL' : 'TAX YEAR'),
+                          _SectionLabel(s.taxYearLabel),
                           Card(
                             child: Padding(
                               padding: const EdgeInsets.all(AppSpacing.xs),
                               child: DropdownButtonFormField<int>(
                                 initialValue: _selectedYear,
                                 decoration: InputDecoration(
-                                  labelText: isSpanish ? 'Año' : 'Year',
+                                  labelText: s.year,
                                   prefixIcon:
                                       const Icon(Icons.calendar_today_rounded),
                                 ),
@@ -612,26 +607,20 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
 
                           // Portfolio net summary
                           if (_properties.isNotEmpty) ...[
-                            _SectionLabel(isSpanish
-                                ? 'RESUMEN PORTAFOLIO'
-                                : 'PORTFOLIO NET'),
+                            _SectionLabel(s.portfolioNet),
                             CalcwisePageEntrance(child: Card(
                               child: Padding(
                                 padding: const EdgeInsets.all(AppSpacing.lg),
                                 child: Column(
                                   children: [
                                     _NetRow(
-                                      label: isSpanish
-                                          ? 'Total ingresos'
-                                          : 'Total Rental Income',
+                                      label: s.totalRentalIncome,
                                       value: '\$${AmountFormatter.formatNumber(grandIncome)}',
                                       color: AppTheme.success,
                                     ),
                                     const SizedBox(height: AppSpacing.sm),
                                     _NetRow(
-                                      label: isSpanish
-                                          ? 'Total gastos'
-                                          : 'Total Expenses',
+                                      label: s.totalExpensesLabel,
                                       value: '\$${AmountFormatter.formatNumber(grandExpenses)}',
                                       color: CalcwiseSemanticColors.error(
                                           Theme.of(context).brightness),
@@ -645,12 +634,8 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                         Expanded(
                                           child: Text(
                                             grandNet >= 0
-                                                ? (isSpanish
-                                                    ? 'Ingreso neto total'
-                                                    : 'Net Rental Income')
-                                                : (isSpanish
-                                                    ? 'Pérdida neta total'
-                                                    : 'Net Rental Loss'),
+                                                ? s.netRentalIncome
+                                                : s.netRentalLoss,
                                             style: const TextStyle(
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: AppTextSize.bodyMd),
@@ -699,12 +684,8 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                         ),
                                         child: Text(
                                           grandNet >= 0
-                                              ? (isSpanish
-                                                  ? 'Ingreso neto'
-                                                  : 'Net Income')
-                                              : (isSpanish
-                                                  ? 'Pérdida neta'
-                                                  : 'Net Loss'),
+                                              ? s.netIncomeBadge
+                                              : s.netLossBadge,
                                           style: TextStyle(
                                             fontSize: AppTextSize.xs,
                                             fontWeight: FontWeight.bold,
@@ -780,13 +761,9 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                 decimal: true),
                                             onChanged: (_) => setState(() {}),
                                             decoration: InputDecoration(
-                                              labelText: isSpanish
-                                                  ? 'Ingreso anual por alquiler'
-                                                  : 'Annual Rental Income',
+                                              labelText: s.annualRentalIncome,
                                               prefixText: '\$',
-                                              helperText: isSpanish
-                                                  ? 'Prellenado con alquiler mensual × 12'
-                                                  : 'Pre-filled from monthly rent × 12',
+                                              helperText: s.preFilledMonthlyRent,
                                             ),
                                           ),
                                           const SizedBox(height: AppSpacing.lg),
@@ -804,9 +781,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                       AppRadius.md),
                                             ),
                                             child: Text(
-                                              isSpanish
-                                                  ? 'Parte I — Gastos (Schedule E)'
-                                                  : 'Part I — Expenses (Schedule E)',
+                                              s.partIExpenses,
                                               style: const TextStyle(
                                                 fontSize: AppTextSize.sm,
                                                 fontWeight: FontWeight.bold,
@@ -823,9 +798,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                   const EdgeInsets.symmetric(
                                                       vertical: 8),
                                               child: Text(
-                                                isSpanish
-                                                    ? 'Sin gastos registrados. Toca + para agregar.'
-                                                    : 'No expenses yet. Tap + to add.',
+                                                s.noExpensesYetTapPlus,
                                                 style: TextStyle(
                                                     color: CalcwiseTheme.of(
                                                             context)
@@ -921,9 +894,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                             children: [
                                               Expanded(
                                                 child: Text(
-                                                  isSpanish
-                                                      ? 'Total gastos'
-                                                      : 'Total Expenses',
+                                                  s.totalExpensesLabel,
                                                   style: const TextStyle(
                                                       fontWeight:
                                                           FontWeight.w600),
@@ -943,12 +914,8 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                               Expanded(
                                                 child: Text(
                                                   net >= 0
-                                                      ? (isSpanish
-                                                          ? 'Ingreso neto'
-                                                          : 'Net Income')
-                                                      : (isSpanish
-                                                          ? 'Pérdida neta'
-                                                          : 'Net Loss'),
+                                                      ? s.netIncomeBadge
+                                                      : s.netLossBadge,
                                                   style: TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                     color: net >= 0
@@ -983,9 +950,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                                 context, isSpanish, p),
                                             icon: const Icon(Icons.add_rounded,
                                                 size: 18),
-                                            label: Text(isSpanish
-                                                ? 'Agregar gasto IRS'
-                                                : 'Add IRS Expense'),
+                                            label: Text(s.addIrsExpense),
                                             style: OutlinedButton.styleFrom(
                                               foregroundColor: AppTheme.primary,
                                               side: const BorderSide(
@@ -1018,15 +983,11 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                           strokeWidth: 2, color: Colors.white),
                                     )
                                   : const Icon(Icons.picture_as_pdf_rounded),
-                              label: Text(isSpanish
-                                  ? 'Exportar Schedule E PDF'
-                                  : 'Export Schedule E PDF'),
+                              label: Text(s.exportScheduleE),
                             ),
                             const SizedBox(height: AppSpacing.sm),
                             Text(
-                              isSpanish
-                                  ? 'Consulta a un profesional fiscal antes de presentar tu declaración.'
-                                  : 'Consult a tax professional before filing your return.',
+                              s.consultTaxProfessional,
                               style: TextStyle(
                                   fontSize: AppTextSize.xs,
                                   color:
@@ -1102,6 +1063,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xxxl),
@@ -1122,9 +1084,7 @@ class _EmptyState extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              isSpanish
-                  ? 'Agrega propiedades en la pestaña Propiedades.'
-                  : 'Add properties in the Properties tab.',
+              s.addPropertiesFirst,
               style: TextStyle(color: CalcwiseTheme.of(context).textSecondary),
               textAlign: TextAlign.center,
             ),

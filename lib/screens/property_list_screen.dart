@@ -4,6 +4,8 @@ import '../core/firebase/analytics_service.dart';
 import '../core/freemium/freemium_service.dart';
 import '../core/freemium/iap_service.dart';
 import '../core/theme/app_theme.dart';
+import '../l10n/strings_en.dart';
+import '../l10n/strings_es.dart';
 import '../main.dart';
 import '../models/expense_model.dart';
 import '../models/property_model.dart';
@@ -98,6 +100,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
 
   Future<void> _showPropertyDialog(BuildContext ctx, bool isSpanish,
       {Property? existing}) async {
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     final nameCtrl = TextEditingController(text: existing?.name ?? '');
     final addrCtrl = TextEditingController(text: existing?.address ?? '');
     final rentCtrl = TextEditingController(
@@ -112,9 +115,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
     await showDialog<void>(
       context: ctx,
       builder: (d) => AlertDialog(
-        title: Text(existing != null
-            ? (isSpanish ? 'Editar Propiedad' : 'Edit Property')
-            : (isSpanish ? 'Nueva Propiedad' : 'New Property')),
+        title: Text(existing != null ? s.editProperty : s.addProperty),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -123,19 +124,15 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                 controller: nameCtrl,
                 textCapitalization: TextCapitalization.words,
                 decoration: InputDecoration(
-                    labelText:
-                        isSpanish ? 'Nombre de la propiedad' : 'Property Name',
-                    hintText: isSpanish
-                        ? 'Ej: Casa Principal'
-                        : 'e.g. Main St Duplex'),
+                    labelText: s.propertyName,
+                    hintText: s.propertyNameDialogHint),
               ),
               const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: addrCtrl,
                 decoration: InputDecoration(
-                    labelText: isSpanish ? 'Dirección' : 'Address',
-                    hintText:
-                        isSpanish ? 'Ej: 123 Calle Principal' : '123 Main St'),
+                    labelText: s.addressOptional,
+                    hintText: '123 Main St'),
               ),
               const SizedBox(height: AppSpacing.md),
               TextField(
@@ -143,7 +140,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
                 decoration: InputDecoration(
-                    labelText: isSpanish ? 'Alquiler mensual' : 'Monthly Rent',
+                    labelText: s.monthlyRent,
                     prefixText: '\$',
                     hintText: '0.00'),
               ),
@@ -153,8 +150,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: false),
                 decoration: InputDecoration(
-                    labelText:
-                        isSpanish ? 'Superficie (ft²)' : 'Square Footage (ft²)',
+                    labelText: s.squareFootageOptional,
                     hintText: '0'),
               ),
             ],
@@ -163,7 +159,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(d),
-            child: Text(isSpanish ? 'Cancelar' : 'Cancel'),
+            child: Text(s.cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -196,7 +192,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
               _load();
             },
             style: ElevatedButton.styleFrom(minimumSize: const Size(80, 40)),
-            child: Text(isSpanish ? 'Guardar' : 'Save'),
+            child: Text(s.save),
           ),
         ],
       ),
@@ -204,21 +200,20 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
   }
 
   Future<void> _deleteProperty(Property p, bool isSpanish) async {
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (d) => AlertDialog(
-        title: Text(isSpanish ? 'Eliminar propiedad' : 'Delete property'),
-        content: Text(isSpanish
-            ? '¿Eliminar "${p.name}" y todos sus gastos? Esta acción no se puede deshacer.'
-            : 'Delete "${p.name}" and all its expense entries? This cannot be undone.'),
+        title: Text(s.deleteProperty),
+        content: Text(s.deletePropertyConfirm(p.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(d, false),
-            child: Text(isSpanish ? 'Cancelar' : 'Cancel'),
+            child: Text(s.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(d, true),
-            child: Text(isSpanish ? 'Eliminar' : 'Delete',
+            child: Text(s.delete,
                 style: const TextStyle(color: AppTheme.dangerRed)),
           ),
         ],
@@ -235,9 +230,10 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (_, isSpanish, __) {
+        final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
         return Scaffold(
           appBar: AppBar(
-            title: Text(isSpanish ? 'Mis Propiedades' : 'My Properties'),
+            title: Text(s.myProperties),
             actions: [
               // Premium badge — always visible in AppBar
               ValueListenableBuilder<bool>(
@@ -253,14 +249,14 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                   return IconButton(
                     icon: const Icon(Icons.star_outline,
                         color: CalcwiseSemanticColors.warnIcon),
-                    tooltip: isSpanish ? 'Obtener Premium' : 'Go Premium',
+                    tooltip: s.goPremium,
                     onPressed: () => IAPService.instance.buy(),
                   );
                 },
               ),
               IconButton(
                 icon: const Icon(Icons.settings_rounded),
-                tooltip: isSpanish ? 'Ajustes' : 'Settings',
+                tooltip: s.settings,
                 onPressed: () => Navigator.push(
                   context,
                   PageRouteBuilder(
@@ -273,7 +269,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
               ),
               PopupMenuButton<_SortMode>(
                 icon: const Icon(Icons.sort_rounded),
-                tooltip: isSpanish ? 'Ordenar' : 'Sort',
+                tooltip: s.sortLabel,
                 initialValue: _sort,
                 onSelected: (m) => setState(() => _sort = m),
                 itemBuilder: (_) => [
@@ -287,7 +283,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                           size: 18,
                           color: AppTheme.primary),
                       const SizedBox(width: AppSpacing.sm),
-                      Text(isSpanish ? 'Por rentabilidad' : 'By profitability'),
+                      Text(s.sortByProfitability),
                     ]),
                   ),
                   PopupMenuItem(
@@ -300,7 +296,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                           size: 18,
                           color: AppTheme.primary),
                       const SizedBox(width: AppSpacing.sm),
-                      Text(isSpanish ? 'Por nombre' : 'By name'),
+                      Text(s.sortByName),
                     ]),
                   ),
                   PopupMenuItem(
@@ -313,7 +309,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                           size: 18,
                           color: AppTheme.primary),
                       const SizedBox(width: AppSpacing.sm),
-                      Text(isSpanish ? 'Más recientes' : 'Newest first'),
+                      Text(s.sortByNewest),
                     ]),
                   ),
                 ],
@@ -325,7 +321,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
             backgroundColor: AppTheme.primary,
             foregroundColor: Colors.white,
             icon: const Icon(Icons.add_rounded),
-            label: Text(isSpanish ? 'Agregar propiedad' : 'Add property'),
+            label: Text(s.addProperty),
           ),
           body: Column(
             children: [
@@ -356,27 +352,19 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                     return await showDialog<bool>(
                                           context: ctx,
                                           builder: (d) => AlertDialog(
-                                            title: Text(isSpanish
-                                                ? 'Eliminar propiedad'
-                                                : 'Delete property'),
-                                            content: Text(isSpanish
-                                                ? '¿Eliminar "${p.name}" y todos sus gastos?'
-                                                : 'Delete "${p.name}" and all its expense data?'),
+                                            title: Text(s.deleteProperty),
+                                            content: Text(s.deletePropertyConfirm(p.name)),
                                             actions: [
                                               TextButton(
                                                 onPressed: () =>
                                                     Navigator.pop(d, false),
-                                                child: Text(isSpanish
-                                                    ? 'Cancelar'
-                                                    : 'Cancel'),
+                                                child: Text(s.cancel),
                                               ),
                                               TextButton(
                                                 onPressed: () =>
                                                     Navigator.pop(d, true),
                                                 child: Text(
-                                                  isSpanish
-                                                      ? 'Eliminar'
-                                                      : 'Delete',
+                                                  s.delete,
                                                   style: const TextStyle(
                                                       color:
                                                           AppTheme.dangerRed),
@@ -501,9 +489,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                               children: [
                                                 Expanded(
                                                   child: _MiniStat(
-                                                    label: isSpanish
-                                                        ? 'Alquiler'
-                                                        : 'Rent',
+                                                    label: s.monthlyRent,
                                                     value:
                                                         AmountFormatter.ui(p.monthlyRent, 'USD'),
                                                     color: CalcwiseTheme.of(
@@ -514,9 +500,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                                 if (hasData) ...[
                                                   Expanded(
                                                     child: _MiniStat(
-                                                      label: isSpanish
-                                                          ? 'Flujo mensual'
-                                                          : 'Monthly CF',
+                                                      label: s.lastMonthCF,
                                                       value:
                                                           '${cf < 0 ? '-' : '+'}${AmountFormatter.ui(cf.abs(), 'USD')}',
                                                       color: cfColor,
@@ -524,9 +508,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                                   ),
                                                   Expanded(
                                                     child: _MiniStat(
-                                                      label: isSpanish
-                                                          ? 'Ratio gastos'
-                                                          : 'Exp. Ratio',
+                                                      label: s.expenseRatioLabel,
                                                       value:
                                                           '${ratio.toStringAsFixed(1)}%',
                                                       color: ratio < 80
@@ -539,9 +521,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                                   Expanded(
                                                     flex: 2,
                                                     child: Text(
-                                                      isSpanish
-                                                          ? 'Sin datos de gastos aún'
-                                                          : 'No expense data yet',
+                                                      s.noCF,
                                                       style: TextStyle(
                                                           fontSize:
                                                               AppTextSize.sm,
@@ -581,6 +561,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40),
@@ -594,18 +575,14 @@ class _EmptyState extends StatelessWidget {
                     .withValues(alpha: 0.35)),
             const SizedBox(height: AppSpacing.xl),
             Text(
-              isSpanish
-                  ? 'Agrega tu primera propiedad'
-                  : 'Add your first property',
+              s.noPropertiesYet,
               style: const TextStyle(
                   fontSize: AppTextSize.title, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.smPlus),
             Text(
-              isSpanish
-                  ? 'Registra tus propiedades y lleva el seguimiento de sus gastos e ingresos mes a mes.'
-                  : 'Track your rental properties and monitor income vs. expenses month by month.',
+              s.noPropertiesSubtitle,
               style: TextStyle(
                   color: CalcwiseTheme.of(context).textSecondary,
                   fontSize: AppTextSize.body),

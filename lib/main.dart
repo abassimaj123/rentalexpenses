@@ -23,6 +23,8 @@ import 'screens/settings_screen.dart';
 import 'screens/tools_screen.dart';
 import 'screens/history_screen.dart';
 import 'services/rental_notification_service.dart';
+import 'l10n/strings_en.dart';
+import 'l10n/strings_es.dart';
 import 'widgets/paywall_hard.dart';
 import 'widgets/paywall_soft.dart';
 
@@ -241,6 +243,7 @@ class _MainShellState extends State<MainShell> {
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (_, isSpanish, __) {
+        final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
         return Scaffold(
           appBar: AppBar(
             flexibleSpace: Container(
@@ -253,7 +256,7 @@ class _MainShellState extends State<MainShell> {
                     color: Colors.white, size: 22),
                 const SizedBox(width: 8),
                 Text(
-                  isSpanish ? 'Gastos de Alquiler' : 'Rental Expenses',
+                  s.appTitle,
                   style: const TextStyle(color: Colors.white),
                 ),
               ],
@@ -285,27 +288,27 @@ class _MainShellState extends State<MainShell> {
               NavigationDestination(
                 icon: const Icon(Icons.home_work_rounded),
                 selectedIcon: const Icon(Icons.home_work_rounded),
-                label: isSpanish ? 'Propiedades' : 'Properties',
+                label: s.navProperties,
               ),
               NavigationDestination(
                 icon: const Icon(Icons.calculate_rounded),
                 selectedIcon: const Icon(Icons.calculate),
-                label: isSpanish ? 'Calculadora' : 'Calculator',
+                label: s.navCalculator,
               ),
               NavigationDestination(
                 icon: const Icon(Icons.bar_chart_rounded),
                 selectedIcon: const Icon(Icons.bar_chart_rounded),
-                label: isSpanish ? 'Reportes' : 'Reports',
+                label: s.navReports,
               ),
               NavigationDestination(
                 icon: const Icon(Icons.build_rounded),
                 selectedIcon: const Icon(Icons.build),
-                label: isSpanish ? 'Herramientas' : 'Tools',
+                label: s.navTools,
               ),
               NavigationDestination(
                 icon: const Icon(Icons.history_rounded),
                 selectedIcon: const Icon(Icons.history_rounded),
-                label: isSpanish ? 'Historial' : 'History',
+                label: s.navHistory,
               ),
             ],
           ),

@@ -9,6 +9,8 @@ import 'package:path/path.dart' as path_pkg;
 import '../core/firebase/analytics_service.dart';
 import '../core/freemium/freemium_service.dart';
 import '../core/theme/app_theme.dart';
+import '../l10n/strings_en.dart';
+import '../l10n/strings_es.dart';
 import '../main.dart';
 import '../models/expense_model.dart';
 import '../models/property_model.dart';
@@ -164,6 +166,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
   }
 
   Future<void> _pickReceipt(bool isSpanish) async {
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -178,14 +181,13 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
               ListTile(
                 leading: const Icon(Icons.camera_alt_rounded,
                     color: AppTheme.primary),
-                title: Text(isSpanish ? 'Tomar foto' : 'Take photo'),
+                title: Text(s.takePhoto),
                 onTap: () => Navigator.pop(ctx, ImageSource.camera),
               ),
               ListTile(
                 leading: const Icon(Icons.photo_library_rounded,
                     color: AppTheme.primary),
-                title: Text(
-                    isSpanish ? 'Elegir de galería' : 'Choose from gallery'),
+                title: Text(s.chooseFromGallery),
                 onTap: () => Navigator.pop(ctx, ImageSource.gallery),
               ),
             ],
@@ -279,16 +281,18 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
       }
 
       if (mounted) {
+        final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(isSpanish ? 'Gastos guardados' : 'Expenses saved'),
+          content: Text(s.expensesSaved),
           duration: const Duration(seconds: 2),
         ));
         Navigator.of(context).pop(true);
       }
     } catch (e) {
       if (mounted) {
+        final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(isSpanish ? 'Error al guardar' : 'Error saving: $e'),
+          content: Text(s.errorSaving),
           backgroundColor: CalcwiseSemanticColors.errorDark,
         ));
       }
@@ -308,6 +312,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (_, isSpanish, __) {
+        final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
         final monthLabel = DateFormat('MMMM yyyy', isSpanish ? 'es' : 'en')
             .format(_selectedMonth);
         final cfColor = _monthlyCF >= 0
@@ -317,8 +322,8 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
         return Scaffold(
           appBar: AppBar(
             title: Text(widget.existing != null
-                ? (isSpanish ? 'Editar Gastos' : 'Edit Expenses')
-                : (isSpanish ? 'Agregar Gastos' : 'Add Expenses')),
+                ? s.editExpensesTitle
+                : s.addExpensesTitle),
           ),
           body: Column(
             children: [
@@ -356,7 +361,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
                     const SizedBox(height: AppSpacing.lg),
 
                     // Month picker
-                    _SectionLabel(isSpanish ? 'PERÍODO' : 'PERIOD'),
+                    _SectionLabel(s.period),
                     Card(
                       child: ListTile(
                         leading: const Icon(Icons.calendar_month_rounded,
@@ -374,30 +379,19 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
                     const SizedBox(height: AppSpacing.xl),
 
                     // Expense fields
-                    _SectionLabel(
-                        isSpanish ? 'GASTOS MENSUALES' : 'MONTHLY EXPENSES'),
+                    _SectionLabel(s.monthlyExpenses),
                     Card(
                       child: Padding(
                         padding: const EdgeInsets.all(AppSpacing.lg),
                         child: Column(
                           children: [
-                            _NumField(
-                                ctrl: _mortCtrl,
-                                label: isSpanish ? 'Hipoteca' : 'Mortgage'),
+                            _NumField(ctrl: _mortCtrl, label: s.hipoteca),
                             const SizedBox(height: AppSpacing.md),
-                            _NumField(
-                                ctrl: _taxCtrl,
-                                label: isSpanish
-                                    ? 'Impuestos de propiedad'
-                                    : 'Property Taxes'),
+                            _NumField(ctrl: _taxCtrl, label: s.propertyTaxesShort),
                             const SizedBox(height: AppSpacing.md),
-                            _NumField(
-                                ctrl: _insCtrl,
-                                label: isSpanish ? 'Seguro' : 'Insurance'),
+                            _NumField(ctrl: _insCtrl, label: s.insuranceShort),
                             const SizedBox(height: AppSpacing.md),
-                            _NumField(
-                                ctrl: _hoaCtrl,
-                                label: isSpanish ? 'Cuotas HOA' : 'HOA Fees'),
+                            _NumField(ctrl: _hoaCtrl, label: s.hoaFeesShort),
                           ],
                         ),
                       ),
@@ -415,9 +409,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
                               children: [
                                 Expanded(
                                   child: Text(
-                                    isSpanish
-                                        ? 'Adm. de propiedad'
-                                        : 'Property Management',
+                                    s.propertyManagement,
                                     style: TextStyle(
                                         fontSize: AppTextSize.md,
                                         color: CalcwiseTheme.of(context)
@@ -439,10 +431,8 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
                             _NumField(
                               ctrl: _mgmtCtrl,
                               label: _mgmtIsPercent
-                                  ? (isSpanish ? '% del alquiler' : '% of rent')
-                                  : (isSpanish
-                                      ? 'Cantidad mensual'
-                                      : 'Monthly amount'),
+                                  ? s.percentOfRentShort
+                                  : s.monthlyAmount,
                               prefix: _mgmtIsPercent ? null : '\$',
                               suffix: _mgmtIsPercent ? '%' : null,
                             ),
@@ -458,11 +448,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _NumField(
-                                ctrl: _maintCtrl,
-                                label: isSpanish
-                                    ? 'Mantenimiento / Reparaciones'
-                                    : 'Maintenance / Repairs'),
+                            _NumField(ctrl: _maintCtrl, label: s.maintenanceRepairsShort),
                             const SizedBox(height: AppSpacing.md),
 
                             // Vacancy toggle
@@ -470,9 +456,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
                               children: [
                                 Expanded(
                                   child: Text(
-                                    isSpanish
-                                        ? 'Pérdida por vacante'
-                                        : 'Vacancy Loss',
+                                    s.vacancyLoss,
                                     style: TextStyle(
                                         fontSize: AppTextSize.md,
                                         color: CalcwiseTheme.of(context)
@@ -494,30 +478,17 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
                             _NumField(
                               ctrl: _vacCtrl,
                               label: _vacIsPercent
-                                  ? (isSpanish ? '% del alquiler' : '% of rent')
-                                  : (isSpanish
-                                      ? 'Pérdida mensual'
-                                      : 'Monthly loss'),
+                                  ? s.percentOfRentShort
+                                  : s.monthlyLossShort,
                               prefix: _vacIsPercent ? null : '\$',
                               suffix: _vacIsPercent ? '%' : null,
                             ),
                             const SizedBox(height: AppSpacing.md),
-                            _NumField(
-                                ctrl: _utilCtrl,
-                                label: isSpanish
-                                    ? 'Servicios públicos'
-                                    : 'Utilities'),
+                            _NumField(ctrl: _utilCtrl, label: s.utilitiesShort),
                             const SizedBox(height: AppSpacing.md),
-                            _NumField(
-                                ctrl: _landCtrl,
-                                label:
-                                    isSpanish ? 'Jardinería' : 'Landscaping'),
+                            _NumField(ctrl: _landCtrl, label: s.landscapingShort),
                             const SizedBox(height: AppSpacing.md),
-                            _NumField(
-                                ctrl: _otherCtrl,
-                                label: isSpanish
-                                    ? 'Otros gastos'
-                                    : 'Other Expenses'),
+                            _NumField(ctrl: _otherCtrl, label: s.otherExpensesShort),
                           ],
                         ),
                       ),
@@ -525,7 +496,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
                     const SizedBox(height: AppSpacing.xl),
 
                     // Feature 2 — Recurring expense toggle
-                    _SectionLabel(isSpanish ? 'RECURRENCIA' : 'RECURRENCE'),
+                    _SectionLabel(s.recurrence),
                     Card(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
@@ -535,17 +506,13 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
                             SwitchListTile(
                               contentPadding: EdgeInsets.zero,
                               title: Text(
-                                isSpanish
-                                    ? 'Gasto recurrente'
-                                    : 'Recurring expense',
+                                s.recurringExpense,
                                 style: const TextStyle(
                                     fontSize: AppTextSize.body,
                                     fontWeight: FontWeight.w500),
                               ),
                               subtitle: Text(
-                                isSpanish
-                                    ? 'Se repite automáticamente'
-                                    : 'Repeats automatically',
+                                s.recurringExpenseSubtitle,
                                 style: TextStyle(
                                     fontSize: AppTextSize.sm,
                                     color: CalcwiseTheme.of(context)
@@ -564,18 +531,16 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
                               DropdownButtonFormField<String>(
                                 initialValue: _recurrenceType,
                                 decoration: InputDecoration(
-                                  labelText:
-                                      isSpanish ? 'Frecuencia' : 'Frequency',
+                                  labelText: s.frequency,
                                 ),
                                 items: [
                                   DropdownMenuItem(
                                     value: 'monthly',
-                                    child:
-                                        Text(isSpanish ? 'Mensual' : 'Monthly'),
+                                    child: Text(s.monthly),
                                   ),
                                   DropdownMenuItem(
                                     value: 'annual',
-                                    child: Text(isSpanish ? 'Anual' : 'Annual'),
+                                    child: Text(s.annual),
                                   ),
                                 ],
                                 onChanged: (v) => setState(
@@ -590,8 +555,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
                     const SizedBox(height: AppSpacing.xl),
 
                     // Feature 3 — Receipt photo attachment
-                    _SectionLabel(
-                        isSpanish ? 'RECIBO / FOTO' : 'RECEIPT / PHOTO'),
+                    _SectionLabel(s.receiptPhoto),
                     _ReceiptSection(
                       isSpanish: isSpanish,
                       receiptPath: _receiptPath,
@@ -617,16 +581,14 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
                     const SizedBox(height: AppSpacing.xl),
 
                     // Live results
-                    _SectionLabel(
-                        isSpanish ? 'RESULTADOS EN VIVO' : 'LIVE RESULTS'),
+                    _SectionLabel(s.liveResults),
                     Card(
                       child: Padding(
                         padding: const EdgeInsets.all(AppSpacing.lg),
                         child: Column(
                           children: [
                             _ResultRow(
-                              label:
-                                  isSpanish ? 'Total gastos' : 'Total Expenses',
+                              label: s.totalExpensesLive,
                               value: AmountFormatter.ui(_totalExpenses, 'USD'),
                               bold: true,
                             ),
@@ -634,9 +596,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
                                 height: 20,
                                 color: CalcwiseTheme.of(context).cardBorder),
                             _ResultRow(
-                              label: isSpanish
-                                  ? 'Flujo de caja mensual'
-                                  : 'Monthly Cash Flow',
+                              label: s.monthlyCashFlowLive,
                               value:
                                   '${_monthlyCF < 0 ? '-' : ''}${AmountFormatter.ui(_monthlyCF.abs(), 'USD')}',
                               valueColor: cfColor,
@@ -644,16 +604,12 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
                             ),
                             const SizedBox(height: AppSpacing.sm),
                             _ResultRow(
-                              label: isSpanish
-                                  ? 'Ratio de gastos'
-                                  : 'Expense Ratio',
+                              label: s.expenseRatioLive,
                               value: '${_expenseRatio.toStringAsFixed(1)}%',
                             ),
                             const SizedBox(height: AppSpacing.sm),
                             _ResultRow(
-                              label: isSpanish
-                                  ? 'Alquiler mínimo'
-                                  : 'Break-Even Rent',
+                              label: s.breakEvenRentLive,
                               value: AmountFormatter.ui(_breakEven, 'USD'),
                             ),
                           ],
@@ -672,8 +628,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
                                   strokeWidth: 2, color: Colors.white),
                             )
                           : const Icon(Icons.save_rounded),
-                      label:
-                          Text(isSpanish ? 'Guardar Gastos' : 'Save Expenses'),
+                      label: Text(s.saveExpenses),
                     ),
                     const SizedBox(height: AppSpacing.xxl),
                   ],
@@ -749,9 +704,10 @@ class _MonthPickerDialogState extends State<_MonthPickerDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final s = widget.isSpanish ? const AppStringsEs() : const AppStringsEn();
     final months = widget.isSpanish ? _monthsEs : _monthsEn;
     return AlertDialog(
-      title: Text(widget.isSpanish ? 'Seleccionar Mes' : 'Select Month'),
+      title: Text(s.selectMonth),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -813,7 +769,7 @@ class _MonthPickerDialogState extends State<_MonthPickerDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(widget.isSpanish ? 'Cancelar' : 'Cancel'),
+          child: Text(s.cancel),
         ),
         ElevatedButton(
           onPressed: () {
@@ -821,7 +777,7 @@ class _MonthPickerDialogState extends State<_MonthPickerDialog> {
             Navigator.pop(context);
           },
           style: ElevatedButton.styleFrom(minimumSize: const Size(80, 40)),
-          child: Text(widget.isSpanish ? 'OK' : 'OK'),
+          child: Text(s.ok),
         ),
       ],
     );
@@ -851,6 +807,7 @@ class _ReceiptSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     // Free user: show premium CTA button
     if (!isPremium) {
       return InkWell(
@@ -870,9 +827,7 @@ class _ReceiptSection extends StatelessWidget {
               const SizedBox(width: AppSpacing.smPlus),
               Expanded(
                 child: Text(
-                  isSpanish
-                      ? 'Agregar Recibo (Premium)'
-                      : 'Add Receipt (Premium)',
+                  s.addReceiptPremium,
                   style: const TextStyle(
                     color: AppTheme.primary,
                     fontWeight: FontWeight.w600,
@@ -893,7 +848,7 @@ class _ReceiptSection extends StatelessWidget {
       return OutlinedButton.icon(
         onPressed: onAdd,
         icon: const Icon(Icons.add_a_photo_rounded),
-        label: Text(isSpanish ? 'Agregar Recibo' : 'Add Receipt'),
+        label: Text(s.addReceipt),
         style: OutlinedButton.styleFrom(
           foregroundColor: AppTheme.primary,
           side: const BorderSide(color: AppTheme.primary),
@@ -941,7 +896,7 @@ class _ReceiptSection extends StatelessWidget {
                           color: AppTheme.success, size: 16),
                       const SizedBox(width: 6),
                       Text(
-                        isSpanish ? 'Recibo adjunto' : 'Receipt attached',
+                        s.receiptAttached,
                         style: const TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: AppTextSize.body,
@@ -956,7 +911,7 @@ class _ReceiptSection extends StatelessWidget {
                         onPressed: onView,
                         icon: const Icon(Icons.zoom_in_rounded, size: 16),
                         label: Text(
-                          isSpanish ? 'Ver' : 'View',
+                          s.view,
                           style: const TextStyle(fontSize: AppTextSize.md),
                         ),
                         style: TextButton.styleFrom(
@@ -971,7 +926,7 @@ class _ReceiptSection extends StatelessWidget {
                         onPressed: onAdd,
                         icon: const Icon(Icons.swap_horiz_rounded, size: 16),
                         label: Text(
-                          isSpanish ? 'Cambiar' : 'Change',
+                          s.change,
                           style: const TextStyle(fontSize: AppTextSize.md),
                         ),
                         style: TextButton.styleFrom(
@@ -988,7 +943,7 @@ class _ReceiptSection extends StatelessWidget {
                         icon:
                             const Icon(Icons.delete_outline_rounded, size: 16),
                         label: Text(
-                          isSpanish ? 'Quitar' : 'Remove',
+                          s.remove,
                           style: const TextStyle(fontSize: AppTextSize.md),
                         ),
                         style: TextButton.styleFrom(

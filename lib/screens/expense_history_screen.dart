@@ -4,6 +4,8 @@ import 'package:intl/intl.dart' show DateFormat;
 import '../core/firebase/analytics_service.dart';
 import '../core/freemium/freemium_service.dart';
 import '../core/theme/app_theme.dart';
+import '../l10n/strings_en.dart';
+import '../l10n/strings_es.dart';
 import '../main.dart';
 import '../models/expense_model.dart';
 import '../models/property_model.dart';
@@ -45,11 +47,12 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
   }
 
   Future<void> _delete(MonthlyExpense e, bool isSpanish) async {
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     await PropertyDatabaseService.instance.deleteExpense(e.id);
     if (mounted) {
       setState(() => _expenses.removeWhere((x) => x.id == e.id));
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(isSpanish ? 'Entrada eliminada' : 'Entry deleted'),
+        content: Text(s.entryDeleted),
         duration: const Duration(seconds: 2),
       ));
     }
@@ -76,13 +79,14 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (_, isSpanish, __) {
+        final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
         final isPremium = freemiumService.hasFullAccess;
         final freeLimit = MonetizationConfig.freeCalculationLimit;
         final dateFmt = DateFormat('MMMM yyyy', isSpanish ? 'es' : 'en');
 
         return Scaffold(
           appBar: AppBar(
-            title: Text(isSpanish ? 'Historial de Gastos' : 'Expense History'),
+            title: Text(s.expenseHistory),
             actions: [
               IconButton(
                 icon: const Icon(Icons.refresh_rounded),
@@ -141,27 +145,19 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                   return await showDialog<bool>(
                                         context: ctx,
                                         builder: (d) => AlertDialog(
-                                          title: Text(isSpanish
-                                              ? 'Eliminar entrada'
-                                              : 'Delete entry'),
-                                          content: Text(isSpanish
-                                              ? '¿Eliminar gastos de ${dateFmt.format(e.date)}?'
-                                              : 'Delete expenses for ${dateFmt.format(e.date)}?'),
+                                          title: Text(s.deleteEntry),
+                                          content: Text(s.deleteEntryConfirm(dateFmt.format(e.date))),
                                           actions: [
                                             TextButton(
                                               onPressed: () =>
                                                   Navigator.pop(d, false),
-                                              child: Text(isSpanish
-                                                  ? 'Cancelar'
-                                                  : 'Cancel'),
+                                              child: Text(s.cancel),
                                             ),
                                             TextButton(
                                               onPressed: () =>
                                                   Navigator.pop(d, true),
                                               child: Text(
-                                                  isSpanish
-                                                      ? 'Eliminar'
-                                                      : 'Delete',
+                                                  s.delete,
                                                   style: const TextStyle(
                                                       color:
                                                           AppTheme.dangerRed)),
@@ -219,7 +215,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                                 const SizedBox(
                                                     height: AppSpacing.xs),
                                                 Text(
-                                                  '${isSpanish ? 'Gastos' : 'Expenses'}: ${AmountFormatter.ui(e.totalExpenses, 'USD')}  •  ${ratio.toStringAsFixed(1)}%',
+                                                  '${s.expensesLabel}: ${AmountFormatter.ui(e.totalExpenses, 'USD')}  •  ${ratio.toStringAsFixed(1)}%',
                                                   style: TextStyle(
                                                     fontSize: AppTextSize.md,
                                                     color: CalcwiseTheme.of(
@@ -287,9 +283,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                               const SizedBox(
                                                   height: AppSpacing.xxs),
                                               Text(
-                                                isSpanish
-                                                    ? 'flujo mensual'
-                                                    : 'monthly CF',
+                                                s.monthlyCFShort,
                                                 style: TextStyle(
                                                   fontSize: AppTextSize.xs,
                                                   color:
@@ -323,6 +317,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xxxl),
@@ -336,16 +331,14 @@ class _EmptyState extends StatelessWidget {
                     .withValues(alpha: 0.4)),
             const SizedBox(height: AppSpacing.lg),
             Text(
-              isSpanish ? 'Sin entradas de gastos' : 'No expense entries yet',
+              s.noExpenseEntriesYet,
               style: const TextStyle(
                   fontSize: AppTextSize.subtitle, fontWeight: FontWeight.w600),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              isSpanish
-                  ? 'Agrega gastos mensuales con el botón + en la pantalla anterior.'
-                  : 'Add monthly expenses using the + button on the previous screen.',
+              s.noExpenseEntriesSubtitle,
               style: TextStyle(color: CalcwiseTheme.of(context).textSecondary),
               textAlign: TextAlign.center,
             ),

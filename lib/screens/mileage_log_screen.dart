@@ -8,6 +8,8 @@ import '../core/firebase/analytics_service.dart';
 import '../core/freemium/freemium_service.dart';
 import '../core/services/pdf_export_service.dart';
 import '../core/theme/app_theme.dart';
+import '../l10n/strings_en.dart';
+import '../l10n/strings_es.dart';
 import '../main.dart';
 import '../models/mileage_trip_model.dart';
 import '../models/property_model.dart';
@@ -178,6 +180,7 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
   }
 
   Future<void> _addTripDialog(bool isSpanish) async {
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     final property = _selectedProperty;
     if (property == null) return;
 
@@ -190,7 +193,7 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
       context: context,
       builder: (d) => StatefulBuilder(
         builder: (d, setLocal) => AlertDialog(
-          title: Text(isSpanish ? 'Agregar trayecto' : 'Add Trip'),
+          title: Text(s.addTrip),
           scrollable: true,
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -202,17 +205,13 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
                 ],
-                decoration: InputDecoration(
-                  labelText: isSpanish
-                      ? 'Millas (un sentido)'
-                      : 'Miles (one-way)',
-                ),
+                decoration: InputDecoration(labelText: s.milesOneWay),
               ),
               const SizedBox(height: AppSpacing.md),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(
-                  isSpanish ? 'Ida y vuelta (×2)' : 'Round trip (×2)',
+                  s.roundTripX2,
                   style: const TextStyle(fontSize: AppTextSize.body),
                 ),
                 value: roundTrip,
@@ -221,11 +220,7 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
               ),
               TextField(
                 controller: purposeCtrl,
-                decoration: InputDecoration(
-                  labelText: isSpanish
-                      ? 'Motivo (visita, reparación…)'
-                      : 'Purpose (visit, repair…)',
-                ),
+                decoration: InputDecoration(labelText: s.purposeLabel),
               ),
               const SizedBox(height: AppSpacing.md),
               ListTile(
@@ -247,7 +242,7 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(d),
-              child: Text(isSpanish ? 'Cancelar' : 'Cancel'),
+              child: Text(s.cancel),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -262,14 +257,13 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
                   miles: miles,
                   purpose: purposeCtrl.text.trim(),
                 );
-                await PropertyDatabaseService.instance
-                    .insertMileageTrip(trip);
+                await PropertyDatabaseService.instance.insertMileageTrip(trip);
                 await AnalyticsService.instance.logMileageTripAdded();
                 if (d.mounted) Navigator.pop(d);
                 _load();
               },
               style: ElevatedButton.styleFrom(minimumSize: const Size(80, 40)),
-              child: Text(isSpanish ? 'Guardar' : 'Save'),
+              child: Text(s.save),
             ),
           ],
         ),
@@ -300,12 +294,9 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
     await PropertyDatabaseService.instance.insertScheduleEEntry(entry);
     await AnalyticsService.instance.logMileageAddedToScheduleE();
     if (!mounted) return;
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(isSpanish
-            ? 'Deducción de millaje agregada al Schedule E ($_selectedYear)'
-            : 'Mileage deduction added to Schedule E ($_selectedYear)'),
-      ),
+      SnackBar(content: Text(s.mileageAddedScheduleE(_selectedYear))),
     );
   }
 
@@ -314,13 +305,12 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (_, isSpanish, __) {
+        final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
         final years = List.generate(4, (i) => _now.year - i);
         final dateFmt = DateFormat('yyyy-MM-dd');
 
         return Scaffold(
-          appBar: AppBar(
-            title: Text(isSpanish ? 'Registro de Millaje' : 'Mileage Log'),
-          ),
+          appBar: AppBar(title: Text(s.mileageLog)),
           floatingActionButton: _selectedProperty == null
               ? null
               : FloatingActionButton.extended(
@@ -328,7 +318,7 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
                   backgroundColor: AppTheme.primary,
                   foregroundColor: Colors.white,
                   icon: const Icon(Icons.add_road_rounded),
-                  label: Text(isSpanish ? 'Agregar trayecto' : 'Add Trip'),
+                  label: Text(s.addTrip),
                 ),
           body: Column(
             children: [
@@ -348,9 +338,7 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
                                       initialValue: _selectedProperty?.id,
                                       isExpanded: true,
                                       decoration: InputDecoration(
-                                        labelText: isSpanish
-                                            ? 'Propiedad'
-                                            : 'Property',
+                                        labelText: s.property,
                                       ),
                                       items: _properties
                                           .map((p) => DropdownMenuItem(
@@ -373,7 +361,7 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
                                     child: DropdownButtonFormField<int>(
                                       initialValue: _selectedYear,
                                       decoration: InputDecoration(
-                                        labelText: isSpanish ? 'Año' : 'Year',
+                                        labelText: s.year,
                                       ),
                                       items: years
                                           .map((y) => DropdownMenuItem(
@@ -399,30 +387,21 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
                                   child: Column(
                                     children: [
                                       _SummaryRow(
-                                        label: isSpanish
-                                            ? 'Total millas $_selectedYear'
-                                            : 'Total miles $_selectedYear',
-                                        value: _totalMiles
-                                            .toStringAsFixed(1),
+                                        label: s.totalMilesYear(_selectedYear),
+                                        value: _totalMiles.toStringAsFixed(1),
                                       ),
                                       const SizedBox(height: AppSpacing.sm),
                                       _SummaryRow(
-                                        label: isSpanish
-                                            ? 'Tasa IRS $_selectedYear'
-                                            : 'IRS rate $_selectedYear',
-                                        value:
-                                            '\$${_rate.toStringAsFixed(3)}/mi',
+                                        label: s.irsRateYear(_selectedYear),
+                                        value: '\$${_rate.toStringAsFixed(3)}/mi',
                                       ),
                                       Divider(
                                           height: 22,
                                           color: CalcwiseTheme.of(context)
                                               .cardBorder),
                                       _SummaryRow(
-                                        label: isSpanish
-                                            ? 'Deducción'
-                                            : 'Deduction',
-                                        value:
-                                            '\$${AmountFormatter.formatNumber(_deduction)}',
+                                        label: s.deductionLabel,
+                                        value: '\$${AmountFormatter.formatNumber(_deduction)}',
                                         bold: true,
                                         color: AppTheme.primary,
                                       ),
@@ -436,9 +415,7 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
                                     ? () => _addToScheduleE(isSpanish)
                                     : null,
                                 icon: const Icon(Icons.add_chart_rounded),
-                                label: Text(isSpanish
-                                    ? 'Agregar al Schedule E (Auto y Viajes)'
-                                    : 'Add to Schedule E (Auto & Travel)'),
+                                label: Text(s.addToScheduleEAutoTravel),
                                 style: ElevatedButton.styleFrom(
                                     minimumSize:
                                         const Size(double.infinity, 48)),
@@ -450,24 +427,21 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
                                 OutlinedButton.icon(
                                   onPressed: () => _exportPdf(isSpanish),
                                   icon: const Icon(Icons.picture_as_pdf_rounded),
-                                  label: Text(isSpanish ? 'Exportar PDF' : 'Export PDF'),
+                                  label: Text(s.exportPdf),
                                   style: OutlinedButton.styleFrom(
                                       minimumSize: const Size(double.infinity, 44)),
                                 ),
                               ],
                               const SizedBox(height: AppSpacing.xl),
 
-                              _SectionLabel(
-                                  isSpanish ? 'TRAYECTOS' : 'TRIPS'),
+                              _SectionLabel(s.trips),
                               if (_trips.isEmpty)
                                 Card(
                                   child: Padding(
                                     padding:
                                         const EdgeInsets.all(AppSpacing.lg),
                                     child: Text(
-                                      isSpanish
-                                          ? 'Sin trayectos. Toca + para agregar.'
-                                          : 'No trips yet. Tap + to add.',
+                                      s.noTripsYet,
                                       style: TextStyle(
                                           color: CalcwiseTheme.of(context)
                                               .textSecondary),
@@ -502,9 +476,7 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
 
                               const SizedBox(height: AppSpacing.lg),
                               Text(
-                                isSpanish
-                                    ? 'Método de millaje estándar del IRS. Mantén un registro contemporáneo. Consulta a un profesional fiscal.'
-                                    : 'IRS standard mileage method. Keep a contemporaneous log. Consult a tax professional.',
+                                s.mileageDisclaimer,
                                 style: TextStyle(
                                     fontSize: AppTextSize.xs,
                                     color: CalcwiseTheme.of(context)
@@ -580,6 +552,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xxxl),
@@ -593,16 +566,14 @@ class _EmptyState extends StatelessWidget {
                     .withValues(alpha: 0.35)),
             const SizedBox(height: AppSpacing.lg),
             Text(
-              isSpanish ? 'Sin propiedades' : 'No properties',
+              s.noPropertiesMileage,
               style: const TextStyle(
                   fontSize: AppTextSize.subtitle, fontWeight: FontWeight.w600),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              isSpanish
-                  ? 'Agrega propiedades en la pestaña Propiedades.'
-                  : 'Add properties in the Properties tab.',
+              s.addPropertiesFirst,
               style: TextStyle(color: CalcwiseTheme.of(context).textSecondary),
               textAlign: TextAlign.center,
             ),

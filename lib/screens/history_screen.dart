@@ -5,6 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../core/firebase/analytics_service.dart';
 import '../core/freemium/freemium_service.dart';
 import '../core/theme/app_theme.dart';
+import '../l10n/strings_en.dart';
+import '../l10n/strings_es.dart';
 import '../main.dart';
 import '../screens/calculator_screen.dart';
 import '../screens/history_detail_screen.dart';
@@ -42,6 +44,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Future<void> _delete(int index, bool isSpanish) async {
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getStringList('expense_history_v1') ?? [];
     if (index < raw.length) raw.removeAt(index);
@@ -49,7 +52,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     await _load();
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(isSpanish ? 'Entrada eliminada' : 'Entry deleted'),
+        content: Text(s.entryDeleted),
         duration: const Duration(seconds: 2),
       ));
     }
@@ -73,6 +76,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (_, isSpanish, __) {
+        final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
         final bodyContent = Column(
           children: [
             Expanded(
@@ -88,12 +92,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
         return widget.showAppBar
             ? Scaffold(
                 appBar: AppBar(
-                  title: Text(isSpanish ? 'Historial' : 'History'),
+                  title: Text(s.historyTitle),
                   actions: [
                     if (_entries.isNotEmpty)
                       IconButton(
                         icon: const Icon(Icons.delete_sweep_rounded),
-                        tooltip: isSpanish ? 'Borrar todo' : 'Clear all',
+                        tooltip: s.clearHistory,
                         onPressed: () => _confirmClearAll(isSpanish),
                       ),
                   ],
@@ -161,33 +165,35 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         fontWeight: FontWeight.w600,
                         fontSize: AppTextSize.bodyMd),
                   ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: AppSpacing.xxs),
-                      Text(
-                        isSpanish
-                            ? 'Flujo mensual: ${cf < 0 ? '-' : ''}${AmountFormatter.ui(cf.abs(), 'USD')}'
-                            : 'Monthly CF: ${cf < 0 ? '-' : ''}${AmountFormatter.ui(cf.abs(), 'USD')}',
-                        style: TextStyle(
-                            color: cfColor, fontWeight: FontWeight.w500),
-                      ),
-                      Text(
-                        _dateFmt.format(e.savedAt),
-                        style: TextStyle(
-                            fontSize: AppTextSize.sm,
-                            color: CalcwiseTheme.of(context).textSecondary),
-                      ),
-                    ],
-                  ),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.replay_rounded,
-                        color: AppTheme.primary, size: 20),
-                    tooltip: isSpanish
-                        ? 'Cargar en calculadora'
-                        : 'Load in calculator',
-                    onPressed: () => _loadIntoCalculator(e),
-                  ),
+                  subtitle: Builder(builder: (context) {
+                    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: AppSpacing.xxs),
+                        Text(
+                          '${s.monthlyCFLabel}: ${cf < 0 ? '-' : ''}${AmountFormatter.ui(cf.abs(), 'USD')}',
+                          style: TextStyle(
+                              color: cfColor, fontWeight: FontWeight.w500),
+                        ),
+                        Text(
+                          _dateFmt.format(e.savedAt),
+                          style: TextStyle(
+                              fontSize: AppTextSize.sm,
+                              color: CalcwiseTheme.of(context).textSecondary),
+                        ),
+                      ],
+                    );
+                  }),
+                  trailing: Builder(builder: (context) {
+                    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
+                    return IconButton(
+                      icon: const Icon(Icons.replay_rounded,
+                          color: AppTheme.primary, size: 20),
+                      tooltip: s.loadInCalculator,
+                      onPressed: () => _loadIntoCalculator(e),
+                    );
+                  }),
                   onTap: () => Navigator.of(context).push(
                     PageRouteBuilder(
                       pageBuilder: (_, __, ___) => HistoryDetailScreen(calc: e),
@@ -206,21 +212,20 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Future<void> _confirmClearAll(bool isSpanish) async {
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     final confirm = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text(isSpanish ? '¿Borrar historial?' : 'Clear history?'),
-        content: Text(isSpanish
-            ? 'Se eliminarán todas las entradas guardadas.'
-            : 'All saved entries will be deleted.'),
+        title: Text(s.clearHistory),
+        content: Text(s.clearHistoryConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(isSpanish ? 'Cancelar' : 'Cancel'),
+            child: Text(s.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text(isSpanish ? 'Borrar' : 'Clear',
+            child: Text(s.clear,
                 style: const TextStyle(color: AppTheme.dangerRed)),
           ),
         ],
@@ -242,6 +247,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xxxl),
@@ -252,15 +258,13 @@ class _EmptyState extends StatelessWidget {
                 size: 72, color: AppTheme.primary.withValues(alpha: 0.3)),
             const SizedBox(height: AppSpacing.lg),
             Text(
-              isSpanish ? 'Sin historial guardado' : 'No saved history',
+              s.noSavedHistory,
               style: const TextStyle(
                   fontSize: AppTextSize.subtitle, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              isSpanish
-                  ? 'Calcula los gastos de una propiedad y guarda el resultado.'
-                  : 'Calculate expenses for a property and save the result.',
+              s.noSavedHistorySubtitle,
               textAlign: TextAlign.center,
               style: TextStyle(color: CalcwiseTheme.of(context).textSecondary),
             ),
@@ -278,6 +282,7 @@ class _UpgradeCTA extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     return Card(
       margin: const EdgeInsets.only(bottom: AppSpacing.md),
       color: AppTheme.primary.withValues(alpha: 0.05),
@@ -294,18 +299,14 @@ class _UpgradeCTA extends StatelessWidget {
                 color: AppTheme.primary.withValues(alpha: 0.6), size: 32),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              isSpanish
-                  ? 'Guardaste $limit de $limit propiedades gratis'
-                  : 'You\'ve saved $limit of $limit free properties',
+              s.savedNOfNFreeProperties(limit),
               textAlign: TextAlign.center,
               style: const TextStyle(
                   fontWeight: FontWeight.w600, fontSize: AppTextSize.body),
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
-              isSpanish
-                  ? 'Desbloquea Premium para historial ilimitado'
-                  : 'Unlock Premium for unlimited history',
+              s.unlockForUnlimitedHistory,
               textAlign: TextAlign.center,
               style: TextStyle(
                   color: CalcwiseTheme.of(context).textSecondary,
@@ -319,11 +320,7 @@ class _UpgradeCTA extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 44),
                 ),
-                child: Text(
-                  isSpanish
-                      ? 'Desbloquear Premium'
-                      : 'Unlock Premium',
-                ),
+                child: Text(s.unlockPremium),
               ),
             ),
           ],

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../l10n/strings_en.dart';
+import '../l10n/strings_es.dart';
 import '../main.dart' show isSpanishNotifier;
 import 'tax_summary_screen.dart';
 import 'compare_properties_screen.dart';
@@ -18,9 +20,10 @@ class ToolsScreen extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (context, isSpanish, _) {
+        final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
         return Scaffold(
           appBar: AppBar(
-            title: Text(isSpanish ? 'Herramientas' : 'Tools'),
+            title: Text(s.tools),
             elevation: 0,
           ),
           body: Column(
@@ -31,10 +34,8 @@ class ToolsScreen extends StatelessWidget {
                   children: [
                     _ToolCard(
                       icon: Icons.receipt_rounded,
-                      title: isSpanish ? 'Resumen Fiscal' : 'Tax Summary',
-                      subtitle: isSpanish
-                          ? 'Desglose de impuestos y deducciones'
-                          : 'Tax breakdown & deductions',
+                      title: s.taxSummaryTool,
+                      subtitle: s.taxSummaryToolSubtitle,
                       onTap: () => Navigator.push(
                           context,
                           PageRouteBuilder(
@@ -48,12 +49,8 @@ class ToolsScreen extends StatelessWidget {
                     const SizedBox(height: AppSpacing.md),
                     _ToolCard(
                       icon: Icons.trending_down_rounded,
-                      title: isSpanish
-                          ? 'Depreciación (27.5 años)'
-                          : 'Depreciation (27.5 yr)',
-                      subtitle: isSpanish
-                          ? 'Calcula depreciación lineal residencial'
-                          : 'Straight-line residential depreciation',
+                      title: s.depreciationTool,
+                      subtitle: s.depreciationToolSubtitle,
                       onTap: () => Navigator.push(
                           context,
                           PageRouteBuilder(
@@ -67,10 +64,8 @@ class ToolsScreen extends StatelessWidget {
                     const SizedBox(height: AppSpacing.md),
                     _ToolCard(
                       icon: Icons.directions_car_rounded,
-                      title: isSpanish ? 'Registro de Millaje' : 'Mileage Log',
-                      subtitle: isSpanish
-                          ? 'Registra trayectos y deduce millaje IRS'
-                          : 'Log trips & deduct IRS mileage',
+                      title: s.mileageLogTool,
+                      subtitle: s.mileageLogToolSubtitle,
                       onTap: () => Navigator.push(
                           context,
                           PageRouteBuilder(
@@ -84,12 +79,8 @@ class ToolsScreen extends StatelessWidget {
                     const SizedBox(height: AppSpacing.md),
                     _ToolCard(
                       icon: Icons.compare_rounded,
-                      title: isSpanish
-                          ? 'Comparar Propiedades'
-                          : 'Compare Properties',
-                      subtitle: isSpanish
-                          ? 'Comparar rentabilidad de propiedades'
-                          : 'Compare property profitability side-by-side',
+                      title: s.comparePropertiesTool,
+                      subtitle: s.comparePropertiesToolSubtitle,
                       onTap: () => Navigator.push(
                           context,
                           PageRouteBuilder(
@@ -103,11 +94,8 @@ class ToolsScreen extends StatelessWidget {
                     const SizedBox(height: AppSpacing.md),
                     _ToolCard(
                       icon: Icons.history_rounded,
-                      title:
-                          isSpanish ? 'Historial de Gastos' : 'Expense History',
-                      subtitle: isSpanish
-                          ? 'Ver historial completo de transacciones'
-                          : 'View full transaction history',
+                      title: s.expenseHistoryTool,
+                      subtitle: s.expenseHistoryToolSubtitle,
                       onTap: () => Navigator.push(
                           context,
                           PageRouteBuilder(
@@ -120,10 +108,8 @@ class ToolsScreen extends StatelessWidget {
                     const SizedBox(height: AppSpacing.md),
                     _ToolCard(
                       icon: Icons.settings_rounded,
-                      title: isSpanish ? 'Configuración' : 'Settings',
-                      subtitle: isSpanish
-                          ? 'Preferencias y configuración de la app'
-                          : 'App preferences & settings',
+                      title: s.settingsTool,
+                      subtitle: s.settingsToolSubtitle,
                       onTap: () => Navigator.push(
                           context,
                           PageRouteBuilder(

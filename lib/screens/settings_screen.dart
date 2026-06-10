@@ -5,6 +5,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../core/freemium/freemium_service.dart';
 import '../core/freemium/iap_service.dart';
 import '../core/theme/app_theme.dart';
+import '../l10n/strings_en.dart';
+import '../l10n/strings_es.dart';
 import '../main.dart';
 import '../services/rental_notification_service.dart';
 
@@ -29,9 +31,10 @@ class SettingsScreen extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (_, isSpanish, __) {
+        final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
         return Scaffold(
           appBar: AppBar(
-            title: Text(isSpanish ? 'Configuración' : 'Settings'),
+            title: Text(s.settings),
             actions: [
               ValueListenableBuilder<bool>(
                 valueListenable: freemiumService.hasFullAccessNotifier,
@@ -46,7 +49,7 @@ class SettingsScreen extends StatelessWidget {
                   return IconButton(
                     icon: const Icon(Icons.star_outline,
                         color: CalcwiseSemanticColors.warnIcon),
-                    tooltip: isSpanish ? 'Obtener Premium' : 'Go Premium',
+                    tooltip: s.goPremium,
                     onPressed: () => IAPService.instance.buy(),
                   );
                 },
@@ -62,7 +65,7 @@ class SettingsScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(AppSpacing.lg),
                   children: [
                     // ── Premium ───────────────────────────────────────
-                    _SectionHeader(label: isSpanish ? 'Premium' : 'Premium'),
+                    _SectionHeader(label: s.premiumSection),
                     ValueListenableBuilder<bool>(
                       valueListenable: freemiumService.hasFullAccessNotifier,
                       builder: (_, isPremium, __) {
@@ -71,12 +74,8 @@ class SettingsScreen extends StatelessWidget {
                             child: ListTile(
                               leading: const Icon(Icons.star_rounded,
                                   color: CalcwiseSemanticColors.warnIcon),
-                              title: Text(isSpanish
-                                  ? '¡Eres Premium!'
-                                  : 'You\'re Premium!'),
-                              subtitle: Text(isSpanish
-                                  ? 'Gracias por tu apoyo'
-                                  : 'Thank you for your support'),
+                              title: Text(s.premiumActive),
+                              subtitle: Text(s.premiumSubtitle),
                             ),
                           );
                         }
@@ -86,12 +85,8 @@ class SettingsScreen extends StatelessWidget {
                               ListTile(
                                 leading: const Icon(Icons.star_outline_rounded,
                                     color: AppTheme.primary),
-                                title: Text(isSpanish
-                                    ? 'Desbloquear Premium'
-                                    : 'Unlock Premium'),
-                                subtitle: Text(isSpanish
-                                    ? 'Acceso completo — \$2.99'
-                                    : 'Full access — \$2.99'),
+                                title: Text(s.unlockPremium),
+                                subtitle: Text(s.premiumSubtitle),
                                 trailing: ElevatedButton(
                                   onPressed: () => IAPService.instance.buy(),
                                   style: ElevatedButton.styleFrom(
@@ -99,7 +94,7 @@ class SettingsScreen extends StatelessWidget {
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 16),
                                   ),
-                                  child: Text(isSpanish ? 'Comprar' : 'Buy'),
+                                  child: Text(s.getPremium),
                                 ),
                               ),
                               Divider(
@@ -111,7 +106,7 @@ class SettingsScreen extends StatelessWidget {
                                         .textSecondary),
                                 title: Text(isSpanish
                                     ? 'Restaurar compra'
-                                    : 'Restore purchase'),
+                                    : 'Restore purchase'),  // restore — no key in AppStrings
                                 onTap: () => IAPService.instance.restore(),
                               ),
                               Divider(
@@ -122,10 +117,10 @@ class SettingsScreen extends StatelessWidget {
                                     color: AppTheme.primary),
                                 title: Text(isSpanish
                                     ? 'Sin anuncios 60 min'
-                                    : 'Ad-free for 60 min'),
+                                    : 'Ad-free for 60 min'),  // no key in AppStrings
                                 subtitle: Text(isSpanish
                                     ? 'Ver un anuncio para desbloquear'
-                                    : 'Watch an ad to unlock'),
+                                    : 'Watch an ad to unlock'),  // no key in AppStrings
                                 onTap: () async {
                                   final earned = await adService.showRewarded();
                                   if (earned)
@@ -149,7 +144,7 @@ class SettingsScreen extends StatelessWidget {
                     const SizedBox(height: AppSpacing.xl),
 
                     // ── Language ──────────────────────────────────────
-                    _SectionHeader(label: isSpanish ? 'Idioma' : 'Language'),
+                    _SectionHeader(label: s.language),
                     Card(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
@@ -161,9 +156,7 @@ class SettingsScreen extends StatelessWidget {
                             const SizedBox(width: AppSpacing.md),
                             Expanded(
                               child: Text(
-                                isSpanish
-                                    ? 'Idioma actual'
-                                    : 'Current language',
+                                s.language,
                                 style: const TextStyle(
                                     fontSize: AppTextSize.bodyMd),
                               ),
@@ -197,7 +190,7 @@ class SettingsScreen extends StatelessWidget {
                       ),
                     ),
                     // ── Theme ────────────────────────────────────────
-                    _SectionHeader(label: isSpanish ? 'Tema' : 'Theme'),
+                    _SectionHeader(label: isSpanish ? 'Tema' : 'Theme'),  // no key in AppStrings
                     Card(
                       child: ValueListenableBuilder<ThemeMode>(
                         valueListenable: themeModeService.notifier,
@@ -216,22 +209,18 @@ class SettingsScreen extends StatelessWidget {
                     const SizedBox(height: AppSpacing.xl),
 
                     // ── Notifications ─────────────────────────────────
-                    _SectionHeader(
-                        label: isSpanish ? 'Notificaciones' : 'Notifications'),
+                    _SectionHeader(label: s.notifications),
                     Card(
                       child: _ReminderTile(isSpanish: isSpanish),
                     ),
                     const SizedBox(height: AppSpacing.xl),
 
                     // ── Support ───────────────────────────────────────
-                    _SectionHeader(label: isSpanish ? 'Soporte' : 'Support'),
+                    _SectionHeader(label: s.support),
                     Card(
                       child: Column(
                         children: [
-                          CalcwiseRateAppTile(
-                              label: isSpanish
-                                  ? 'Calificar la app'
-                                  : 'Rate the App'),
+                          CalcwiseRateAppTile(label: s.rateApp),
                           Divider(
                               height: 1,
                               color: CalcwiseTheme.of(context).cardBorder),
@@ -240,7 +229,7 @@ class SettingsScreen extends StatelessWidget {
                                 color: AppTheme.primary),
                             title: Text(isSpanish
                                 ? 'Contactar soporte'
-                                : 'Contact Support'),
+                                : 'Contact Support'),  // no key in AppStrings
                             trailing: Icon(Icons.open_in_new_rounded,
                                 size: 18,
                                 color: CalcwiseTheme.of(context).textSecondary),
@@ -253,14 +242,12 @@ class SettingsScreen extends StatelessWidget {
                     const SizedBox(height: AppSpacing.xl),
 
                     // ── Legal ─────────────────────────────────────────
-                    _SectionHeader(label: isSpanish ? 'Legal' : 'Legal'),
+                    _SectionHeader(label: isSpanish ? 'Legal' : 'Legal'),  // same in both languages
                     Card(
                       child: ListTile(
                         leading: const Icon(Icons.privacy_tip_rounded,
                             color: AppTheme.primary),
-                        title: Text(isSpanish
-                            ? 'Política de privacidad'
-                            : 'Privacy Policy'),
+                        title: Text(s.privacyPolicy),
                         trailing: Icon(Icons.open_in_new_rounded,
                             size: 18,
                             color: CalcwiseTheme.of(context).textSecondary),
@@ -473,16 +460,15 @@ class _ReminderTileState extends State<_ReminderTile> {
 
   @override
   Widget build(BuildContext context) {
+    final s = widget.isSpanish ? const AppStringsEs() : const AppStringsEn();
     return SwitchListTile(
       secondary: const Icon(Icons.notifications_rounded, color: AppTheme.primary),
       title: Text(
-        widget.isSpanish ? 'Recordatorio mensual' : 'Monthly expense reminder',
+        s.monthlyReminder,
         style: const TextStyle(fontSize: AppTextSize.body),
       ),
       subtitle: Text(
-        widget.isSpanish
-            ? 'Aviso el 28 de cada mes a las 10:00 AM'
-            : 'Reminder on the 28th of each month at 10:00 AM',
+        s.monthlyReminderSubtitle,
         style: TextStyle(
             fontSize: AppTextSize.xs,
             color: CalcwiseTheme.of(context).textSecondary),

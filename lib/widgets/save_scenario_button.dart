@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/freemium/freemium_service.dart';
+import '../l10n/strings_en.dart';
+import '../l10n/strings_es.dart';
 import '../main.dart' show isSpanishNotifier;
 
 /// A "Save Scenario" button that pins the current calculator result.
@@ -23,10 +25,11 @@ class _SaveScenarioButtonState extends State<SaveScenarioButton> {
 
   Future<void> _handleTap() async {
     final isEs = isSpanishNotifier.value;
+    final s = isEs ? const AppStringsEs() : const AppStringsEn();
     String? label;
 
     if (freemiumService.hasFullAccess) {
-      label = await _showNameDialog(isEs);
+      label = await _showNameDialog(s);
       if (label == null) return;
       if (label.trim().isEmpty) label = null;
     }
@@ -39,10 +42,8 @@ class _SaveScenarioButtonState extends State<SaveScenarioButton> {
         SnackBar(
           content: Text(
             label != null && label.isNotEmpty
-                ? (isEs
-                    ? 'Escenario "$label" guardado'
-                    : 'Scenario "$label" saved')
-                : (isEs ? 'Escenario guardado' : 'Scenario saved'),
+                ? s.scenarioSaved(label)
+                : s.scenarioSavedNoLabel,
           ),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 2),
@@ -53,31 +54,29 @@ class _SaveScenarioButtonState extends State<SaveScenarioButton> {
     }
   }
 
-  Future<String?> _showNameDialog(bool isEs) async {
+  Future<String?> _showNameDialog(AppStrings s) async {
     final controller = TextEditingController();
     return showDialog<String>(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text(isEs ? 'Guardar escenario' : 'Save Scenario'),
+        title: Text(s.saveScenarioTitle),
         content: TextField(
           controller: controller,
           autofocus: true,
           textCapitalization: TextCapitalization.words,
           decoration: InputDecoration(
-            hintText: isEs
-                ? 'Nombre del escenario (opcional)'
-                : 'Scenario name (optional)',
+            hintText: s.scenarioNameHint,
           ),
           onSubmitted: (v) => Navigator.pop(context, v),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(isEs ? 'Cancelar' : 'Cancel'),
+            child: Text(s.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, controller.text),
-            child: Text(isEs ? 'Guardar' : 'Save'),
+            child: Text(s.save),
           ),
         ],
       ),
@@ -87,6 +86,7 @@ class _SaveScenarioButtonState extends State<SaveScenarioButton> {
   @override
   Widget build(BuildContext context) {
     final isEs = isSpanishNotifier.value;
+    final s = isEs ? const AppStringsEs() : const AppStringsEn();
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton.icon(
@@ -98,11 +98,7 @@ class _SaveScenarioButtonState extends State<SaveScenarioButton> {
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
             : const Icon(Icons.bookmark_add_outlined, size: 18),
-        label: Text(
-          _saving
-              ? (isEs ? 'Guardando…' : 'Saving…')
-              : (isEs ? 'Guardar escenario' : 'Save Scenario'),
-        ),
+        label: Text(_saving ? s.saving : s.saveScenario),
         style: OutlinedButton.styleFrom(
           minimumSize: const Size.fromHeight(48),
         ),

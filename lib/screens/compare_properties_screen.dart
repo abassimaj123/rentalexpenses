@@ -6,6 +6,8 @@ import '../core/firebase/analytics_service.dart';
 import '../core/freemium/freemium_service.dart';
 import '../core/services/pdf_export_service.dart';
 import '../core/theme/app_theme.dart';
+import '../l10n/strings_en.dart';
+import '../l10n/strings_es.dart';
 import '../main.dart';
 import '../models/expense_model.dart';
 import '../models/property_model.dart';
@@ -121,6 +123,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
   }
 
   Future<void> _pickMonth(bool isSpanish) async {
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     int pickedYear = _selectedMonth.year;
     int pickedMonth = _selectedMonth.month;
 
@@ -130,36 +133,16 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
         return StatefulBuilder(
           builder: (ctx, setLocal) {
             final monthsEn = [
-              'Jan',
-              'Feb',
-              'Mar',
-              'Apr',
-              'May',
-              'Jun',
-              'Jul',
-              'Aug',
-              'Sep',
-              'Oct',
-              'Nov',
-              'Dec'
+              'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+              'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
             ];
             final monthsEs = [
-              'Ene',
-              'Feb',
-              'Mar',
-              'Abr',
-              'May',
-              'Jun',
-              'Jul',
-              'Ago',
-              'Sep',
-              'Oct',
-              'Nov',
-              'Dic'
+              'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+              'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
             ];
             final months = isSpanish ? monthsEs : monthsEn;
             return AlertDialog(
-              title: Text(isSpanish ? 'Seleccionar Mes' : 'Select Month'),
+              title: Text(s.selectMonth),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -223,7 +206,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: Text(isSpanish ? 'Cancelar' : 'Cancel'),
+                  child: Text(s.cancel),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -234,7 +217,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                   },
                   style:
                       ElevatedButton.styleFrom(minimumSize: const Size(80, 40)),
-                  child: const Text('OK'),
+                  child: Text(s.ok),
                 ),
               ],
             );
@@ -438,14 +421,12 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (_, isSpanish, __) {
+        final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
         final isPremium = freemiumService.hasFullAccess;
 
         if (!isPremium) {
           return Scaffold(
-            appBar: AppBar(
-              title: Text(
-                  isSpanish ? 'Comparar Propiedades' : 'Compare Properties'),
-            ),
+            appBar: AppBar(title: Text(s.compareProperties)),
             body: Column(
               children: [
                 Expanded(
@@ -466,16 +447,14 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                           ),
                           const SizedBox(height: AppSpacing.xl),
                           Text(
-                            isSpanish ? 'Función Premium' : 'Premium Feature',
+                            s.premiumFeature,
                             style: const TextStyle(
                                 fontSize: AppTextSize.titleMd,
                                 fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: AppSpacing.smPlus),
                           Text(
-                            isSpanish
-                                ? 'La comparación de propiedades está disponible para usuarios Premium. Desbloquea para ver análisis lado a lado.'
-                                : 'Property comparison is available for Premium users. Unlock to see side-by-side analysis.',
+                            s.premiumFeatureSubtitle,
                             style: TextStyle(
                                 color: CalcwiseTheme.of(context).textSecondary),
                             textAlign: TextAlign.center,
@@ -484,8 +463,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                           ElevatedButton.icon(
                             onPressed: () => PaywallHard.show(context),
                             icon: const Icon(Icons.star_rounded),
-                            label: Text(
-                                isSpanish ? 'Obtener Premium' : 'Get Premium'),
+                            label: Text(s.getPremium),
                           ),
                         ],
                       ),
@@ -503,8 +481,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
 
         return Scaffold(
           appBar: AppBar(
-            title:
-                Text(isSpanish ? 'Comparar Propiedades' : 'Compare Properties'),
+            title: Text(s.compareProperties),
             actions: [
               IconButton(
                 icon: const Icon(Icons.calendar_month_rounded),
@@ -520,9 +497,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                     : _allProperties.isEmpty
                         ? Center(
                             child: Text(
-                              isSpanish
-                                  ? 'Sin propiedades para comparar.'
-                                  : 'No properties to compare.',
+                              s.noPropertiesToCompare,
                               style: TextStyle(
                                   color:
                                       CalcwiseTheme.of(context).textSecondary),
@@ -569,9 +544,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                               const SizedBox(height: AppSpacing.lg),
 
                               // Property chips
-                              _SectionLabel(isSpanish
-                                  ? 'SELECCIONAR PROPIEDADES (máx. 3)'
-                                  : 'SELECT PROPERTIES (max 3)'),
+                              _SectionLabel(s.selectPropertiesMax3),
                               Wrap(
                                 spacing: 8,
                                 runSpacing: 8,
@@ -599,8 +572,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
 
                               // Comparison table
                               if (selected.length >= 2) ...[
-                                _SectionLabel(
-                                    isSpanish ? 'COMPARACIÓN' : 'COMPARISON'),
+                                _SectionLabel(s.comparison),
                                 CalcwisePageEntrance(child: Card(
                                   child: Padding(
                                     padding:
@@ -621,7 +593,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                                 OutlinedButton.icon(
                                   onPressed: () => _exportPdf(isSpanish),
                                   icon: const Icon(Icons.picture_as_pdf_rounded),
-                                  label: Text(isSpanish ? 'Exportar PDF' : 'Export PDF'),
+                                  label: Text(s.exportPdf),
                                   style: OutlinedButton.styleFrom(
                                       minimumSize: const Size(double.infinity, 44)),
                                 ),
@@ -638,9 +610,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                                             .cardBorder),
                                   ),
                                   child: Text(
-                                    isSpanish
-                                        ? 'Selecciona al menos 2 propiedades para comparar.'
-                                        : 'Select at least 2 properties to compare.',
+                                    s.selectAtLeast2,
                                     style: TextStyle(
                                         color: CalcwiseTheme.of(context)
                                             .textSecondary),
@@ -680,9 +650,10 @@ class _ComparisonTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     final rows = [
       _RowData(
-        label: isSpanish ? 'Alquiler mensual' : 'Monthly Rent',
+        label: s.monthlyRentRow,
         values:
             properties.map((p) => AmountFormatter.ui(p.monthlyRent, 'USD')).toList(),
         colors: properties
@@ -692,7 +663,7 @@ class _ComparisonTable extends StatelessWidget {
         rawValues: properties.map((p) => p.monthlyRent).toList(),
       ),
       _RowData(
-        label: isSpanish ? 'Total gastos' : 'Total Expenses',
+        label: s.totalExpensesRow,
         values: properties.map((p) {
           final e = expenseMap[p.id];
           return AmountFormatter.ui(e?.totalExpenses ?? 0, 'USD');
@@ -706,7 +677,7 @@ class _ComparisonTable extends StatelessWidget {
             .toList(),
       ),
       _RowData(
-        label: isSpanish ? 'Flujo mensual' : 'Monthly CF',
+        label: s.monthlyCFRow,
         values: properties.map((p) {
           final cf = cfFn(p);
           return '${cf < 0 ? '-' : '+'}${AmountFormatter.ui(cf.abs(), 'USD')}';
@@ -721,7 +692,7 @@ class _ComparisonTable extends StatelessWidget {
         rawValues: properties.map(cfFn).toList(),
       ),
       _RowData(
-        label: isSpanish ? 'Flujo anual' : 'Annual CF',
+        label: s.annualCFRow,
         values: properties.map((p) {
           final cf = cfFn(p) * 12;
           return '${cf < 0 ? '-' : '+'}${AmountFormatter.ui(cf.abs(), 'USD')}';
@@ -736,7 +707,7 @@ class _ComparisonTable extends StatelessWidget {
         rawValues: properties.map((p) => cfFn(p) * 12).toList(),
       ),
       _RowData(
-        label: isSpanish ? 'Ratio gastos' : 'Expense Ratio',
+        label: s.expenseRatioRow,
         values:
             properties.map((p) => '${ratioFn(p).toStringAsFixed(1)}%').toList(),
         colors: properties.map((p) {
@@ -747,7 +718,7 @@ class _ComparisonTable extends StatelessWidget {
         rawValues: properties.map(ratioFn).toList(),
       ),
       _RowData(
-        label: 'NOI (${isSpanish ? 'anual' : 'annual'})',
+        label: s.noiAnnual(s.annual.toLowerCase()),
         values: properties.map((p) {
           final n = noiFn(p);
           return '${n < 0 ? '-' : ''}${AmountFormatter.ui(n.abs(), 'USD')}';

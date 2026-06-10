@@ -7,6 +7,8 @@ import '../core/firebase/analytics_service.dart';
 import '../core/freemium/freemium_service.dart';
 import '../core/services/pdf_export_service.dart';
 import '../core/theme/app_theme.dart';
+import '../l10n/strings_en.dart';
+import '../l10n/strings_es.dart';
 import '../main.dart';
 import '../models/property_model.dart';
 import '../models/schedule_e_entry_model.dart';
@@ -216,12 +218,9 @@ class _DepreciationScreenState extends State<DepreciationScreen> {
     await PropertyDatabaseService.instance.insertScheduleEEntry(entry);
     await AnalyticsService.instance.logDepreciationAddedToScheduleE();
     if (!mounted) return;
+    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(isSpanish
-            ? 'Depreciación agregada al Schedule E ($_inServiceYear)'
-            : 'Depreciation added to Schedule E ($_inServiceYear)'),
-      ),
+      SnackBar(content: Text(s.depreciationAddedScheduleE(_inServiceYear))),
     );
   }
 
@@ -230,6 +229,7 @@ class _DepreciationScreenState extends State<DepreciationScreen> {
     return ValueListenableBuilder<bool>(
       valueListenable: isSpanishNotifier,
       builder: (_, isSpanish, __) {
+        final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
         final months = isSpanish
             ? const [
                 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -244,11 +244,7 @@ class _DepreciationScreenState extends State<DepreciationScreen> {
         final invalid = _hasNegativeInput;
 
         return Scaffold(
-          appBar: AppBar(
-            title: Text(isSpanish
-                ? 'Calculadora de Depreciación'
-                : 'Depreciation Calculator'),
-          ),
+          appBar: AppBar(title: Text(s.depreciationCalculator)),
           body: Column(
             children: [
               Expanded(
@@ -257,47 +253,27 @@ class _DepreciationScreenState extends State<DepreciationScreen> {
                     : ListView(
                         padding: const EdgeInsets.all(AppSpacing.lg),
                         children: [
-                          _SectionLabel(isSpanish
-                              ? 'RESIDENCIAL US — 27.5 AÑOS'
-                              : 'US RESIDENTIAL — 27.5 YEARS'),
+                          _SectionLabel(s.usResidential27),
                           Card(
                             child: Padding(
                               padding: const EdgeInsets.all(AppSpacing.lg),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  _moneyField(
-                                    _purchaseCtrl,
-                                    isSpanish
-                                        ? 'Precio de compra (\$)'
-                                        : 'Purchase price (\$)',
-                                  ),
+                                  _moneyField(_purchaseCtrl, s.purchasePrice),
                                   const SizedBox(height: AppSpacing.md),
-                                  _moneyField(
-                                    _landCtrl,
-                                    isSpanish
-                                        ? 'Valor del terreno (\$) — no depreciable'
-                                        : 'Land value (\$) — not depreciable',
-                                  ),
+                                  _moneyField(_landCtrl, s.landValue),
                                   const SizedBox(height: AppSpacing.md),
-                                  _moneyField(
-                                    _improvementsCtrl,
-                                    isSpanish
-                                        ? 'Mejoras de capital (\$) — opcional'
-                                        : 'Capital improvements (\$) — optional',
-                                  ),
+                                  _moneyField(_improvementsCtrl, s.capitalImprovements),
                                   const SizedBox(height: AppSpacing.md),
                                   Row(
                                     children: [
                                       Expanded(
-                                        child:
-                                            DropdownButtonFormField<int>(
+                                        child: DropdownButtonFormField<int>(
                                           initialValue: _inServiceMonth,
                                           isExpanded: true,
                                           decoration: InputDecoration(
-                                            labelText: isSpanish
-                                                ? 'Mes en servicio'
-                                                : 'In-service month',
+                                            labelText: s.inServiceMonth,
                                           ),
                                           items: [
                                             for (var m = 1; m <= 12; m++)
@@ -320,8 +296,7 @@ class _DepreciationScreenState extends State<DepreciationScreen> {
                                         child: DropdownButtonFormField<int>(
                                           initialValue: _inServiceYear,
                                           decoration: InputDecoration(
-                                            labelText:
-                                                isSpanish ? 'Año' : 'Year',
+                                            labelText: s.year,
                                           ),
                                           items: years
                                               .map((y) => DropdownMenuItem(
@@ -352,9 +327,7 @@ class _DepreciationScreenState extends State<DepreciationScreen> {
                               child: Padding(
                                 padding: const EdgeInsets.all(AppSpacing.lg),
                                 child: Text(
-                                  isSpanish
-                                      ? 'Los valores no pueden ser negativos.'
-                                      : 'Values cannot be negative.',
+                                  s.valuesCannotBeNegative,
                                   style: TextStyle(
                                       color: CalcwiseSemanticColors.error(
                                           Theme.of(context).brightness)),
@@ -362,38 +335,28 @@ class _DepreciationScreenState extends State<DepreciationScreen> {
                               ),
                             )
                           else ...[
-                            _SectionLabel(
-                                isSpanish ? 'RESULTADO' : 'RESULT'),
+                            _SectionLabel(s.result),
                             CalcwisePageEntrance(child: Card(
                               child: Padding(
                                 padding: const EdgeInsets.all(AppSpacing.lg),
                                 child: Column(
                                   children: [
                                     _ResultRow(
-                                      label: isSpanish
-                                          ? 'Base depreciable'
-                                          : 'Depreciable basis',
-                                      value:
-                                          '\$${AmountFormatter.formatNumber(_basis)}',
+                                      label: s.depreciableBasis,
+                                      value: '\$${AmountFormatter.formatNumber(_basis)}',
                                     ),
                                     const SizedBox(height: AppSpacing.sm),
                                     _ResultRow(
-                                      label: isSpanish
-                                          ? 'Depreciación anual (÷ 27.5)'
-                                          : 'Annual depreciation (÷ 27.5)',
-                                      value:
-                                          '\$${AmountFormatter.formatNumber(_annual)}',
+                                      label: s.annualDepreciation27,
+                                      value: '\$${AmountFormatter.formatNumber(_annual)}',
                                     ),
                                     Divider(
                                         height: 22,
                                         color: CalcwiseTheme.of(context)
                                             .cardBorder),
                                     _ResultRow(
-                                      label: isSpanish
-                                          ? '1er año (mid-month, $_inServiceYear)'
-                                          : '1st year (mid-month, $_inServiceYear)',
-                                      value:
-                                          '\$${AmountFormatter.formatNumber(_firstYear)}',
+                                      label: s.firstYearMidMonth(_inServiceYear),
+                                      value: '\$${AmountFormatter.formatNumber(_firstYear)}',
                                       bold: true,
                                       color: AppTheme.primary,
                                     ),
@@ -405,9 +368,7 @@ class _DepreciationScreenState extends State<DepreciationScreen> {
 
                             if (_properties.isEmpty)
                               Text(
-                                isSpanish
-                                    ? 'Agrega una propiedad para guardar la depreciación en el Schedule E.'
-                                    : 'Add a property to save depreciation to Schedule E.',
+                                s.addPropertyForScheduleE,
                                 style: TextStyle(
                                     color: CalcwiseTheme.of(context)
                                         .textSecondary),
@@ -417,9 +378,7 @@ class _DepreciationScreenState extends State<DepreciationScreen> {
                                 initialValue: _selectedProperty?.id,
                                 isExpanded: true,
                                 decoration: InputDecoration(
-                                  labelText: isSpanish
-                                      ? 'Propiedad'
-                                      : 'Property',
+                                  labelText: s.property,
                                 ),
                                 items: _properties
                                     .map((p) => DropdownMenuItem(
@@ -440,9 +399,7 @@ class _DepreciationScreenState extends State<DepreciationScreen> {
                                     ? () => _addToScheduleE(isSpanish)
                                     : null,
                                 icon: const Icon(Icons.add_chart_rounded),
-                                label: Text(isSpanish
-                                    ? 'Agregar al Schedule E'
-                                    : 'Add to Schedule E'),
+                                label: Text(s.addToScheduleE),
                                 style: ElevatedButton.styleFrom(
                                     minimumSize:
                                         const Size(double.infinity, 48)),
@@ -456,20 +413,17 @@ class _DepreciationScreenState extends State<DepreciationScreen> {
                             OutlinedButton.icon(
                               onPressed: () => _exportPdf(isSpanish),
                               icon: const Icon(Icons.picture_as_pdf_rounded),
-                              label: Text(isSpanish ? 'Exportar PDF' : 'Export PDF'),
+                              label: Text(s.exportPdf),
                               style: OutlinedButton.styleFrom(
                                   minimumSize: const Size(double.infinity, 44)),
                             ),
                           ],
                           const SizedBox(height: AppSpacing.lg),
                           Text(
-                            isSpanish
-                                ? 'Estimación de depreciación lineal (MACRS GDS, 27.5 años, convención de medio mes). El terreno no es depreciable. Consulta a un profesional fiscal.'
-                                : 'Straight-line depreciation estimate (MACRS GDS, 27.5 years, mid-month convention). Land is not depreciable. Consult a tax professional.',
+                            s.depreciationDisclaimer,
                             style: TextStyle(
                                 fontSize: AppTextSize.xs,
-                                color:
-                                    CalcwiseTheme.of(context).textSecondary),
+                                color: CalcwiseTheme.of(context).textSecondary),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: AppSpacing.xxl),
