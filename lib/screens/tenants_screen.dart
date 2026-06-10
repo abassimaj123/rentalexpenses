@@ -261,7 +261,8 @@ class _TenantsScreenState extends State<TenantsScreen> {
             icon: const Icon(Icons.person_add_rounded),
             label: Text(s.addTenant),
           ),
-          body: Column(
+          body: CalcwisePageEntrance(
+            child: Column(
             children: [
               Expanded(
                 child: _loading
@@ -542,6 +543,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
               ),
               const CalcwiseAdFooter(),
             ],
+          ),
           ),
         );
       },

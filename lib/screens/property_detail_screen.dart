@@ -236,7 +236,8 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
           ),
           floatingActionButtonLocation:
               FloatingActionButtonLocation.centerFloat,
-          body: Column(
+          body: CalcwisePageEntrance(
+            child: Column(
             children: [
               Expanded(
                 child: _loading
@@ -491,6 +492,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
               ),
               const CalcwiseAdFooter(),
             ],
+          ),
           ),
         );
       },

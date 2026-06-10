@@ -301,7 +301,8 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
               ),
             ],
           ),
-          body: Column(
+          body: CalcwisePageEntrance(
+            child: Column(
             children: [
               Expanded(
                 child: ListView(
@@ -513,6 +514,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                 ),
               ),
             ],
+          ),
           ),
         );
       },

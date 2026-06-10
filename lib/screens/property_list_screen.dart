@@ -323,7 +323,8 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
             icon: const Icon(Icons.add_rounded),
             label: Text(s.addProperty),
           ),
-          body: Column(
+          body: CalcwisePageEntrance(
+            child: Column(
             children: [
               Expanded(
                 child: _loading
@@ -546,6 +547,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
               ),
               const CalcwiseAdFooter(),
             ],
+          ),
           ),
         );
       },

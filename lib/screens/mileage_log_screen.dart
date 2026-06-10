@@ -320,7 +320,8 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
                   icon: const Icon(Icons.add_road_rounded),
                   label: Text(s.addTrip),
                 ),
-          body: Column(
+          body: CalcwisePageEntrance(
+            child: Column(
             children: [
               Expanded(
                 child: _loading
@@ -488,6 +489,7 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
               ),
               const CalcwiseAdFooter(),
             ],
+          ),
           ),
         );
       },

@@ -94,7 +94,8 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
               ),
             ],
           ),
-          body: Column(
+          body: CalcwisePageEntrance(
+            child: Column(
             children: [
               Expanded(
                 child: _loading
@@ -304,6 +305,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
               ),
               const CalcwiseAdFooter(),
             ],
+          ),
           ),
         );
       },

@@ -102,7 +102,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       ),
                   ],
                 ),
-                body: bodyContent,
+                body: CalcwisePageEntrance(child: bodyContent),
               )
             : bodyContent;
       },

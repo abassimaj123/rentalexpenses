@@ -325,7 +325,8 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
                 ? s.editExpensesTitle
                 : s.addExpensesTitle),
           ),
-          body: Column(
+          body: CalcwisePageEntrance(
+            child: Column(
             children: [
               Expanded(
                 child: ListView(
@@ -636,6 +637,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
               ),
               const CalcwiseAdFooter(),
             ],
+          ),
           ),
         );
       },
