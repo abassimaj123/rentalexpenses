@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:calcwise_core/calcwise_core.dart';
 import '../l10n/strings_en.dart';
 import '../l10n/strings_es.dart';
@@ -127,27 +126,5 @@ class InsightEngine {
     }
 
     return insights.take(maxCount).toList();
-  }
-
-  static Color colorFor(InsightSeverity s) {
-    switch (s) {
-      case InsightSeverity.good:
-        return const Color(0xFF34C759);
-      case InsightSeverity.warning:
-        return const Color(0xFFFFA500);
-      case InsightSeverity.alert:
-        return const Color(0xFFDC2626);
-    }
-  }
-
-  static Color surfaceFor(InsightSeverity s) {
-    switch (s) {
-      case InsightSeverity.good:
-        return const Color(0xFFECFDF5);
-      case InsightSeverity.warning:
-        return const Color(0xFFFFFBEB);
-      case InsightSeverity.alert:
-        return const Color(0xFFFEF2F2);
-    }
   }
 }

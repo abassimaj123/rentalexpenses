@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 enum LeaseStatus { active, expiringSoon, expired }
 
 class Tenant {
@@ -38,17 +36,6 @@ class Tenant {
   int get daysRemaining {
     final now = DateTime.now();
     return leaseEnd.difference(now).inDays;
-  }
-
-  Color get statusColor {
-    switch (status) {
-      case LeaseStatus.active:
-        return const Color(0xFF34C759);
-      case LeaseStatus.expiringSoon:
-        return const Color(0xFFFFA500);
-      case LeaseStatus.expired:
-        return Colors.red;
-    }
   }
 
   Map<String, dynamic> toMap() => {

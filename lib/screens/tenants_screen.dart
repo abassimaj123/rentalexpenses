@@ -9,6 +9,7 @@ import '../l10n/strings_es.dart';
 import '../main.dart';
 import '../models/property_model.dart';
 import '../models/tenant_model.dart';
+import '../ui/tenant_colors.dart';
 import '../services/property_database_service.dart';
 
 class TenantsScreen extends StatefulWidget {
