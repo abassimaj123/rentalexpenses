@@ -974,14 +974,16 @@ class _CashFlowNetChart extends StatelessWidget {
               ),
 
               // Bar chart
-              LayoutBuilder(builder: (context, constraints) {
-                final chartHeight =
-                    (constraints.maxWidth < 400) ? 185.0 : 220.0;
-                return SizedBox(
-                  height: chartHeight,
-                  child: BarChart(
-                    BarChartData(
-                      minY: -chartMax,
+              CalcwiseChartReveal(
+                axis: Axis.vertical,
+                child: LayoutBuilder(builder: (context, constraints) {
+                  final chartHeight =
+                      (constraints.maxWidth < 400) ? 185.0 : 220.0;
+                  return SizedBox(
+                    height: chartHeight,
+                    child: BarChart(
+                      BarChartData(
+                        minY: -chartMax,
                       maxY: chartMax,
                       barGroups: barGroups,
                       extraLinesData: ExtraLinesData(
@@ -1079,6 +1081,7 @@ class _CashFlowNetChart extends StatelessWidget {
                   ),
                 );
               }),
+              ),
 
               const SizedBox(height: 12),
 
@@ -1261,10 +1264,12 @@ class _ExpenseCategoryChart extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final chartHeight =
-                      (constraints.maxWidth < 400) ? 200.0 : 240.0;
+              CalcwiseChartReveal(
+                axis: Axis.vertical,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final chartHeight =
+                        (constraints.maxWidth < 400) ? 200.0 : 240.0;
                   return SizedBox(
                     height: chartHeight,
                     child: BarChart(
@@ -1338,6 +1343,7 @@ class _ExpenseCategoryChart extends StatelessWidget {
                     ),
                   );
                 },
+                ),
               ),
               const SizedBox(height: 8),
               // Legend
@@ -1688,15 +1694,17 @@ class _CashFlowTrendChart extends StatelessWidget {
               ),
 
               // Chart
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final chartHeight =
-                      (constraints.maxWidth < 400) ? 185.0 : 220.0;
-                  return SizedBox(
-                    height: chartHeight,
-                    child: BarChart(
-                      BarChartData(
-                        maxY: maxY,
+              CalcwiseChartReveal(
+                axis: Axis.vertical,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final chartHeight =
+                        (constraints.maxWidth < 400) ? 185.0 : 220.0;
+                    return SizedBox(
+                      height: chartHeight,
+                      child: BarChart(
+                        BarChartData(
+                          maxY: maxY,
                         barGroups: barGroups,
                         gridData: const FlGridData(
                             show: true, drawVerticalLine: false),
@@ -1776,6 +1784,7 @@ class _CashFlowTrendChart extends StatelessWidget {
                     ),
                   );
                 },
+                ),
               ),
 
               // Free-tier upsell banner

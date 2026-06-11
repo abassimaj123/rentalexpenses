@@ -1014,6 +1014,20 @@ class _ResultsSection extends StatelessWidget {
             label: s.monthlyCashFlow,
             value: '${cf < 0 ? '-' : ''}${AmountFormatter.ui(cf.abs(), 'USD')}',
             secondary: s.rentMinusTotalExpenses,
+            rawValue: cf,
+            valueFormatter: (v) => '${v < 0 ? '-' : ''}${AmountFormatter.ui(v.abs(), 'USD')}',
+            rawStats: [
+              (
+                label: s.annualCF,
+                value: calc.annualCashFlow,
+                formatter: (v) => '${v < 0 ? '-' : ''}${AmountFormatter.ui(v.abs(), 'USD')}',
+              ),
+              (
+                label: s.annualNOI,
+                value: calc.noi,
+                formatter: (v) => AmountFormatter.ui(v, 'USD'),
+              ),
+            ],
             stats: [
               (
                 label: s.annualCF,
