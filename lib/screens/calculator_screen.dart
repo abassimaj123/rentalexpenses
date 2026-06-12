@@ -430,6 +430,7 @@ class _CalculatorScreenState extends State<CalculatorScreen>
 
     _scheduleAutoSave(calc);
     unawaited(AnalyticsService.instance.logCalculate());
+    unawaited(AnalyticsService.instance.maybeLogFirstCalculate());
     adService.onAction();
     final trigger = await paywallSession.recordAction();
     if (trigger != PaywallTrigger.none && mounted) PaywallHard.show(context);

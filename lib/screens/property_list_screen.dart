@@ -37,6 +37,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView('property_list');
     _load();
   }
 

@@ -1,3 +1,6 @@
+import 'dart:isolate';
+import 'dart:typed_data';
+
 import 'package:calcwise_core/calcwise_core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' show DateFormat;
@@ -14,6 +17,293 @@ import '../l10n/strings_es.dart';
 import '../main.dart';
 import '../screens/calculator_screen.dart';
 import '../widgets/paywall_soft.dart';
+
+// ── Isolate-safe params & builder for history-detail PDF ─────────────────────
+
+class _HistoryDetailPdfParams {
+  final String propertyName;
+  final String savedAtFormatted;
+  final double monthlyCashFlow;
+  final double annualCashFlow;
+  final double noi;
+  final double rentIncome;
+  final double mortgage;
+  final double propertyTaxes;
+  final double insurance;
+  final double hoaFees;
+  final double propertyMgmt;
+  final double maintenance;
+  final double vacancyLoss;
+  final double utilities;
+  final double landscaping;
+  final double otherExpenses;
+  final double totalExpenses;
+  final double? capRate;
+  final double? grossYield;
+  final double? cocRoi;
+  // Localised strings
+  final String lMyProperty;
+  final String lSavedLabel;
+  final String lMonthlyCashFlow;
+  final String lAnnualCashFlow;
+  final String lBreakdown;
+  final String lCategory;
+  final String lAmount;
+  final String lMonthlyRent;
+  final String lMortgage;
+  final String lPropertyTaxes;
+  final String lInsurance;
+  final String lAdministration;
+  final String lMaintenance;
+  final String lVacancy;
+  final String lUtilities;
+  final String lLandscaping;
+  final String lOther;
+  final String lTotalExpenses;
+  final String lInvestmentMetrics;
+  final String lGrossYield;
+  final String lFooter;
+
+  const _HistoryDetailPdfParams({
+    required this.propertyName,
+    required this.savedAtFormatted,
+    required this.monthlyCashFlow,
+    required this.annualCashFlow,
+    required this.noi,
+    required this.rentIncome,
+    required this.mortgage,
+    required this.propertyTaxes,
+    required this.insurance,
+    required this.hoaFees,
+    required this.propertyMgmt,
+    required this.maintenance,
+    required this.vacancyLoss,
+    required this.utilities,
+    required this.landscaping,
+    required this.otherExpenses,
+    required this.totalExpenses,
+    this.capRate,
+    this.grossYield,
+    this.cocRoi,
+    required this.lMyProperty,
+    required this.lSavedLabel,
+    required this.lMonthlyCashFlow,
+    required this.lAnnualCashFlow,
+    required this.lBreakdown,
+    required this.lCategory,
+    required this.lAmount,
+    required this.lMonthlyRent,
+    required this.lMortgage,
+    required this.lPropertyTaxes,
+    required this.lInsurance,
+    required this.lAdministration,
+    required this.lMaintenance,
+    required this.lVacancy,
+    required this.lUtilities,
+    required this.lLandscaping,
+    required this.lOther,
+    required this.lTotalExpenses,
+    required this.lInvestmentMetrics,
+    required this.lGrossYield,
+    required this.lFooter,
+  });
+}
+
+Future<List<int>> _buildHistoryDetailPdf(_HistoryDetailPdfParams p) async {
+  const green = PdfColor.fromInt(0xFF16A34A);
+  const red = PdfColor.fromInt(0xFFDC2626);
+  const gray = PdfColor.fromInt(0xFF64748B);
+  const light = PdfColor.fromInt(0xFFF1F5F9);
+
+  pw.Widget metric({
+    required String label,
+    required String value,
+    required PdfColor color,
+  }) =>
+      pw.Expanded(
+        child: pw.Container(
+          padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          decoration: pw.BoxDecoration(
+            border: pw.Border.all(color: PdfColors.grey300),
+            borderRadius: pw.BorderRadius.circular(AppRadius.sm),
+          ),
+          child: pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.center,
+            children: [
+              pw.Text(label,
+                  style: const pw.TextStyle(
+                      fontSize: 9, color: PdfColors.grey600),
+                  textAlign: pw.TextAlign.center),
+              pw.SizedBox(height: 4),
+              pw.Text(value,
+                  style: pw.TextStyle(
+                      fontSize: AppTextSize.md,
+                      fontWeight: pw.FontWeight.bold,
+                      color: color),
+                  textAlign: pw.TextAlign.center),
+            ],
+          ),
+        ),
+      );
+
+  final cfSign = p.monthlyCashFlow >= 0 ? '+' : '-';
+
+  final doc = pw.Document();
+  doc.addPage(pw.Page(
+    pageFormat: PdfPageFormat.a4,
+    margin: const pw.EdgeInsets.all(36),
+    build: (ctx) => pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        // ── Header ─────────────────────────────────────────────────────
+        pw.Container(
+          width: double.infinity,
+          padding:
+              const pw.EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          decoration: const pw.BoxDecoration(color: green),
+          child: pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text(
+                p.propertyName.isNotEmpty ? p.propertyName : p.lMyProperty,
+                style: pw.TextStyle(
+                  fontSize: AppTextSize.subtitle,
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColors.white,
+                ),
+              ),
+              pw.SizedBox(height: 4),
+              pw.Text(
+                '${p.lSavedLabel}: ${p.savedAtFormatted}',
+                style: const pw.TextStyle(
+                    fontSize: AppTextSize.xs, color: PdfColors.white),
+              ),
+            ],
+          ),
+        ),
+        pw.SizedBox(height: 20),
+
+        // ── Cash-flow hero row ──────────────────────────────────────────
+        pw.Row(children: [
+          metric(
+            label: p.lMonthlyCashFlow,
+            value:
+                '$cfSign${AmountFormatter.ui(p.monthlyCashFlow.abs(), 'USD')}',
+            color: p.monthlyCashFlow >= 0 ? green : red,
+          ),
+          pw.SizedBox(width: 12),
+          metric(
+            label: p.lAnnualCashFlow,
+            value:
+                '${p.annualCashFlow >= 0 ? '+' : '-'}${AmountFormatter.ui(p.annualCashFlow.abs(), 'USD')}',
+            color: p.annualCashFlow >= 0 ? green : red,
+          ),
+          pw.SizedBox(width: 12),
+          metric(
+            label: 'NOI',
+            value:
+                '${p.noi >= 0 ? '+' : '-'}${AmountFormatter.ui(p.noi.abs(), 'USD')}',
+            color: p.noi >= 0 ? green : red,
+          ),
+        ]),
+        pw.SizedBox(height: 18),
+
+        // ── Income / Expenses table ─────────────────────────────────────
+        pw.Text(
+          p.lBreakdown,
+          style: pw.TextStyle(
+              fontWeight: pw.FontWeight.bold,
+              fontSize: AppTextSize.md,
+              color: gray),
+        ),
+        pw.SizedBox(height: 6),
+        pw.TableHelper.fromTextArray(
+          headers: [p.lCategory, p.lAmount],
+          data: [
+            [p.lMonthlyRent, AmountFormatter.ui(p.rentIncome, 'USD')],
+            if (p.mortgage > 0)
+              [p.lMortgage, AmountFormatter.ui(p.mortgage, 'USD')],
+            if (p.propertyTaxes > 0)
+              [p.lPropertyTaxes, AmountFormatter.ui(p.propertyTaxes, 'USD')],
+            if (p.insurance > 0)
+              [p.lInsurance, AmountFormatter.ui(p.insurance, 'USD')],
+            if (p.hoaFees > 0)
+              ['HOA', AmountFormatter.ui(p.hoaFees, 'USD')],
+            if (p.propertyMgmt > 0)
+              [p.lAdministration, AmountFormatter.ui(p.propertyMgmt, 'USD')],
+            if (p.maintenance > 0)
+              [p.lMaintenance, AmountFormatter.ui(p.maintenance, 'USD')],
+            if (p.vacancyLoss > 0)
+              [p.lVacancy, AmountFormatter.ui(p.vacancyLoss, 'USD')],
+            if (p.utilities > 0)
+              [p.lUtilities, AmountFormatter.ui(p.utilities, 'USD')],
+            if (p.landscaping > 0)
+              [p.lLandscaping, AmountFormatter.ui(p.landscaping, 'USD')],
+            if (p.otherExpenses > 0)
+              [p.lOther, AmountFormatter.ui(p.otherExpenses, 'USD')],
+            [p.lTotalExpenses, AmountFormatter.ui(p.totalExpenses, 'USD')],
+          ],
+          border: pw.TableBorder.all(color: PdfColors.grey300),
+          headerStyle: pw.TextStyle(
+              fontWeight: pw.FontWeight.bold, fontSize: AppTextSize.xs),
+          cellStyle: const pw.TextStyle(fontSize: AppTextSize.xs),
+          headerDecoration:
+              const pw.BoxDecoration(color: PdfColor.fromInt(0xFFECFDF5)),
+          cellHeight: 22,
+          oddRowDecoration: const pw.BoxDecoration(color: light),
+        ),
+        pw.SizedBox(height: 16),
+
+        // ── Investor metrics (if available) ────────────────────────────
+        if (p.capRate != null || p.cocRoi != null) ...[
+          pw.Text(
+            p.lInvestmentMetrics,
+            style: pw.TextStyle(
+                fontWeight: pw.FontWeight.bold,
+                fontSize: AppTextSize.md,
+                color: gray),
+          ),
+          pw.SizedBox(height: 6),
+          pw.Row(children: [
+            if (p.capRate != null) ...[
+              metric(
+                label: 'Cap Rate',
+                value: '${p.capRate!.toStringAsFixed(2)}%',
+                color: p.capRate! >= 6 ? green : red,
+              ),
+              pw.SizedBox(width: 12),
+            ],
+            if (p.grossYield != null) ...[
+              metric(
+                label: p.lGrossYield,
+                value: '${p.grossYield!.toStringAsFixed(2)}%',
+                color: p.grossYield! >= 8 ? green : red,
+              ),
+              pw.SizedBox(width: 12),
+            ],
+            if (p.cocRoi != null)
+              metric(
+                label: 'CoC ROI',
+                value: '${p.cocRoi!.toStringAsFixed(2)}%',
+                color: p.cocRoi! >= 8 ? green : red,
+              ),
+          ]),
+          pw.SizedBox(height: 12),
+        ],
+
+        pw.Spacer(),
+        pw.Divider(color: PdfColors.grey300),
+        pw.SizedBox(height: 4),
+        pw.Text(
+          p.lFooter,
+          style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600),
+        ),
+      ],
+    ),
+  ));
+
+  return doc.save();
+}
 
 /// Read-only detail view for a saved expense calculation from history.
 class HistoryDetailScreen extends StatefulWidget {
@@ -45,170 +335,57 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
     try {
       final c = widget.calc;
       final dateFmt = DateFormat('MMMM d, yyyy');
-      final cf = c.monthlyCashFlow;
-      final cfSign = cf >= 0 ? '+' : '-';
 
-      final doc = pw.Document();
-      const green = PdfColor.fromInt(0xFF16A34A);
-      const red = PdfColor.fromInt(0xFFDC2626);
-      const gray = PdfColor.fromInt(0xFF64748B);
-      const light = PdfColor.fromInt(0xFFF1F5F9);
+      final params = _HistoryDetailPdfParams(
+        propertyName: c.propertyName,
+        savedAtFormatted: dateFmt.format(c.savedAt),
+        monthlyCashFlow: c.monthlyCashFlow,
+        annualCashFlow: c.annualCashFlow,
+        noi: c.noi,
+        rentIncome: c.rentIncome,
+        mortgage: c.mortgage,
+        propertyTaxes: c.propertyTaxes,
+        insurance: c.insurance,
+        hoaFees: c.hoaFees,
+        propertyMgmt: c.propertyMgmt,
+        maintenance: c.maintenance,
+        vacancyLoss: c.vacancyLoss,
+        utilities: c.utilities,
+        landscaping: c.landscaping,
+        otherExpenses: c.otherExpenses,
+        totalExpenses: c.totalExpenses,
+        capRate: c.capRate,
+        grossYield: c.grossYield,
+        cocRoi: c.cocRoi,
+        lMyProperty: s.myProperty,
+        lSavedLabel: s.savedLabel,
+        lMonthlyCashFlow: s.monthlyCashFlow,
+        lAnnualCashFlow: s.annualCashFlow,
+        lBreakdown: s.breakdown,
+        lCategory: s.category,
+        lAmount: s.amount,
+        lMonthlyRent: s.monthlyRent,
+        lMortgage: s.mortgage,
+        lPropertyTaxes: s.propertyTaxesLabel,
+        lInsurance: s.insurance,
+        lAdministration: s.administration,
+        lMaintenance: s.maintenance,
+        lVacancy: s.vacancy,
+        lUtilities: s.utilities,
+        lLandscaping: s.landscapingLabel,
+        lOther: s.other,
+        lTotalExpenses: s.totalExpenses,
+        lInvestmentMetrics: s.investmentMetrics,
+        lGrossYield: s.grossYield,
+        lFooter:
+            'Rental Expenses Tracker — ${DateFormat('yyyy-MM-dd').format(DateTime.now())}',
+      );
 
-      doc.addPage(pw.Page(
-        pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.all(36),
-        build: (ctx) => pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            // ── Header ───────────────────────────────────────────────────
-            pw.Container(
-              width: double.infinity,
-              padding:
-                  const pw.EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-              decoration: const pw.BoxDecoration(color: green),
-              child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Text(
-                    c.propertyName.isNotEmpty
-                        ? c.propertyName
-                        : s.myProperty,
-                    style: pw.TextStyle(
-                      fontSize: AppTextSize.subtitle,
-                      fontWeight: pw.FontWeight.bold,
-                      color: PdfColors.white,
-                    ),
-                  ),
-                  pw.SizedBox(height: 4),
-                  pw.Text(
-                    '${s.savedLabel}: ${dateFmt.format(c.savedAt)}',
-                    style: const pw.TextStyle(
-                        fontSize: AppTextSize.xs, color: PdfColors.white),
-                  ),
-                ],
-              ),
-            ),
-            pw.SizedBox(height: 20),
-
-            // ── Cash-flow hero row ────────────────────────────────────────
-            pw.Row(children: [
-              _pdfMetric(
-                label: s.monthlyCashFlow,
-                value: '$cfSign${AmountFormatter.ui(cf.abs(), 'USD')}',
-                color: cf >= 0 ? green : red,
-              ),
-              pw.SizedBox(width: 12),
-              _pdfMetric(
-                label: s.annualCashFlow,
-                value:
-                    '${c.annualCashFlow >= 0 ? '+' : '-'}${AmountFormatter.ui(c.annualCashFlow.abs(), 'USD')}',
-                color: c.annualCashFlow >= 0 ? green : red,
-              ),
-              pw.SizedBox(width: 12),
-              _pdfMetric(
-                label: 'NOI',
-                value: '${c.noi >= 0 ? '+' : '-'}${AmountFormatter.ui(c.noi.abs(), 'USD')}',
-                color: c.noi >= 0 ? green : red,
-              ),
-            ]),
-            pw.SizedBox(height: 18),
-
-            // ── Income / Expenses table ───────────────────────────────────
-            pw.Text(
-              s.breakdown,
-              style: pw.TextStyle(
-                  fontWeight: pw.FontWeight.bold,
-                  fontSize: AppTextSize.md,
-                  color: gray),
-            ),
-            pw.SizedBox(height: 6),
-            pw.TableHelper.fromTextArray(
-              headers: [s.category, s.amount],
-              data: [
-                [s.monthlyRent, AmountFormatter.ui(c.rentIncome, 'USD')],
-                if (c.mortgage > 0)
-                  [s.mortgage, AmountFormatter.ui(c.mortgage, 'USD')],
-                if (c.propertyTaxes > 0)
-                  [s.propertyTaxesLabel, AmountFormatter.ui(c.propertyTaxes, 'USD')],
-                if (c.insurance > 0)
-                  [s.insurance, AmountFormatter.ui(c.insurance, 'USD')],
-                if (c.hoaFees > 0) ['HOA', AmountFormatter.ui(c.hoaFees, 'USD')],
-                if (c.propertyMgmt > 0)
-                  [s.administration, AmountFormatter.ui(c.propertyMgmt, 'USD')],
-                if (c.maintenance > 0)
-                  [s.maintenance, AmountFormatter.ui(c.maintenance, 'USD')],
-                if (c.vacancyLoss > 0)
-                  [s.vacancy, AmountFormatter.ui(c.vacancyLoss, 'USD')],
-                if (c.utilities > 0)
-                  [s.utilities, AmountFormatter.ui(c.utilities, 'USD')],
-                if (c.landscaping > 0)
-                  [s.landscapingLabel, AmountFormatter.ui(c.landscaping, 'USD')],
-                if (c.otherExpenses > 0)
-                  [s.other, AmountFormatter.ui(c.otherExpenses, 'USD')],
-                [s.totalExpenses, AmountFormatter.ui(c.totalExpenses, 'USD')],
-              ],
-              border: pw.TableBorder.all(color: PdfColors.grey300),
-              headerStyle: pw.TextStyle(
-                  fontWeight: pw.FontWeight.bold, fontSize: AppTextSize.xs),
-              cellStyle: const pw.TextStyle(fontSize: AppTextSize.xs),
-              headerDecoration:
-                  const pw.BoxDecoration(color: PdfColor.fromInt(0xFFECFDF5)),
-              cellHeight: 22,
-              oddRowDecoration: const pw.BoxDecoration(color: light),
-            ),
-            pw.SizedBox(height: 16),
-
-            // ── Investor metrics (if available) ───────────────────────────
-            if (c.capRate != null || c.cocRoi != null) ...[
-              pw.Text(
-                s.investmentMetrics,
-                style: pw.TextStyle(
-                    fontWeight: pw.FontWeight.bold,
-                    fontSize: AppTextSize.md,
-                    color: gray),
-              ),
-              pw.SizedBox(height: 6),
-              pw.Row(children: [
-                if (c.capRate != null) ...[
-                  _pdfMetric(
-                    label: 'Cap Rate',
-                    value: '${c.capRate!.toStringAsFixed(2)}%',
-                    color: c.capRate! >= 6 ? green : red,
-                  ),
-                  pw.SizedBox(width: 12),
-                ],
-                if (c.grossYield != null) ...[
-                  _pdfMetric(
-                    label: s.grossYield,
-                    value: '${c.grossYield!.toStringAsFixed(2)}%',
-                    color: c.grossYield! >= 8 ? green : red,
-                  ),
-                  pw.SizedBox(width: 12),
-                ],
-                if (c.cocRoi != null)
-                  _pdfMetric(
-                    label: 'CoC ROI',
-                    value: '${c.cocRoi!.toStringAsFixed(2)}%',
-                    color: c.cocRoi! >= 8 ? green : red,
-                  ),
-              ]),
-              pw.SizedBox(height: 12),
-            ],
-
-            pw.Spacer(),
-            pw.Divider(color: PdfColors.grey300),
-            pw.SizedBox(height: 4),
-            pw.Text(
-              'Rental Expenses Tracker — ${DateFormat('yyyy-MM-dd').format(DateTime.now())}',
-              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600),
-            ),
-          ],
-        ),
-      ));
+      final bytes = await Isolate.run(() => _buildHistoryDetailPdf(params));
 
       await AnalyticsService.instance.logPdfExported();
       await Printing.sharePdf(
-        bytes: await doc.save(),
+        bytes: Uint8List.fromList(bytes),
         filename:
             '${c.propertyName.isEmpty ? "rental" : c.propertyName.replaceAll(' ', '_')}_expense.pdf',
       );
@@ -223,38 +400,6 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
       if (mounted) setState(() => _exporting = false);
     }
   }
-
-  /// Small metric box for PDF layout.
-  pw.Widget _pdfMetric({
-    required String label,
-    required String value,
-    required PdfColor color,
-  }) =>
-      pw.Expanded(
-        child: pw.Container(
-          padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-          decoration: pw.BoxDecoration(
-            border: pw.Border.all(color: PdfColors.grey300),
-            borderRadius: pw.BorderRadius.circular(AppRadius.sm),
-          ),
-          child: pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.center,
-            children: [
-              pw.Text(label,
-                  style:
-                      const pw.TextStyle(fontSize: 9, color: PdfColors.grey600),
-                  textAlign: pw.TextAlign.center),
-              pw.SizedBox(height: 4),
-              pw.Text(value,
-                  style: pw.TextStyle(
-                      fontSize: AppTextSize.md,
-                      fontWeight: pw.FontWeight.bold,
-                      color: color),
-                  textAlign: pw.TextAlign.center),
-            ],
-          ),
-        ),
-      );
 
   @override
   Widget build(BuildContext context) {

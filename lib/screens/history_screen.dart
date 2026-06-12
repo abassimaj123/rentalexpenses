@@ -31,8 +31,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
   void initState() {
     super.initState();
     AnalyticsService.instance.logScreenView('history');
+    historyRefreshNotifier.addListener(_reload);
     _load();
   }
+
+  @override
+  void dispose() {
+    historyRefreshNotifier.removeListener(_reload);
+    super.dispose();
+  }
+
+  void _reload() => _load();
 
   Future<void> _load() async {
     final entries = await loadHistory();

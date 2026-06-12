@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/firebase/analytics_service.dart';
 import '../l10n/strings_en.dart';
 import '../l10n/strings_es.dart';
 import '../main.dart' show isSpanishNotifier;
@@ -12,8 +13,19 @@ import 'package:calcwise_core/calcwise_core.dart'
     show CalcwiseAdFooter, AppDuration, AppSpacing, AppRadius, AppTextSize;
 
 /// Tools hub screen — provides access to utility calculators and features
-class ToolsScreen extends StatelessWidget {
+class ToolsScreen extends StatefulWidget {
   const ToolsScreen({super.key});
+
+  @override
+  State<ToolsScreen> createState() => _ToolsScreenState();
+}
+
+class _ToolsScreenState extends State<ToolsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    AnalyticsService.instance.logScreenView('tools');
+  }
 
   @override
   Widget build(BuildContext context) {
