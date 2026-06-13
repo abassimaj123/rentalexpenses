@@ -781,7 +781,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                                   description: isSpanish
                                       ? 'Desbloquea el desglose de gastos de todas tus propiedades'
                                       : 'Unlock the expense breakdown for all your properties',  // chart-specific
-                                  onUnlock: () => IAPService.instance.buy(),
+                                  onUnlock: () => PaywallHard.show(context),
                                   price: IAPService.instance.localizedPrice,
                                 ),
                               ],

@@ -254,6 +254,17 @@ class SettingsScreen extends StatelessWidget {
                         onTap: () => _launchUrl('https://calqwise.com/privacy'),
                       ),
                     ),
+                    Card(
+                      clipBehavior: Clip.antiAlias,
+                      child: ListTile(
+                        leading: const Icon(Icons.manage_search_rounded,
+                            color: AppTheme.primary),
+                        title: Text(isSpanish
+                            ? 'Configuración de privacidad'
+                            : 'Privacy Settings'),
+                        onTap: showCalcwisePrivacyOptions,
+                      ),
+                    ),
                     const SizedBox(height: AppSpacing.xl),
 
                     // ── Privacy ───────────────────────────────────────
