@@ -39,3 +39,6 @@ release.env
 
 # AdMob production unit IDs (injected via --dart-define-from-file)
 admob.json
+
+# Build debug symbols (binary, not for VCS)
+debug_symbols/
