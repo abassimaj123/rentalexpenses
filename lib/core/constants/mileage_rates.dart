@@ -2,10 +2,10 @@
 ///
 /// Update this map each year when the IRS publishes the new rate.
 /// Source: IRS standard mileage rates (business).
-///   2026 = $0.725/mile (IRS Notice 2025-5)
-///   2025 = $0.70/mile
-///   2024 = $0.67/mile
-///   2023 = $0.655/mile
+///   2026 = $0.725/mile (IRS Notice 2026-10)
+///   2025 = $0.70/mile  (IRS Notice 2025-5)
+///   2024 = $0.67/mile  (IRS Notice 2024-8)
+///   2023 = $0.655/mile (IRS Notice 2023-3)
 class MileageRates {
   MileageRates._();
 
