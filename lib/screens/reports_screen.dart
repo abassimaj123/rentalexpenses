@@ -787,6 +787,18 @@ class _ReportsScreenState extends State<ReportsScreen> {
                               ],
                               const SizedBox(height: 20),
 
+                              // ── 10-Year Net Income Projection ──────────────
+                              if (_properties.isNotEmpty) ...[
+                                const SizedBox(height: 4),
+                                _TenYearProjectionSection(
+                                  properties: _properties,
+                                  expenseMap: _expenseMap,
+                                  isPremium: isPremium,
+                                  isSpanish: isSpanish,
+                                ),
+                                const SizedBox(height: 20),
+                              ],
+
                               // Top performers
                               if (performers.isNotEmpty) ...[
                                 _SectionLabel(isSpanish
@@ -1915,6 +1927,578 @@ class _EmptyState extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ── 10-Year After-Tax Net Income Projection ───────────────────────────────────
+
+class _YearProjection {
+  final int year;
+  final double grossIncome;
+  final double expenses;
+  double get net => grossIncome - expenses;
+
+  const _YearProjection({
+    required this.year,
+    required this.grossIncome,
+    required this.expenses,
+  });
+}
+
+class _TenYearProjectionSection extends StatefulWidget {
+  final List<Property> properties;
+  final Map<String, MonthlyExpense?> expenseMap;
+  final bool isPremium;
+  final bool isSpanish;
+
+  const _TenYearProjectionSection({
+    required this.properties,
+    required this.expenseMap,
+    required this.isPremium,
+    required this.isSpanish,
+  });
+
+  @override
+  State<_TenYearProjectionSection> createState() =>
+      _TenYearProjectionSectionState();
+}
+
+class _TenYearProjectionSectionState
+    extends State<_TenYearProjectionSection> {
+  bool _expanded = false;
+  double _rentGrowth = 0.03;
+  double _expenseGrowth = 0.02;
+
+  static const int _freeYears = 3;
+  static const int _totalYears = 10;
+
+  List<_YearProjection> _buildProjections() {
+    double annualIncome = widget.properties.fold<double>(
+          0,
+          (s, p) => s + p.monthlyRent * 12,
+        );
+    double annualExpenses = widget.properties.fold<double>(
+      0,
+      (s, p) => s + (widget.expenseMap[p.id]?.totalExpenses ?? 0) * 12,
+    );
+
+    final projections = <_YearProjection>[];
+    for (int i = 1; i <= _totalYears; i++) {
+      if (i > 1) {
+        annualIncome *= (1 + _rentGrowth);
+        annualExpenses *= (1 + _expenseGrowth);
+      }
+      projections.add(_YearProjection(
+        year: i,
+        grossIncome: annualIncome,
+        expenses: annualExpenses,
+      ));
+    }
+    return projections;
+  }
+
+  String _compact(double v) {
+    final abs = v.abs();
+    if (abs >= 1000000) return '\$${(abs / 1000000).toStringAsFixed(1)}M';
+    if (abs >= 1000) return '\$${(abs / 1000).toStringAsFixed(1)}k';
+    return '\$${abs.toStringAsFixed(0)}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = CalcwiseTheme.of(context);
+    final projections = _buildProjections();
+    final yr10 = projections.last;
+    final yr1 = projections.first;
+    final incomePct =
+        yr1.grossIncome > 0
+            ? ((yr10.grossIncome - yr1.grossIncome) / yr1.grossIncome * 100)
+            : 0.0;
+    final netPct =
+        yr1.net != 0
+            ? ((yr10.net - yr1.net) / yr1.net.abs() * 100)
+            : 0.0;
+    final isSpanish = widget.isSpanish;
+    final isPremium = widget.isPremium;
+
+    return Card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InkWell(
+            onTap: () => setState(() => _expanded = !_expanded),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(AppRadius.xl),
+              topRight: Radius.circular(AppRadius.xl),
+              bottomLeft: Radius.circular(_expanded ? 0 : AppRadius.xl),
+              bottomRight: Radius.circular(_expanded ? 0 : AppRadius.xl),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.mdPlus,
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: AppTheme.primary.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                    ),
+                    child: const Icon(
+                      Icons.trending_up_rounded,
+                      color: AppTheme.primary,
+                      size: 18,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          isSpanish
+                              ? 'PROYECCIÓN 10 AÑOS'
+                              : '10-YEAR PROJECTION',
+                          style: TextStyle(
+                            fontSize: AppTextSize.xs,
+                            fontWeight: FontWeight.bold,
+                            color: theme.textSecondary,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          isSpanish
+                              ? 'Ingreso neto estimado después de impuestos'
+                              : 'Estimated after-tax net income',
+                          style: TextStyle(
+                            fontSize: AppTextSize.xs,
+                            color: theme.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    _expanded
+                        ? Icons.expand_less_rounded
+                        : Icons.expand_more_rounded,
+                    color: theme.textSecondary,
+                    size: 20,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (_expanded) ...[
+            Divider(height: 1, color: theme.cardBorder),
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Sliders
+                  _GrowthSlider(
+                    label: isSpanish
+                        ? 'Crecimiento del alquiler'
+                        : 'Rent growth rate',
+                    value: _rentGrowth,
+                    min: 0.0,
+                    max: 0.10,
+                    onChanged: (v) => setState(() => _rentGrowth = v),
+                    accentColor: AppTheme.primary,
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  _GrowthSlider(
+                    label: isSpanish
+                        ? 'Crecimiento de gastos'
+                        : 'Expense growth rate',
+                    value: _expenseGrowth,
+                    min: 0.0,
+                    max: 0.08,
+                    onChanged: (v) => setState(() => _expenseGrowth = v),
+                    accentColor: AppTheme.warning,
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // Bar chart — free: 3 years, premium: all 10
+                  _ProjectionBarChart(
+                    projections:
+                        isPremium
+                            ? projections
+                            : projections.sublist(0, _freeYears),
+                    isSpanish: isSpanish,
+                    compact: _compact,
+                  ),
+
+                  // Premium gate overlay
+                  if (!isPremium) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    CalcwisePremiumGate(
+                      title: isSpanish
+                          ? 'Proyección completa 10 años'
+                          : 'Full 10-Year Projection',
+                      description: isSpanish
+                          ? 'Desbloquea los años 4–10 y todos los escenarios de crecimiento'
+                          : 'Unlock years 4–10 and all growth scenarios',
+                      onUnlock: () => PaywallHard.show(context),
+                      price: IAPService.instance.localizedPrice,
+                    ),
+                  ],
+
+                  // Summary line
+                  if (isPremium) ...[
+                    const SizedBox(height: AppSpacing.md),
+                    _ProjectionSummary(
+                      grossPct: incomePct,
+                      netPct: netPct,
+                      yr10Net: yr10.net,
+                      isSpanish: isSpanish,
+                      compact: _compact,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// ── Growth rate slider ────────────────────────────────────────────────────────
+
+class _GrowthSlider extends StatelessWidget {
+  final String label;
+  final double value;
+  final double min;
+  final double max;
+  final ValueChanged<double> onChanged;
+  final Color accentColor;
+
+  const _GrowthSlider({
+    required this.label,
+    required this.value,
+    required this.min,
+    required this.max,
+    required this.onChanged,
+    required this.accentColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final pct = (value * 100).toStringAsFixed(1);
+    final theme = CalcwiseTheme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: AppTextSize.sm,
+                  color: theme.textSecondary,
+                ),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm,
+                vertical: 2,
+              ),
+              decoration: BoxDecoration(
+                color: accentColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(AppRadius.full),
+              ),
+              child: Text(
+                '$pct%',
+                style: TextStyle(
+                  fontSize: AppTextSize.xs,
+                  fontWeight: FontWeight.bold,
+                  color: accentColor,
+                ),
+              ),
+            ),
+          ],
+        ),
+        SliderTheme(
+          data: SliderThemeData(
+            activeTrackColor: accentColor,
+            thumbColor: accentColor,
+            inactiveTrackColor: accentColor.withValues(alpha: 0.20),
+            overlayColor: accentColor.withValues(alpha: 0.12),
+            trackHeight: 3,
+            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+          ),
+          child: Slider(
+            value: value,
+            min: min,
+            max: max,
+            divisions: (max * 100).round(),
+            onChanged: onChanged,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Horizontal bar chart ──────────────────────────────────────────────────────
+
+class _ProjectionBarChart extends StatelessWidget {
+  final List<_YearProjection> projections;
+  final bool isSpanish;
+  final String Function(double) compact;
+
+  const _ProjectionBarChart({
+    required this.projections,
+    required this.isSpanish,
+    required this.compact,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = CalcwiseTheme.of(context);
+    final brightness = Theme.of(context).brightness;
+    final successColor = CalcwiseSemanticColors.success(brightness);
+    final errorColor = CalcwiseSemanticColors.error(brightness);
+
+    if (projections.isEmpty) return const SizedBox.shrink();
+
+    final maxGross = projections
+        .map((p) => p.grossIncome)
+        .reduce((a, b) => a > b ? a : b);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Legend
+        Row(
+          children: [
+            _ProjLegendDot(
+              color: AppTheme.primary.withValues(alpha: 0.30),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              isSpanish ? 'Ingreso bruto' : 'Gross income',
+              style: TextStyle(
+                fontSize: AppTextSize.xs,
+                color: theme.textSecondary,
+              ),
+            ),
+            const SizedBox(width: 12),
+            _ProjLegendDot(
+              color: AppTheme.warning.withValues(alpha: 0.55),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              isSpanish ? 'Gastos' : 'Expenses',
+              style: TextStyle(
+                fontSize: AppTextSize.xs,
+                color: theme.textSecondary,
+              ),
+            ),
+            const SizedBox(width: 12),
+            _ProjLegendDot(color: successColor),
+            const SizedBox(width: 4),
+            Text(
+              isSpanish ? 'Neto' : 'Net',
+              style: TextStyle(
+                fontSize: AppTextSize.xs,
+                color: theme.textSecondary,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.md),
+
+        ...projections.map((proj) {
+          final grossFrac =
+              maxGross > 0 ? (proj.grossIncome / maxGross).clamp(0.0, 1.0) : 0.0;
+          final expFrac =
+              maxGross > 0 ? (proj.expenses / maxGross).clamp(0.0, 1.0) : 0.0;
+          final netFrac =
+              maxGross > 0 ? (proj.net / maxGross).clamp(0.0, 1.0) : 0.0;
+          final isPositive = proj.net >= 0;
+          final netColor = isPositive ? successColor : errorColor;
+
+          return Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.smPlus),
+            child: Row(
+              children: [
+                // Year label
+                SizedBox(
+                  width: 48,
+                  child: Text(
+                    isSpanish ? 'Año ${proj.year}' : 'Yr ${proj.year}',
+                    style: TextStyle(
+                      fontSize: AppTextSize.xs,
+                      color: theme.textSecondary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+
+                // Bars
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Gross income bar (background)
+                      LayoutBuilder(
+                        builder: (_, constraints) {
+                          final total = constraints.maxWidth;
+                          return Stack(
+                            children: [
+                              // Gross background
+                              Container(
+                                width: total * grossFrac,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  color: AppTheme.primary.withValues(alpha: 0.18),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                              // Expenses overlay
+                              Container(
+                                width: total * expFrac,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  color: AppTheme.warning.withValues(alpha: 0.50),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 3),
+                      // Net bar
+                      LayoutBuilder(
+                        builder: (_, constraints) {
+                          final total = constraints.maxWidth;
+                          return Container(
+                            width: total * netFrac.clamp(0.0, 1.0),
+                            height: 5,
+                            decoration: BoxDecoration(
+                              color: netColor,
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+
+                // Net value label
+                SizedBox(
+                  width: 56,
+                  child: Text(
+                    '${isPositive ? '+' : '-'}${compact(proj.net.abs())}',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      fontSize: AppTextSize.xs,
+                      fontWeight: FontWeight.w600,
+                      color: netColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+      ],
+    );
+  }
+}
+
+class _ProjLegendDot extends StatelessWidget {
+  final Color color;
+  const _ProjLegendDot({required this.color});
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: 10,
+        height: 10,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(3),
+        ),
+      );
+}
+
+// ── Projection summary line ───────────────────────────────────────────────────
+
+class _ProjectionSummary extends StatelessWidget {
+  final double grossPct;
+  final double netPct;
+  final double yr10Net;
+  final bool isSpanish;
+  final String Function(double) compact;
+
+  const _ProjectionSummary({
+    required this.grossPct,
+    required this.netPct,
+    required this.yr10Net,
+    required this.isSpanish,
+    required this.compact,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = CalcwiseTheme.of(context);
+    final brightness = Theme.of(context).brightness;
+    final isPositiveNet = yr10Net >= 0;
+    final netColor = isPositiveNet
+        ? CalcwiseSemanticColors.success(brightness)
+        : CalcwiseSemanticColors.error(brightness);
+
+    final grossStr = '${grossPct >= 0 ? '+' : ''}${grossPct.toStringAsFixed(0)}%';
+    final netStr = '${netPct >= 0 ? '+' : ''}${netPct.toStringAsFixed(0)}%';
+
+    final summaryText = isSpanish
+        ? 'Año 10: Bruto $grossStr, Neto $netStr — aprox. ${compact(yr10Net)}/año neto'
+        : 'By Year 10: Gross $grossStr, Net $netStr — approx. ${compact(yr10Net)}/yr net income';
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceTint,
+        borderRadius: BorderRadius.circular(AppRadius.mdPlus),
+        border: Border.all(
+          color: AppTheme.primary.withValues(alpha: 0.18),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.insights_rounded,
+            size: 15,
+            color: netColor,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              summaryText,
+              style: TextStyle(
+                fontSize: AppTextSize.xs,
+                color: theme.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
