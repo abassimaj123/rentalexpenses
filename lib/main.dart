@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:calcwise_core/calcwise_core.dart'
     hide CrashlyticsService, iapErrorNotifier, PaywallHard;
 import 'package:firebase_core/firebase_core.dart';
@@ -65,6 +66,7 @@ Future<void> main() async {
   await initializeDateFormatting('en', null);
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  unawaited(CalcwiseRemoteConfig.initialize());
   await CalcwiseTax.init(remoteFetcher: calcwiseTaxRemoteFetch);
   await AnalyticsService.instance.logAppOpen();
   await CrashlyticsService.init();
