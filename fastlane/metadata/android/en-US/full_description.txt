@@ -1,0 +1,13 @@
+The landlord's tax toolkit — track rental income and expenses across multiple properties and generate a tax-ready summary in minutes. Built for individual landlords and small portfolio investors who want organized records without a spreadsheet or accountant.
+
+Income and expense tracking by property: log rent received, maintenance costs, insurance, property taxes, utilities, HOA fees, property management fees, advertising, legal fees, and travel miles for property visits. Automatic categorization matches IRS Schedule E and CRA T776 categories so your data maps directly to your tax return. Receipt photo attachment keeps documentation organized. Tenant management tracks lease dates, monthly rent, and payment history per tenant.
+
+Depreciation calculator: residential rental property depreciates over 27.5 years (US) or the CCA schedule (Canada). Enter your property value and improvement history and get the annual depreciation deduction automatically. Capital cost allowance (CCA) calculator for Canadian landlords with Class 1 and Class 8 assets. Mileage log for vehicle trips to the property — IRS standard mileage rate (67¢/mile for 2024) applied automatically.
+
+Compare Properties side by side: see cash flow, net operating income (NOI), cap rate, and ROI for up to 4 properties simultaneously. After-Tax 10-Year Projection shows your estimated net income trajectory assuming adjustable rent growth and expense inflation rates — with a premium 10-year chart.
+
+Tax Summary report generates a clean printable PDF organized by Schedule E categories. Export to CSV for import into tax software. Supports US and Canadian tax rules.
+
+Full bilingual support in English and French (EN+FR). Dark mode. Works 100% offline.
+
+Keywords: rental property expense tracker, landlord app, rental income tracker, Schedule E tracker, rental expense log, depreciation calculator rental, CCA calculator Canada, mileage log rental property, NOI calculator, cap rate calculator, rental property tax app, T776 Canada.

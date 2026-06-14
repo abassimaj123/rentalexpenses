@@ -1,0 +1,11 @@
+L'application de gestion fiscale pour propriétaires bailleurs — suivez vos revenus et dépenses locatifs sur plusieurs propriétés et générez un résumé fiscal prêt pour la déclaration en quelques minutes.
+
+Suivi des revenus et dépenses par propriété : loyers perçus, entretien, assurances, taxes foncières, services publics, frais de gestion, publicité, frais juridiques et kilométrage pour visites. Les catégories correspondent automatiquement au formulaire T776 de l'ARC.
+
+Calculateur DPA : les immeubles résidentiels locatifs sont en Catégorie 1 (4 %). Entrez la valeur de votre immeuble et obtenez la déduction pour amortissement annuelle automatiquement. Journal de kilométrage avec le taux CRA (0,70 $/km pour les 5 000 premiers km).
+
+Rapport fiscal : générez un PDF organisé par catégories T776. Exportation CSV pour logiciels de déclaration. Projection 10 ans : estimez votre revenu net sur 10 ans selon des hypothèses de croissance des loyers et d'inflation des dépenses.
+
+Support bilingue EN+FR. Mode sombre. Fonctionne hors ligne.
+
+Mots-clés : dépenses immeuble locatif, suivi revenus locatifs, T776 ARC, calculateur DPA, journal kilométrage propriétaire, application propriétaire bailleur, revenu locatif impôt Canada.
