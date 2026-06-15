@@ -691,7 +691,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
                                   padding: const EdgeInsets.all(AppSpacing.lg),
                                   child: Column(
                                     children: [
-                                      Row(
+                                      IntrinsicHeight(
+                                        child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.stretch,
                                         children: [
                                           Expanded(
                                             child: _SummaryTile(
@@ -712,12 +714,14 @@ class _ReportsScreenState extends State<ReportsScreen> {
                                             ),
                                           ),
                                         ],
-                                      ),
+                                      )),
                                       Divider(
                                           height: 24,
                                           color: CalcwiseTheme.of(context)
                                               .cardBorder),
-                                      Row(
+                                      IntrinsicHeight(
+                                        child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.stretch,
                                         children: [
                                           Expanded(
                                             child: _SummaryTile(
@@ -743,7 +747,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                                             ),
                                           ),
                                         ],
-                                      ),
+                                      )),
                                     ],
                                   ),
                                 ),
