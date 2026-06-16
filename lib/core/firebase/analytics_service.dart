@@ -24,4 +24,7 @@ class AnalyticsService extends CalcwiseAnalytics {
   Future<void> logMileageTripAdded() => log('mileage_trip_added');
   Future<void> logMileageAddedToScheduleE() =>
       log('mileage_added_schedule_e');
+
+  Future<void> logPaywallConverted(String source) =>
+      log('paywall_converted', {'source': source});
 }

@@ -224,6 +224,7 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   int _index = 0;
+  bool _wasPremium = false;
 
   static const _screens = [
     PropertyListScreen(),
@@ -236,8 +237,26 @@ class _MainShellState extends State<MainShell> {
   @override
   void initState() {
     super.initState();
+    _wasPremium = freemiumService.hasFullAccess;
+    freemiumService.isPremiumNotifier.addListener(_onPremiumChange);
     WidgetsBinding.instance.addPostFrameCallback(
         (_) async => await paywallSession.recordSession());
+  }
+
+  @override
+  void dispose() {
+    freemiumService.isPremiumNotifier.removeListener(_onPremiumChange);
+    super.dispose();
+  }
+
+  void _onPremiumChange() {
+    final now = freemiumService.hasFullAccess;
+    if (now && !_wasPremium && mounted) {
+      showPremiumWelcomeSnackBar(context);
+      try { AnalyticsService.instance.logPaywallConverted('iap'); } catch (_) {}
+    }
+    _wasPremium = now;
+    unawaited(AnalyticsService.instance.setUserPremium(now));
   }
 
   Future<void> _onTabChanged(int i) async {
