@@ -359,6 +359,8 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
       label: label,
     );
     historyRefreshNotifier.value++;
+    adService.onSave();
+    paywallSession.recordAction().ignore();
   }
 
   Future<void> _exportPdf(bool isSpanish) async {

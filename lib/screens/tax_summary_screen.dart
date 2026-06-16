@@ -175,6 +175,8 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
       label: label,
     );
     historyRefreshNotifier.value++;
+    adService.onSave();
+    paywallSession.recordAction().ignore();
   }
 
   double _totalIncome(Property p) {

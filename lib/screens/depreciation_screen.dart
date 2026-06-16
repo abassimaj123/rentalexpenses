@@ -171,6 +171,8 @@ class _DepreciationScreenState extends State<DepreciationScreen> {
       label: label,
     );
     historyRefreshNotifier.value++;
+    adService.onSave();
+    paywallSession.recordAction().ignore();
   }
 
   Future<void> _exportPdf(bool isSpanish) async {

@@ -383,6 +383,8 @@ class _CalculatorScreenState extends State<CalculatorScreen>
       label: label,
     );
     historyRefreshNotifier.value++;
+    adService.onSave();
+    paywallSession.recordAction().ignore();
   }
 
   Future<void> _calculate(bool isSpanish) async {

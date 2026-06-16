@@ -142,6 +142,8 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
       label: label,
     );
     historyRefreshNotifier.value++;
+    adService.onSave();
+    paywallSession.recordAction().ignore();
   }
 
   Future<void> _exportPdf(bool isSpanish) async {

@@ -278,6 +278,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
       label: label,
     );
     historyRefreshNotifier.value++;
+    adService.onSave();
+    paywallSession.recordAction().ignore();
   }
 
   double _cf(Property p) {
