@@ -612,6 +612,97 @@ class _CalculatorScreenState extends State<CalculatorScreen>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
+                            // ── Results ─────────────────────────────────────────
+                            AnimatedSwitcher(
+                              duration: AppDuration.base,
+                              transitionBuilder: (child, anim) =>
+                                  FadeTransition(
+                                opacity: anim,
+                                child: SlideTransition(
+                                  position: Tween<Offset>(
+                                    begin: const Offset(0, 0.04),
+                                    end: Offset.zero,
+                                  ).animate(CurvedAnimation(
+                                      parent: anim, curve: Curves.easeOut)),
+                                  child: child,
+                                ),
+                              ),
+                              child: _result != null
+                                  ? KeyedSubtree(
+                                      key: const ValueKey('results'),
+                                      child: CalcwisePageEntrance(
+                                        child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.stretch,
+                                        children: [
+                                          _ResultsSection(
+                                            calc: _result!,
+                                            isSpanish: isSpanish,
+                                          ),
+                                          const SizedBox(height: AppSpacing.md),
+                                          InsightCard(
+                                            insights: InsightEngine.generate(
+                                              monthlyRent: _result!.rentIncome,
+                                              totalMonthlyExpenses:
+                                                  _result!.totalExpenses,
+                                              monthlyCashFlow:
+                                                  _result!.monthlyCashFlow,
+                                              expenseRatioPct:
+                                                  _result!.expenseRatio,
+                                              vacancyLoss: _result!.vacancyLoss,
+                                              capRate: _result!.capRate,
+                                              isSpanish: isSpanish,
+                                            ),
+                                            isSpanish: isSpanish,
+                                          ),
+                                          const SizedBox(height: AppSpacing.lg),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: SaveScenarioButton(
+                                                    onSave: _saveScenario),
+                                              ),
+                                              const SizedBox(
+                                                  width: AppSpacing.sm),
+                                              OutlinedButton.icon(
+                                                onPressed: () =>
+                                                    _exportPdf(isSpanish),
+                                                icon: const Icon(
+                                                    Icons.picture_as_pdf_rounded),
+                                                label: Text(isSpanish
+                                                    ? 'PDF'
+                                                    : 'PDF'),
+                                                style: OutlinedButton.styleFrom(
+                                                    minimumSize:
+                                                        const Size(0, 44)),
+                                              ),
+                                              const SizedBox(
+                                                  width: AppSpacing.sm),
+                                              OutlinedButton.icon(
+                                                onPressed: () =>
+                                                    _share(isSpanish),
+                                                icon: const Icon(
+                                                    Icons.share_rounded),
+                                                label: Text(isSpanish
+                                                    ? 'Compartir'
+                                                    : 'Share'),
+                                                style: OutlinedButton.styleFrom(
+                                                    minimumSize:
+                                                        const Size(0, 44)),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(
+                                              height: AppSpacing.xxl),
+                                        ],
+                                      ),
+                                      ),
+                                    )
+                                  : const SizedBox.shrink(
+                                      key: ValueKey('empty')),
+                            ),
+                            const SizedBox(height: AppSpacing.xxl),
+
                             // ── Property Setup ──────────────────────────────────
                             _SectionLabel(s.propertySetup),
                             _buildCard([
@@ -833,132 +924,6 @@ class _CalculatorScreenState extends State<CalculatorScreen>
                                 prefix: '\$',
                               ),
                             ]),
-                            const SizedBox(height: AppSpacing.xxl),
-
-                            // ── Optional recalculate (non-blocking) ─────────────
-                            if (_result != null)
-                              OutlinedButton.icon(
-                                onPressed: _debouncedCalculate,
-                                icon:
-                                    const Icon(Icons.refresh_rounded, size: 18),
-                                label: Text(s.recalculate),
-                              ),
-                            const SizedBox(height: AppSpacing.xxl),
-
-                            // ── Empty state ─────────────────────────────────────
-                            if (_result == null)
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: AppSpacing.xxl),
-                                child: Column(
-                                  children: [
-                                    Icon(Icons.home_work_rounded,
-                                        size: 48,
-                                        color: CalcwiseTheme.of(context)
-                                            .textSecondary
-                                            .withValues(alpha: 0.4)),
-                                    const SizedBox(height: AppSpacing.md),
-                                    Text(
-                                      s.enterExpensesToSeeResults,
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                          fontSize: AppTextSize.body,
-                                          color: CalcwiseTheme.of(context)
-                                              .textSecondary),
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                            // ── Results ─────────────────────────────────────────
-                            AnimatedSwitcher(
-                              duration: AppDuration.base,
-                              transitionBuilder: (child, anim) =>
-                                  FadeTransition(
-                                opacity: anim,
-                                child: SlideTransition(
-                                  position: Tween<Offset>(
-                                    begin: const Offset(0, 0.04),
-                                    end: Offset.zero,
-                                  ).animate(CurvedAnimation(
-                                      parent: anim, curve: Curves.easeOut)),
-                                  child: child,
-                                ),
-                              ),
-                              child: _result != null
-                                  ? KeyedSubtree(
-                                      key: const ValueKey('results'),
-                                      child: CalcwisePageEntrance(
-                                        child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.stretch,
-                                        children: [
-                                          _ResultsSection(
-                                            calc: _result!,
-                                            isSpanish: isSpanish,
-                                          ),
-                                          const SizedBox(height: AppSpacing.md),
-                                          InsightCard(
-                                            insights: InsightEngine.generate(
-                                              monthlyRent: _result!.rentIncome,
-                                              totalMonthlyExpenses:
-                                                  _result!.totalExpenses,
-                                              monthlyCashFlow:
-                                                  _result!.monthlyCashFlow,
-                                              expenseRatioPct:
-                                                  _result!.expenseRatio,
-                                              vacancyLoss: _result!.vacancyLoss,
-                                              capRate: _result!.capRate,
-                                              isSpanish: isSpanish,
-                                            ),
-                                            isSpanish: isSpanish,
-                                          ),
-                                          const SizedBox(height: AppSpacing.lg),
-                                          Row(
-                                            children: [
-                                              Expanded(
-                                                child: SaveScenarioButton(
-                                                    onSave: _saveScenario),
-                                              ),
-                                              const SizedBox(
-                                                  width: AppSpacing.sm),
-                                              OutlinedButton.icon(
-                                                onPressed: () =>
-                                                    _exportPdf(isSpanish),
-                                                icon: const Icon(
-                                                    Icons.picture_as_pdf_rounded),
-                                                label: Text(isSpanish
-                                                    ? 'PDF'
-                                                    : 'PDF'),
-                                                style: OutlinedButton.styleFrom(
-                                                    minimumSize:
-                                                        const Size(0, 44)),
-                                              ),
-                                              const SizedBox(
-                                                  width: AppSpacing.sm),
-                                              OutlinedButton.icon(
-                                                onPressed: () =>
-                                                    _share(isSpanish),
-                                                icon: const Icon(
-                                                    Icons.share_rounded),
-                                                label: Text(isSpanish
-                                                    ? 'Compartir'
-                                                    : 'Share'),
-                                                style: OutlinedButton.styleFrom(
-                                                    minimumSize:
-                                                        const Size(0, 44)),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(
-                                              height: AppSpacing.xxl),
-                                        ],
-                                      ),
-                                      ),
-                                    )
-                                  : const SizedBox.shrink(
-                                      key: ValueKey('empty')),
-                            ),
                           ],
                         )),
                       ),
