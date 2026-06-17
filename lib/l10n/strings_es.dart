@@ -337,6 +337,8 @@ class AppStringsEs extends AppStrings {
   @override String get expenseHistoryToolSubtitle => 'Ver historial completo de transacciones';
   @override String get settingsTool => 'Configuración';
   @override String get settingsToolSubtitle => 'Preferencias y configuración de la app';
+  @override String get investmentRulesTitle => 'Reglas de Inversión';
+  @override String get investmentRulesToolSubtitle => 'Regla del 1% · Regla del 50% · Estimación CapEx';
 
   // ── Settings screen ────────────────────────────────────────────────────────
   @override String get settings => 'Configuración';

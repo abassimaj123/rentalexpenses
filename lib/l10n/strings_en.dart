@@ -339,6 +339,8 @@ abstract class AppStrings {
   String get expenseHistoryToolSubtitle;
   String get settingsTool;
   String get settingsToolSubtitle;
+  String get investmentRulesTitle;
+  String get investmentRulesToolSubtitle;
 
   // ── Settings screen ─────────────────────────────────────────────────────────
   String get settings;
@@ -767,6 +769,8 @@ class AppStringsEn extends AppStrings {
   @override String get expenseHistoryToolSubtitle => 'View full transaction history';
   @override String get settingsTool => 'Settings';
   @override String get settingsToolSubtitle => 'App preferences & settings';
+  @override String get investmentRulesTitle => 'Investment Rules';
+  @override String get investmentRulesToolSubtitle => '1% Rule · 50% Rule · CapEx estimate';
 
   // ── Settings screen ────────────────────────────────────────────────────────
   @override String get settings => 'Settings';

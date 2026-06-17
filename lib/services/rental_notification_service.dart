@@ -12,18 +12,30 @@ class RentalNotificationService {
   static const _notifId = 200;
 
   static Future<void> initialize() async {
-    tz_data.initializeTimeZones();
-    final tzName = await FlutterTimezone.getLocalTimezone();
-    tz.setLocalLocation(tz.getLocation(tzName));
+    try {
+      tz_data.initializeTimeZones();
+      final tzName = await FlutterTimezone.getLocalTimezone();
+      tz.setLocalLocation(tz.getLocation(tzName));
 
-    const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-    await _plugin
-        .initialize(const InitializationSettings(android: androidSettings));
+      const androidSettings =
+          AndroidInitializationSettings('@mipmap/ic_launcher');
+      await _plugin
+          .initialize(const InitializationSettings(android: androidSettings));
+    } catch (_) {
+      // flutter_local_notifications v18 may throw on Android 14 — non-fatal.
+    }
   }
 
   /// Schedule on the 28th of each month at 10:00 AM — reminds before month-end.
   static Future<void> scheduleMonthlyReminder(bool isSpanish) async {
+    try {
+      await _doScheduleMonthlyReminder(isSpanish);
+    } catch (_) {
+      // Non-fatal — monthly reminder silently skipped if scheduling fails.
+    }
+  }
+
+  static Future<void> _doScheduleMonthlyReminder(bool isSpanish) async {
     final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     await _plugin.cancel(_notifId);
     final now = tz.TZDateTime.now(tz.local);

@@ -609,8 +609,7 @@ class _CalculatorScreenState extends State<CalculatorScreen>
                     child: Center(
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 600),
-                        child: CalcwisePageEntrance(
-                            child: Column(
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             // ── Property Setup ──────────────────────────────────
@@ -889,7 +888,8 @@ class _CalculatorScreenState extends State<CalculatorScreen>
                               child: _result != null
                                   ? KeyedSubtree(
                                       key: const ValueKey('results'),
-                                      child: Column(
+                                      child: CalcwisePageEntrance(
+                                        child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.stretch,
                                         children: [
@@ -954,16 +954,16 @@ class _CalculatorScreenState extends State<CalculatorScreen>
                                               height: AppSpacing.xxl),
                                         ],
                                       ),
+                                      ),
                                     )
                                   : const SizedBox.shrink(
                                       key: ValueKey('empty')),
                             ),
                           ],
-                        )), // CalcwisePageEntrance closes
+                        )),
                       ),
                     ),
                   ),
-                ),
                 const CalcwiseAdFooter(),
               ],
             ),

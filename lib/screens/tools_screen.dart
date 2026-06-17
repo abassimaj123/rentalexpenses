@@ -6,6 +6,7 @@ import '../main.dart' show isSpanishNotifier;
 import 'tax_summary_screen.dart';
 import 'compare_properties_screen.dart';
 import 'depreciation_screen.dart';
+import 'investment_rules_screen.dart';
 import 'mileage_log_screen.dart';
 import 'settings_screen.dart';
 import 'history_screen.dart';
@@ -44,6 +45,21 @@ class _ToolsScreenState extends State<ToolsScreen> {
                 child: ListView(
                   padding: const EdgeInsets.all(AppSpacing.lg),
                   children: [
+                    _ToolCard(
+                      icon: Icons.rule_rounded,
+                      title: s.investmentRulesTitle,
+                      subtitle: s.investmentRulesToolSubtitle,
+                      onTap: () => Navigator.push(
+                          context,
+                          PageRouteBuilder(
+                            pageBuilder: (_, __, ___) =>
+                                const InvestmentRulesScreen(),
+                            transitionsBuilder: (_, anim, __, child) =>
+                                FadeTransition(opacity: anim, child: child),
+                            transitionDuration: AppDuration.base,
+                          )),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
                     _ToolCard(
                       icon: Icons.receipt_rounded,
                       title: s.taxSummaryTool,
