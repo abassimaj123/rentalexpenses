@@ -2,10 +2,12 @@ import 'dart:isolate';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import '../freemium/iap_service.dart';
+import '../../widgets/paywall_hard.dart';
 import '../theme/app_theme.dart';
 import '../../l10n/strings_en.dart';
 import '../../l10n/strings_es.dart';
@@ -305,7 +307,7 @@ pw.Widget _buildReportPage(_ReportParams p) {
       NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 2);
   final cur0 =
       NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 0);
-  final dateFmt = DateFormat('MMMM d, yyyy');
+  final dateFmt = DateFormat('MMMM d, yyyy', p.isSpanish ? 'es' : 'en');
   return pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
     pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -479,7 +481,7 @@ pw.Widget _buildComparisonPage(_ComparisonParams p) {
   final now = DateTime.now();
   final cur0 =
       NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 0);
-  final dateFmt = DateFormat('MMMM d, yyyy');
+  final dateFmt = DateFormat('MMMM d, yyyy', p.isSpanish ? 'es' : 'en');
   final selectedMonth =
       DateTime.fromMillisecondsSinceEpoch(p.selectedMonthMs);
   final monthFmt = DateFormat('MMMM yyyy', p.isSpanish ? 'es' : 'en');
@@ -651,7 +653,7 @@ pw.Widget _buildDepreciationPage(_DepreciationParams p) {
       NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 2);
   final cur0 =
       NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 0);
-  final dateFmt = DateFormat('MMMM d, yyyy');
+  final dateFmt = DateFormat('MMMM d, yyyy', p.isSpanish ? 'es' : 'en');
   final monthNames = p.isSpanish
       ? const [
           'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -762,8 +764,8 @@ pw.Widget _buildDepreciationPage(_DepreciationParams p) {
             ...checkpoints.map((yr) {
               final cum = cumAt(yr);
               final label = yr == 28
-                  ? p.isSpanish ? '27.5 años (total)' : '27.5 yrs (full)'
-                  : '$yr ${p.isSpanish ? 'años' : 'yrs'}';
+                  ? p.isSpanish ? '27.5 años (total)' : '27.5 years (full)'
+                  : '$yr ${p.isSpanish ? 'años' : 'years'}';
               return _row2(label, cur0.format(cum),
                   bold: yr == 28, color: yr == 28 ? _navy : null);
             }),
@@ -781,7 +783,7 @@ pw.Widget _buildDepreciationPage(_DepreciationParams p) {
             _row2(
                 p.isSpanish
                     ? 'Ahorro total (27.5 años)'
-                    : 'Total Savings (27.5 yrs)',
+                    : 'Total Savings (27.5 years)',
                 cur0.format(p.depreciableBasis * taxRate)),
           ]),
         ])),
@@ -803,7 +805,7 @@ pw.Widget _buildDepreciationPage(_DepreciationParams p) {
 pw.Widget _buildMileageHeader(_MileageParams p) {
   final cur2 =
       NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 2);
-  final dateFmt = DateFormat('MMMM d, yyyy');
+  final dateFmt = DateFormat('MMMM d, yyyy', p.isSpanish ? 'es' : 'en');
   final now = DateTime.now();
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -984,6 +986,7 @@ pw.Widget _buildMileageBody(_MileageParams p) {
 // ── Top-level isolate entry points ────────────────────────────────────────────
 
 Future<Uint8List> _buildReportPdf(_ReportParams p) async {
+  await initializeDateFormatting();
   final pdf = pw.Document();
   pdf.addPage(pw.Page(
     pageFormat: PdfPageFormat.a4,
@@ -994,6 +997,7 @@ Future<Uint8List> _buildReportPdf(_ReportParams p) async {
 }
 
 Future<Uint8List> _buildComparisonPdf(_ComparisonParams p) async {
+  await initializeDateFormatting();
   final pdf = pw.Document();
   pdf.addPage(pw.Page(
     pageFormat: PdfPageFormat.a4,
@@ -1004,6 +1008,7 @@ Future<Uint8List> _buildComparisonPdf(_ComparisonParams p) async {
 }
 
 Future<Uint8List> _buildDepreciationPdf(_DepreciationParams p) async {
+  await initializeDateFormatting();
   final pdf = pw.Document();
   pdf.addPage(pw.Page(
     pageFormat: PdfPageFormat.a4,
@@ -1014,6 +1019,7 @@ Future<Uint8List> _buildDepreciationPdf(_DepreciationParams p) async {
 }
 
 Future<Uint8List> _buildMileagePdf(_MileageParams p) async {
+  await initializeDateFormatting();
   final pdf = pw.Document();
   pdf.addPage(pw.MultiPage(
     pageFormat: PdfPageFormat.a4,
@@ -1167,14 +1173,18 @@ class PdfExportService {
       context: context,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (ctx) => _PdfUnlockSheet(onExport: onExport),
+      builder: (ctx) => _PdfUnlockSheet(
+        onExport: onExport,
+        onBuyPremium: () => PaywallHard.show(context),
+      ),
     );
   }
 }
 
 class _PdfUnlockSheet extends StatefulWidget {
   final Future<void> Function() onExport;
-  const _PdfUnlockSheet({required this.onExport});
+  final VoidCallback onBuyPremium;
+  const _PdfUnlockSheet({required this.onExport, required this.onBuyPremium});
   @override
   State<_PdfUnlockSheet> createState() => _PdfUnlockSheetState();
 }
@@ -1282,7 +1292,7 @@ class _PdfUnlockSheetState extends State<_PdfUnlockSheet> {
             child: ElevatedButton.icon(
               onPressed: () {
                 Navigator.pop(context);
-                IAPService.instance.buy();
+                widget.onBuyPremium();
               },
               icon: const Icon(Icons.workspace_premium, size: 18),
               label: Text(s.premiumUnlimited,

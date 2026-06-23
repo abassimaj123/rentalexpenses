@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../core/freemium/freemium_service.dart';
 import '../core/freemium/iap_service.dart';
+import '../widgets/paywall_hard.dart';
 import '../core/theme/app_theme.dart';
 import '../l10n/strings_en.dart';
 import '../l10n/strings_es.dart';
@@ -50,7 +51,7 @@ class SettingsScreen extends StatelessWidget {
                     icon: const Icon(Icons.star_outline,
                         color: CalcwiseSemanticColors.warnIcon),
                     tooltip: s.goPremium,
-                    onPressed: () => IAPService.instance.buy(),
+                    onPressed: () => PaywallHard.show(context),
                   );
                 },
               ),
@@ -88,7 +89,7 @@ class SettingsScreen extends StatelessWidget {
                                 title: Text(s.unlockPremium),
                                 subtitle: Text(s.premiumSubtitle),
                                 trailing: ElevatedButton(
-                                  onPressed: () => IAPService.instance.buy(),
+                                  onPressed: () => PaywallHard.show(context),
                                   style: ElevatedButton.styleFrom(
                                     minimumSize: const Size(80, 36),
                                     padding: const EdgeInsets.symmetric(

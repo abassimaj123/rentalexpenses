@@ -16,6 +16,7 @@ import '../l10n/strings_en.dart';
 import '../l10n/strings_es.dart';
 import '../main.dart';
 import '../screens/calculator_screen.dart';
+import '../widgets/paywall_hard.dart';
 import '../widgets/paywall_soft.dart';
 
 // ── Isolate-safe params & builder for history-detail PDF ─────────────────────
@@ -334,7 +335,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
     setState(() => _exporting = true);
     try {
       final c = widget.calc;
-      final dateFmt = DateFormat('MMMM d, yyyy');
+      final dateFmt = DateFormat('MMMM d, yyyy', isSpanish ? 'es' : 'en');
 
       final params = _HistoryDetailPdfParams(
         propertyName: c.propertyName,
@@ -403,7 +404,8 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final dateFmt = DateFormat('MMM d, yyyy — h:mm a');
+    final dateFmt = DateFormat(
+        'MMM d, yyyy — h:mm a', isSpanishNotifier.value ? 'es' : 'en');
     final c = widget.calc;
     final cfColor =
         c.monthlyCashFlow >= 0 ? AppTheme.success : AppTheme.dangerRed;
@@ -434,7 +436,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                   return IconButton(
                     icon: const Icon(Icons.star_outline, color: Colors.amber),
                     tooltip: s.goPremium,
-                    onPressed: () => IAPService.instance.buy(),
+                    onPressed: () => PaywallHard.show(context),
                   );
                 },
               ),

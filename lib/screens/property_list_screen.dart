@@ -251,7 +251,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                     icon: const Icon(Icons.star_outline,
                         color: CalcwiseSemanticColors.warnIcon),
                     tooltip: s.goPremium,
-                    onPressed: () => IAPService.instance.buy(),
+                    onPressed: () => PaywallHard.show(context),
                   );
                 },
               ),

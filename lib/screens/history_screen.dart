@@ -24,7 +24,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
   List<ExpenseCalc> _entries = [];
   bool _loading = true;
 
-  final _dateFmt = DateFormat('MMM d, yyyy');
+  final _dateFmt = DateFormat('MMM d, yyyy', 'en');
+  final _dateFmtEs = DateFormat('d MMM yyyy', 'es');
   // AmountFormatter replaces NumberFormat _mFmt
 
   @override
@@ -186,7 +187,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               color: cfColor, fontWeight: FontWeight.w500),
                         ),
                         Text(
-                          _dateFmt.format(e.savedAt),
+                          (isSpanish ? _dateFmtEs : _dateFmt).format(e.savedAt),
                           style: TextStyle(
                               fontSize: AppTextSize.sm,
                               color: CalcwiseTheme.of(context).textSecondary),
