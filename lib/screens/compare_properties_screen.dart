@@ -49,57 +49,10 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
 
   Future<void> _loadProperties() async {
     setState(() => _loading = true);
-    var props = await PropertyDatabaseService.instance.getAllProperties();
-    // Seed sample properties on first open so comparison is visible immediately
-    if (props.isEmpty) {
-      final now = DateTime.now();
-      final propA = Property(
-        id: 'sample_prop_a',
-        name: 'Property A',
-        address: '123 Main St',
-        monthlyRent: 2000,
-        squareFootage: 900,
-        createdDate: now,
-      );
-      final propB = Property(
-        id: 'sample_prop_b',
-        name: 'Property B',
-        address: '456 Oak Ave',
-        monthlyRent: 2500,
-        squareFootage: 1100,
-        createdDate: now,
-      );
-      await PropertyDatabaseService.instance.insertProperty(propA);
-      await PropertyDatabaseService.instance.insertProperty(propB);
-      // Seed expenses for current month
-      await PropertyDatabaseService.instance.insertExpense(MonthlyExpense(
-        id: 'sample_exp_a',
-        propertyId: 'sample_prop_a',
-        year: now.year,
-        month: now.month,
-        mortgage: 1200,
-        insurance: 100,
-        propertyTaxes: 150,
-        maintenance: 80,
-        utilities: 0,
-      ));
-      await PropertyDatabaseService.instance.insertExpense(MonthlyExpense(
-        id: 'sample_exp_b',
-        propertyId: 'sample_prop_b',
-        year: now.year,
-        month: now.month,
-        mortgage: 1500,
-        insurance: 120,
-        propertyTaxes: 200,
-        maintenance: 100,
-        utilities: 0,
-      ));
-      props = await PropertyDatabaseService.instance.getAllProperties();
-    }
+    final props = await PropertyDatabaseService.instance.getAllProperties();
     if (mounted) {
       setState(() {
         _allProperties = props;
-        // Auto-select both sample properties so comparison shows immediately
         if (props.length >= 2 && _selectedIds.isEmpty) {
           _selectedIds.add(props[0].id);
           _selectedIds.add(props[1].id);
