@@ -207,6 +207,11 @@ class _TenantsScreenState extends State<TenantsScreen> {
         ),
       ),
     );
+    nameCtrl.dispose();
+    emailCtrl.dispose();
+    phoneCtrl.dispose();
+    rentCtrl.dispose();
+    notesCtrl.dispose();
   }
 
   Future<void> _confirmDelete(

@@ -129,6 +129,10 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
         ],
       ),
     );
+    nameCtrl.dispose();
+    addrCtrl.dispose();
+    rentCtrl.dispose();
+    sqftCtrl.dispose();
   }
 
   Future<void> _addExpenses(bool isSpanish) async {

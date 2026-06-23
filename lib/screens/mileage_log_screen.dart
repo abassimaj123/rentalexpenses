@@ -271,6 +271,8 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
         ),
       ),
     );
+    milesCtrl.dispose();
+    purposeCtrl.dispose();
   }
 
   Future<void> _deleteTrip(MileageTrip trip) async {

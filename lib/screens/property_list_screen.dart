@@ -198,6 +198,10 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
         ],
       ),
     );
+    nameCtrl.dispose();
+    addrCtrl.dispose();
+    rentCtrl.dispose();
+    sqftCtrl.dispose();
   }
 
   Future<void> _deleteProperty(Property p, bool isSpanish) async {
