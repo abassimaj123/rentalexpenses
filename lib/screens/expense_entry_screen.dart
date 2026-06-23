@@ -215,6 +215,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
     final destPath = path_pkg.join(receiptsDir.path, fileName);
 
     await File(picked.path).copy(destPath);
+    if (!mounted) return;
 
     // Delete old file if it was replaced
     if (_receiptPath != null && _receiptPath != destPath) {
