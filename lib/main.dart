@@ -68,6 +68,7 @@ Future<void> main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   unawaited(CalcwiseRemoteConfig.initialize());
   await CalcwiseTax.init(remoteFetcher: calcwiseTaxRemoteFetch);
+  unawaited(AnalyticsService.instance.initialize());
   await AnalyticsService.instance.logAppOpen();
   await CrashlyticsService.init();
 
