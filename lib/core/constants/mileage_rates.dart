@@ -2,8 +2,7 @@
 ///
 /// Update this map each year when the IRS publishes the new rate.
 /// Source: IRS standard mileage rates (business).
-///   2026 = $0.725/mile (IRS Notice 2026-10)
-///   2025 = $0.70/mile  (IRS Notice 2025-5)
+///   2025 = $0.670/mile (IRS Rev. Proc. 2024-38)
 ///   2024 = $0.67/mile  (IRS Notice 2024-8)
 ///   2023 = $0.655/mile (IRS Notice 2023-3)
 class MileageRates {
@@ -13,12 +12,11 @@ class MileageRates {
   static const Map<int, double> businessRatePerMile = {
     2023: 0.655,
     2024: 0.67,
-    2025: 0.70,
-    2026: 0.725,
+    2025: 0.670,
   };
 
   /// Most recent known rate, used as a fallback for years not in the map.
-  static const double latestRate = 0.725;
+  static const double latestRate = 0.670;
 
   /// Returns the business rate for [year], falling back to the closest
   /// earlier known year, or [latestRate] if none.

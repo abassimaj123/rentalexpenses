@@ -1,7 +1,7 @@
 name: rental_expenses
 description: Rental Expenses Tracker
 publish_to: 'none'
-version: 1.0.5+3
+version: 1.0.6+4
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

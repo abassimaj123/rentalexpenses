@@ -447,7 +447,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                     ...IrsCategories.all
                         .where((c) =>
                             catTotals.containsKey(c) && catTotals[c]! > 0)
-                        .map((c) => [c, '\$${AmountFormatter.formatNumber(catTotals[c]!)}']),
+                        .map((c) => [IrsCategories.translate(c, isSpanish), '\$${AmountFormatter.formatNumber(catTotals[c]!)}']),
                     [
                       s.totalExpensesLabel,
                       '\$${AmountFormatter.formatNumber(totalExp)}',
