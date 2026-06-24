@@ -10,9 +10,20 @@ import '../l10n/strings_en.dart';
 import '../l10n/strings_es.dart';
 import '../main.dart';
 import '../services/rental_notification_service.dart';
+import '../core/firebase/analytics_service.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    AnalyticsService.instance.logScreenView('settings');
+  }
 
   Future<void> _setLanguage(bool isSpanish) async {
     isSpanishNotifier.value = isSpanish;
