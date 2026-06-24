@@ -122,6 +122,8 @@ Future<void> main() async {
     freemium: freemiumService,
     isSpanishNotifier: isSpanishNotifier,
   );
+  PaywallHard.setAnalytics(AnalyticsService.instance);
+  PaywallSoft.setAnalytics(AnalyticsService.instance);
   runApp(const _IapErrorWrapper());
 }
 
