@@ -123,6 +123,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
   }
 
   void _recalculate() {
+    AnalyticsService.instance.maybeLogFirstCalculate();
     final rent = widget.property.monthlyRent;
     final mort = _parseD(_mortCtrl);
     final tax = _parseD(_taxCtrl);

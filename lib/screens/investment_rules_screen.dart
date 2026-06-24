@@ -56,7 +56,7 @@ class _InvestmentRulesScreenState extends State<InvestmentRulesScreen> {
     final rent = _parse(_rentCtrl);
     final price = _parse(_priceCtrl);
     final noi = _parse(_noiCtrl);
-
+    AnalyticsService.instance.maybeLogFirstCalculate();
     setState(() {
       if (rent > 0 && price > 0) {
         _onePercent = rent / price * 100;
