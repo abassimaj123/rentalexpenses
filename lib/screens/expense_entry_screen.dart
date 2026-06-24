@@ -281,7 +281,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
         await PropertyDatabaseService.instance.insertExpense(expense);
       }
 
-      await paywallSession.recordAction();
+      final trigger = await paywallSession.recordAction();
       await AnalyticsService.instance.logExpenseTracked('monthly_expenses');
       if (_isRecurring) {
         await AnalyticsService.instance.logRecurringExpenseCreated();
@@ -293,6 +293,12 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
           content: Text(s.expensesSaved),
           duration: const Duration(seconds: 2),
         ));
+        if (trigger == PaywallTrigger.hard) {
+          await PaywallHard.show(context);
+          if (!mounted) return;
+        } else if (trigger == PaywallTrigger.soft) {
+          PaywallSoft.show(context);
+        }
         Navigator.of(context).pop(true);
       }
     } catch (e) {
