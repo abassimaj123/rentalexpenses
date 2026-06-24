@@ -200,6 +200,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                   await AnalyticsService.instance.logTenantAdded();
                 }
                 if (d.mounted) Navigator.pop(d);
+                if (!mounted) return;
                 _load();
               },
               child: Text(s.save),
