@@ -257,6 +257,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
             actions: [
               IconButton(
                 icon: const Icon(Icons.refresh_rounded),
+                tooltip: 'Refresh',
                 onPressed: _load,
               ),
             ],
@@ -536,6 +537,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
                                                     .error(Theme.of(context)
                                                         .brightness),
                                                 size: 20),
+                                            tooltip: 'Delete payment',
                                             onPressed: () => _confirmDelete(
                                                 ctx, isSpanish, t),
                                           ),

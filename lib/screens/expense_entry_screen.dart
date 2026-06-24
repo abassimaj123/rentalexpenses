@@ -722,6 +722,7 @@ class _MonthPickerDialogState extends State<_MonthPickerDialog> {
             children: [
               IconButton(
                 icon: const Icon(Icons.chevron_left_rounded),
+                tooltip: 'Previous year',
                 onPressed: () => setState(() => _year--),
               ),
               Text('$_year',
@@ -730,6 +731,7 @@ class _MonthPickerDialogState extends State<_MonthPickerDialog> {
                       fontWeight: FontWeight.bold)),
               IconButton(
                 icon: const Icon(Icons.chevron_right_rounded),
+                tooltip: 'Next year',
                 onPressed: () => setState(() => _year++),
               ),
             ],

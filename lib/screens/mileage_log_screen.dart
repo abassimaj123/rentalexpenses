@@ -474,6 +474,7 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
                                                   CalcwiseSemanticColors.error(
                                                       Theme.of(context)
                                                           .brightness)),
+                                          tooltip: 'Delete trip',
                                           onPressed: () => _deleteTrip(t),
                                         ),
                                       ),

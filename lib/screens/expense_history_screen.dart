@@ -92,6 +92,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
             actions: [
               IconButton(
                 icon: const Icon(Icons.refresh_rounded),
+                tooltip: 'Refresh',
                 onPressed: _load,
               ),
             ],

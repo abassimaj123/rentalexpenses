@@ -340,6 +340,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                     children: [
                       IconButton(
                         icon: const Icon(Icons.chevron_left_rounded),
+                        tooltip: 'Previous year',
                         onPressed: () => setLocal(() => pickedYear--),
                       ),
                       Text('$pickedYear',
@@ -348,6 +349,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                               fontWeight: FontWeight.bold)),
                       IconButton(
                         icon: const Icon(Icons.chevron_right_rounded),
+                        tooltip: 'Next year',
                         onPressed: () => setLocal(() => pickedYear++),
                       ),
                     ],

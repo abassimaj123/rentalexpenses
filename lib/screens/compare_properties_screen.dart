@@ -104,6 +104,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                     children: [
                       IconButton(
                         icon: const Icon(Icons.chevron_left_rounded),
+                        tooltip: 'Previous year',
                         onPressed: () => setLocal(() => pickedYear--),
                       ),
                       Text('$pickedYear',
@@ -112,6 +113,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                               fontWeight: FontWeight.bold)),
                       IconButton(
                         icon: const Icon(Icons.chevron_right_rounded),
+                        tooltip: 'Next year',
                         onPressed: () => setLocal(() => pickedYear++),
                       ),
                     ],
@@ -440,6 +442,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
             actions: [
               IconButton(
                 icon: const Icon(Icons.calendar_month_rounded),
+                tooltip: 'Pick month',
                 onPressed: () => _pickMonth(isSpanish),
               ),
             ],
