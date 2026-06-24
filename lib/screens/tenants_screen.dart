@@ -241,6 +241,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
     if (confirmed == true) {
       HapticFeedback.mediumImpact();
       await PropertyDatabaseService.instance.deleteTenant(t.id);
+      if (!mounted) return;
       _load();
     }
   }

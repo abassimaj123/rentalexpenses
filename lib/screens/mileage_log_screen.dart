@@ -277,6 +277,7 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
 
   Future<void> _deleteTrip(MileageTrip trip) async {
     await PropertyDatabaseService.instance.deleteMileageTrip(trip.id);
+    if (!mounted) return;
     _load();
   }
 
@@ -475,7 +476,10 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
                                                       Theme.of(context)
                                                           .brightness)),
                                           tooltip: 'Delete trip',
-                                          onPressed: () => _deleteTrip(t),
+                                          onPressed: () {
+                                            HapticFeedback.mediumImpact();
+                                            _deleteTrip(t);
+                                          },
                                         ),
                                       ),
                                     )),
