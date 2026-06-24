@@ -39,6 +39,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
   }
 
   Future<void> _load() async {
+    if (!mounted) return;
     setState(() => _loading = true);
     final list = await PropertyDatabaseService.instance
         .getExpensesForProperty(_property.id);
@@ -149,7 +150,10 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
         transitionDuration: AppDuration.base,
       ),
     );
-    if (result == true) _load();
+    if (result == true) {
+      if (!mounted) return;
+      _load();
+    }
   }
 
   Future<void> _openEntry(MonthlyExpense e) async {
@@ -165,7 +169,10 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
         transitionDuration: AppDuration.base,
       ),
     );
-    if (result == true) _load();
+    if (result == true) {
+      if (!mounted) return;
+      _load();
+    }
   }
 
   @override
