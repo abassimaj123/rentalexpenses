@@ -71,6 +71,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView('expense_entry');
     _selectedMonth =
         DateTime(widget.targetMonth.year, widget.targetMonth.month);
     final e = widget.existing;
