@@ -174,6 +174,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(minimumSize: const Size(80, 40)),
               onPressed: () async {
+                HapticFeedback.mediumImpact();
                 final name = nameCtrl.text.trim();
                 if (name.isEmpty) return;
                 final id = existing?.id ??
@@ -238,6 +239,7 @@ class _TenantsScreenState extends State<TenantsScreen> {
       ),
     );
     if (confirmed == true) {
+      HapticFeedback.mediumImpact();
       await PropertyDatabaseService.instance.deleteTenant(t.id);
       _load();
     }

@@ -1,5 +1,6 @@
 import 'package:calcwise_core/calcwise_core.dart' hide PaywallHard;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../core/firebase/analytics_service.dart';
 import '../core/freemium/freemium_service.dart';
 import '../core/freemium/iap_service.dart';
@@ -91,6 +92,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
   }
 
   Future<void> _addProperty(bool isSpanish) async {
+    HapticFeedback.mediumImpact();
     final isPremium = freemiumService.hasFullAccess;
     if (!isPremium && _properties.length >= _freePropertyLimit) {
       await PaywallHard.show(context);
@@ -225,6 +227,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
       ),
     );
     if (confirmed == true) {
+      HapticFeedback.mediumImpact();
       await PropertyDatabaseService.instance.deleteProperty(p.id);
       _load();
     }

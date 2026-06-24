@@ -1,5 +1,6 @@
 import 'package:calcwise_core/calcwise_core.dart' hide PaywallHard;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import '../core/firebase/analytics_service.dart';
 import '../core/freemium/freemium_service.dart';
@@ -47,6 +48,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
   }
 
   Future<void> _delete(MonthlyExpense e, bool isSpanish) async {
+    HapticFeedback.mediumImpact();
     final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     await PropertyDatabaseService.instance.deleteExpense(e.id);
     if (mounted) {

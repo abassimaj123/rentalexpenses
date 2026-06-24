@@ -1,5 +1,6 @@
 import 'package:calcwise_core/calcwise_core.dart' hide PaywallHard;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/firebase/analytics_service.dart';
@@ -54,6 +55,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Future<void> _delete(int index, bool isSpanish) async {
+    HapticFeedback.mediumImpact();
     final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getStringList('expense_history_v1') ?? [];

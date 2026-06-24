@@ -1,5 +1,6 @@
 import 'package:calcwise_core/calcwise_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import '../core/firebase/analytics_service.dart';
 import '../core/freemium/freemium_service.dart';
@@ -109,6 +110,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
+              HapticFeedback.mediumImpact();
               final updated = _property.copyWith(
                 name: nameCtrl.text.trim().isEmpty
                     ? _property.name
@@ -136,6 +138,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
   }
 
   Future<void> _addExpenses(bool isSpanish) async {
+    HapticFeedback.mediumImpact();
     final now = DateTime.now();
     final result = await Navigator.of(context).push<bool>(
       PageRouteBuilder(

@@ -166,6 +166,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
   }
 
   Future<void> _pickReceipt(bool isSpanish) async {
+    HapticFeedback.mediumImpact();
     final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
@@ -227,6 +228,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
   }
 
   void _deleteReceipt() {
+    HapticFeedback.mediumImpact();
     if (_receiptPath != null) {
       final f = File(_receiptPath!);
       if (f.existsSync()) f.deleteSync();
@@ -235,6 +237,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
   }
 
   Future<void> _save(bool isSpanish) async {
+    HapticFeedback.mediumImpact();
     if (_isSaving) return;
     setState(() => _isSaving = true);
 

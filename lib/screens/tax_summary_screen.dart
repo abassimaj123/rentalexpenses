@@ -1,5 +1,6 @@
 import 'package:calcwise_core/calcwise_core.dart' hide PaywallHard;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -140,6 +141,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
   }
 
   Future<void> _saveScenario(String? label) async {
+    HapticFeedback.mediumImpact();
     final hash = _currentHash;
     if (hash == null) return;
     double grossIncome = 0;
@@ -348,6 +350,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
   }
 
   Future<void> _exportPdf(BuildContext ctx, bool isSpanish) async {
+    HapticFeedback.mediumImpact();
     if (!freemiumService.hasFullAccess) {
       await PaywallHard.show(ctx);
       return;
