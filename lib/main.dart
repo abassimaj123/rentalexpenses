@@ -85,7 +85,7 @@ Future<void> main() async {
     await RentalNotificationService.initialize();
     await RentalNotificationService.scheduleMonthlyReminder(isSpanishNotifier.value);
   } catch (e) {
-    debugPrint('Notification init error: $e');
+    if (kDebugMode) debugPrint('Notification init error: $e');
   }
   await IAPService.instance.initialize();
   await paywallSession.initialize();
@@ -100,7 +100,7 @@ Future<void> main() async {
     }
     if (AdConfig.adsEnabled) await adService.initialize();
   } catch (e) {
-    debugPrint('AdMob init error: $e');
+    if (kDebugMode) debugPrint('AdMob init error: $e');
   }
 
   AnalyticsService.instance.setUserPremium(freemiumService.hasFullAccess);
