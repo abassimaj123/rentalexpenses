@@ -275,10 +275,8 @@ class _MainShellState extends State<MainShell> {
     if (trigger == PaywallTrigger.none || !mounted) return;
     if (!(ModalRoute.of(context)?.isCurrent ?? false)) return;
     if (trigger == PaywallTrigger.hard) {
-      AnalyticsService.instance.logPaywallShown('hard');
       PaywallHard.show(context);
     } else {
-      AnalyticsService.instance.logPaywallShown('soft');
       PaywallSoft.show(context);
     }
   }
