@@ -235,7 +235,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                           if (e.receiptPath != null) ...[
                                             const SizedBox(
                                                 width: AppSpacing.sm),
-                                            GestureDetector(
+                                            InkWell(
                                               onTap: () {
                                                 Navigator.of(ctx).push(
                                                   PageRouteBuilder(
@@ -253,6 +253,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                                   ),
                                                 );
                                               },
+                                              borderRadius: BorderRadius.circular(AppRadius.md),
                                               child: Container(
                                                 width: 32,
                                                 height: 32,

@@ -751,8 +751,9 @@ class _MonthPickerDialogState extends State<_MonthPickerDialog> {
             runSpacing: 8,
             children: List.generate(12, (i) {
               final selected = (i + 1) == _month;
-              return GestureDetector(
+              return InkWell(
                 onTap: () => setState(() => _month = i + 1),
+                borderRadius: BorderRadius.circular(AppRadius.md),
                 child: Container(
                   width: 72,
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
@@ -883,8 +884,9 @@ class _ReceiptSection extends StatelessWidget {
         child: Row(
           children: [
             // Thumbnail
-            GestureDetector(
+            InkWell(
               onTap: onView,
+              borderRadius: BorderRadius.circular(AppRadius.mdPlus),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(AppRadius.mdPlus),
                 child: Image.file(

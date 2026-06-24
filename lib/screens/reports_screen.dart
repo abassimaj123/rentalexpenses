@@ -367,8 +367,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
                         button: true,
                         selected: sel,
                         label: months[i],
-                        child: GestureDetector(
+                        child: InkWell(
                           onTap: () => setLocal(() => pickedMonth = i + 1),
+                          borderRadius: BorderRadius.circular(AppRadius.md),
                           child: Container(
                             width: 62,
                             padding: const EdgeInsets.symmetric(vertical: 8),
