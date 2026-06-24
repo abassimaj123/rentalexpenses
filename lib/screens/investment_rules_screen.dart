@@ -8,12 +8,16 @@ import 'package:calcwise_core/calcwise_core.dart'
         CalcwiseTheme,
         CalcwiseAdFooter,
         CalcwisePageEntrance,
-        CalcwiseStaggerItem;
+        CalcwiseStaggerItem,
+        PaywallSoft,
+        PaywallHard,
+        PaywallTrigger;
 import '../core/firebase/analytics_service.dart';
+import '../core/freemium/freemium_service.dart';
 import '../core/theme/app_theme.dart';
 import '../l10n/strings_en.dart';
 import '../l10n/strings_es.dart';
-import '../main.dart' show isSpanishNotifier, adService;
+import '../main.dart' show isSpanishNotifier, adService, paywallSession;
 
 class InvestmentRulesScreen extends StatefulWidget {
   const InvestmentRulesScreen({super.key});
@@ -81,6 +85,13 @@ class _InvestmentRulesScreenState extends State<InvestmentRulesScreen> {
       }
     });
     adService.onAction();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted || freemiumService.hasFullAccess) return;
+      final trigger = await paywallSession.recordAction();
+      if (!mounted) return;
+      if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
+      if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
+    });
   }
 
   String _fmt(double v) {
