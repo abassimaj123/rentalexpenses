@@ -147,6 +147,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
       _expenseRatio = rent > 0 ? (total / rent * 100) : 0;
       _breakEven = total;
     });
+    adService.onAction();
   }
 
   Future<void> _pickMonth(bool isSpanish) async {

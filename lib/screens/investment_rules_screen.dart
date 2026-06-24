@@ -13,7 +13,7 @@ import '../core/firebase/analytics_service.dart';
 import '../core/theme/app_theme.dart';
 import '../l10n/strings_en.dart';
 import '../l10n/strings_es.dart';
-import '../main.dart' show isSpanishNotifier;
+import '../main.dart' show isSpanishNotifier, adService;
 
 class InvestmentRulesScreen extends StatefulWidget {
   const InvestmentRulesScreen({super.key});
@@ -80,6 +80,7 @@ class _InvestmentRulesScreenState extends State<InvestmentRulesScreen> {
         _capRate = null;
       }
     });
+    adService.onAction();
   }
 
   String _fmt(double v) {
