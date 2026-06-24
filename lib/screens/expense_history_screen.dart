@@ -73,6 +73,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
         transitionDuration: AppDuration.base,
       ),
     );
+    if (!mounted) return;
     if (result == true) _load();
   }
 
