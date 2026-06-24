@@ -281,7 +281,10 @@ class _ReportsScreenState extends State<ReportsScreen> {
     );
     historyRefreshNotifier.value++;
     adService.onSave();
-    paywallSession.recordAction().ignore();
+    final trigger = await paywallSession.recordAction();
+    if (!mounted) return;
+    if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
+    if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
   }
 
   double _cf(Property p) {

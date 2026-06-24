@@ -16,6 +16,7 @@ import '../models/property_model.dart';
 import '../models/schedule_e_entry_model.dart';
 import '../services/property_database_service.dart';
 import '../widgets/paywall_hard.dart';
+import '../widgets/paywall_soft.dart';
 import '../widgets/save_scenario_button.dart';
 
 class TaxSummaryScreen extends StatefulWidget {
@@ -178,7 +179,10 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
     );
     historyRefreshNotifier.value++;
     adService.onSave();
-    paywallSession.recordAction().ignore();
+    final trigger = await paywallSession.recordAction();
+    if (!mounted) return;
+    if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
+    if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
   }
 
   double _totalIncome(Property p) {

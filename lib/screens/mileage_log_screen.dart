@@ -16,6 +16,7 @@ import '../models/property_model.dart';
 import '../models/schedule_e_entry_model.dart';
 import '../services/property_database_service.dart';
 import '../widgets/paywall_hard.dart';
+import '../widgets/paywall_soft.dart';
 import '../widgets/save_scenario_button.dart';
 
 /// Business-mileage log (IRS standard mileage method → Schedule E line 6,
@@ -143,7 +144,10 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
     );
     historyRefreshNotifier.value++;
     adService.onSave();
-    paywallSession.recordAction().ignore();
+    final trigger = await paywallSession.recordAction();
+    if (!mounted) return;
+    if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
+    if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
   }
 
   Future<void> _exportPdf(bool isSpanish) async {
