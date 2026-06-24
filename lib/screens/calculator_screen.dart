@@ -247,6 +247,7 @@ class _CalculatorScreenState extends State<CalculatorScreen>
       c.addListener(_debouncedCalculate);
     }
     WidgetsBinding.instance.addPostFrameCallback((_) => _debouncedCalculate());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkPaywall());
   }
 
   List<TextEditingController> get _allControllers => [
@@ -434,8 +435,12 @@ class _CalculatorScreenState extends State<CalculatorScreen>
     unawaited(AnalyticsService.instance.logCalculate());
     unawaited(AnalyticsService.instance.maybeLogFirstCalculate());
     adService.onAction();
+  }
+
+  Future<void> _checkPaywall() async {
     final trigger = await paywallSession.recordAction();
-    if (trigger != PaywallTrigger.none && mounted) PaywallHard.show(context);
+    if (!mounted) return;
+    if (trigger != PaywallTrigger.none) PaywallHard.show(context);
   }
 
   Future<void> _save(bool isSpanish) async {
