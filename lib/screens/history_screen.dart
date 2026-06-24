@@ -61,6 +61,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final raw = prefs.getStringList('expense_history_v1') ?? [];
     if (index < raw.length) raw.removeAt(index);
     await prefs.setStringList('expense_history_v1', raw);
+    if (!mounted) return;
     await _load();
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -246,6 +247,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     if (confirm == true) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('expense_history_v1');
+      if (!mounted) return;
       await _load();
     }
   }
