@@ -235,7 +235,10 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                           if (e.receiptPath != null) ...[
                                             const SizedBox(
                                                 width: AppSpacing.sm),
-                                            InkWell(
+                                            Semantics(
+                                              label: 'View receipt',
+                                              button: true,
+                                              child: InkWell(
                                               onTap: () {
                                                 Navigator.of(ctx).push(
                                                   PageRouteBuilder(
@@ -270,6 +273,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                                   size: 18,
                                                 ),
                                               ),
+                                            ),
                                             ),
                                             const SizedBox(
                                                 width: AppSpacing.sm),
