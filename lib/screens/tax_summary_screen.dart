@@ -527,6 +527,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
       );
 
       await AnalyticsService.instance.logScheduleEExported();
+      AnalyticsService.instance.logPdfExported();
       await Printing.layoutPdf(onLayout: (_) => doc.save());
     } finally {
       if (mounted) setState(() => _exporting = false);
