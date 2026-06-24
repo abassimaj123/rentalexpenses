@@ -475,7 +475,7 @@ class _CalculatorScreenState extends State<CalculatorScreen>
   Future<void> _share(bool isSpanish) async {
     final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     if (_result == null) return;
-    HapticFeedback.lightImpact();
+    HapticFeedback.mediumImpact();
     final c = _result!;
     final cf = c.monthlyCashFlow;
     final lines = <String>[
