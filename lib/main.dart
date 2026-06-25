@@ -54,8 +54,8 @@ final adService = CalcwiseAdService(
     bannerAndroid: AdConfig.bannerAndroid,
     interstitialAndroid: AdConfig.interstitialAndroid,
     rewardedAndroid: AdConfig.rewardedAndroid,
-    calcThreshold: AdConfig.calcThreshold,
-    cooldownMinutes: AdConfig.cooldownMinutes,
+    calcThreshold: 7,
+    cooldownMinutes: 5,
   ),
   freemium: freemiumService,
   analytics: AnalyticsService.instance,
@@ -273,7 +273,6 @@ class _MainShellState extends State<MainShell> {
   Future<void> _onTabChanged(int i) async {
     setState(() => _index = i);
     if (i == 0) return;
-    adService.onAction();
     // Paywall: record tab-switch as an action — triggers gate every N actions
     final trigger = await paywallSession.recordAction();
     if (trigger == PaywallTrigger.none || !mounted) return;
