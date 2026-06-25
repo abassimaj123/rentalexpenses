@@ -182,7 +182,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
     );
   }
 
-  Future<void> _toggleProperty(String id) async {
+  void _toggleProperty(String id) {
     setState(() {
       if (_selectedIds.contains(id)) {
         _selectedIds.remove(id);
@@ -195,16 +195,6 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
     _loadExpenses();
     if (_selectedIds.length >= 2) {
       AnalyticsService.instance.logPropertiesCompared();
-      final trigger = await paywallSession.recordAction();
-      if (trigger != PaywallTrigger.none &&
-          mounted &&
-          !freemiumService.hasFullAccess) {
-        if (trigger == PaywallTrigger.soft) {
-          PaywallSoft.show(context);
-        } else {
-          PaywallHard.show(context);
-        }
-      }
     }
   }
 
@@ -514,8 +504,8 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                                   return FilterChip(
                                     label: Text(p.name),
                                     selected: sel,
-                                    onSelected: (_) async {
-                                      await _toggleProperty(p.id);
+                                    onSelected: (_) {
+                                      _toggleProperty(p.id);
                                     },
                                     selectedColor: AppTheme.primary
                                         .withValues(alpha: 0.15),

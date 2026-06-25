@@ -56,7 +56,7 @@ class _InvestmentRulesScreenState extends State<InvestmentRulesScreen> {
     return double.tryParse(raw) ?? 0;
   }
 
-  void _calculate() {
+  Future<void> _calculate() async {
     final rent = _parse(_rentCtrl);
     final price = _parse(_priceCtrl);
     final noi = _parse(_noiCtrl);
@@ -85,13 +85,12 @@ class _InvestmentRulesScreenState extends State<InvestmentRulesScreen> {
       }
     });
     adService.onAction();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!mounted || freemiumService.hasFullAccess) return;
+    if (!freemiumService.hasFullAccess) {
       final trigger = await paywallSession.recordAction();
       if (!mounted) return;
       if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
       if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
-    });
+    }
   }
 
   String _fmt(double v) {

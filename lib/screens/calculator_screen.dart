@@ -247,7 +247,6 @@ class _CalculatorScreenState extends State<CalculatorScreen>
       c.addListener(_debouncedCalculate);
     }
     WidgetsBinding.instance.addPostFrameCallback((_) => _debouncedCalculate());
-    WidgetsBinding.instance.addPostFrameCallback((_) => _checkPaywall());
   }
 
   List<TextEditingController> get _allControllers => [
