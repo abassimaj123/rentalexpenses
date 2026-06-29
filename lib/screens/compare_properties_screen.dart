@@ -444,7 +444,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
             children: [
               Expanded(
                 child: _loading
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const SizedBox.shrink()
                     : _allProperties.isEmpty
                         ? Center(
                             child: Text(
