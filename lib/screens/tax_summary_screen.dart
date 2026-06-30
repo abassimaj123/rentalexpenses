@@ -575,7 +575,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                 ),
               IconButton(
                 icon: const Icon(Icons.refresh_rounded),
-                tooltip: 'Refresh',
+                tooltip: isSpanishNotifier.value ? 'Actualizar' : 'Refresh',
                 onPressed: _load,
               ),
             ],

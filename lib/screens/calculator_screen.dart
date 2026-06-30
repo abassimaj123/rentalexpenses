@@ -489,7 +489,9 @@ class _CalculatorScreenState extends State<CalculatorScreen>
       s.shareAnnualCashFlow(c.annualCashFlow < 0 ? '-' : '+', AmountFormatter.ui(c.annualCashFlow.abs(), 'USD')),
       s.shareAnnualNOI(AmountFormatter.ui(c.noi, 'USD')),
       if (c.capRate != null)
-        '• Cap Rate: ${c.capRate!.toStringAsFixed(2)}%',
+        isSpanish
+            ? '• Tasa de cap: ${c.capRate!.toStringAsFixed(2)}%'
+            : '• Cap Rate: ${c.capRate!.toStringAsFixed(2)}%',
       if (c.cocRoi != null)
         isSpanish
             ? '• ROI (Cash-on-Cash): ${c.cocRoi!.toStringAsFixed(2)}%'

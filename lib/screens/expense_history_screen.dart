@@ -93,7 +93,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
             actions: [
               IconButton(
                 icon: const Icon(Icons.refresh_rounded),
-                tooltip: 'Refresh',
+                tooltip: isSpanishNotifier.value ? 'Actualizar' : 'Refresh',
                 onPressed: _load,
               ),
             ],
@@ -236,7 +236,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                                             const SizedBox(
                                                 width: AppSpacing.sm),
                                             Semantics(
-                                              label: 'View receipt',
+                                              label: isSpanishNotifier.value ? 'Ver recibo' : 'View receipt',
                                               button: true,
                                               child: InkWell(
                                               onTap: () {

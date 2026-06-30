@@ -479,7 +479,7 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
                                                   CalcwiseSemanticColors.error(
                                                       Theme.of(context)
                                                           .brightness)),
-                                          tooltip: 'Delete trip',
+                                          tooltip: isSpanishNotifier.value ? 'Eliminar viaje' : 'Delete trip',
                                           onPressed: () {
                                             HapticFeedback.mediumImpact();
                                             _deleteTrip(t);

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:calcwise_core/calcwise_core.dart';
 import '../core/theme/app_theme.dart';
 import '../core/firebase/analytics_service.dart';
-import '../main.dart' show MainShell;
+import '../main.dart' show MainShell, isSpanishNotifier;
 import 'onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -24,8 +24,10 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) => CalcwiseSplash(
         appName: 'Rental',
         appSuffix: 'Pro',
-        tagline: 'Track every rental dollar',
-        chips: const ['ROI', 'Tax Deductions', 'Cash Flow'],
+        tagline: isSpanishNotifier.value ? 'Controla cada dólar de alquiler' : 'Track every rental dollar',
+        chips: isSpanishNotifier.value
+            ? const ['ROI', 'Deducciones fiscales', 'Flujo de caja']
+            : const ['ROI', 'Tax Deductions', 'Cash Flow'],
         badgeSymbol: r'$-',
         badgeIcon: Icons.receipt_long_rounded,
         backgroundColor: AppTheme.primary,

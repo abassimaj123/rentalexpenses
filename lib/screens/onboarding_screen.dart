@@ -14,6 +14,9 @@ class OnboardingScreen extends StatelessWidget {
             title: 'Track Every\nRental Dollar',
             subtitle: 'ROI, cash flow, and tax deductions — all in one place.',
             pills: ['ROI', 'Cash Flow', 'Tax Deductions'],
+            titleEs: 'Controla cada\ndólar de alquiler',
+            subtitleEs: 'ROI, flujo de caja y deducciones fiscales — todo en un solo lugar.',
+            pillsEs: ['ROI', 'Flujo de caja', 'Deducciones'],
           ),
           OnboardingPage(
             icon: Icons.assignment_rounded,
@@ -21,6 +24,10 @@ class OnboardingScreen extends StatelessWidget {
             subtitle:
                 'Cap rate, gross yield, net yield — see the full picture of your investment.',
             pills: ['Cap Rate', 'Gross Yield', 'Net Yield'],
+            titleEs: 'Conoce tus\nrendimientos reales',
+            subtitleEs:
+                'Tasa de cap, rendimiento bruto, neto — ve el panorama completo de tu inversión.',
+            pillsEs: ['Tasa de cap', 'Rend. bruto', 'Rend. neto'],
           ),
         ],
       );
