@@ -439,12 +439,6 @@ class _CalculatorScreenState extends State<CalculatorScreen>
     adService.onAction();
   }
 
-  Future<void> _checkPaywall() async {
-    final trigger = await paywallSession.recordAction();
-    if (!mounted) return;
-    if (trigger != PaywallTrigger.none) PaywallHard.show(context);
-  }
-
   Future<void> _save(bool isSpanish) async {
     final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     if (_result == null) return;
@@ -1065,7 +1059,7 @@ class _ResultsSection extends StatelessWidget {
               child: Column(children: [
                 if (calc.capRate != null) ...[
                   _InvestorMetricRow(
-                    label: 'Cap Rate',
+                    label: s.capRateLabel,
                     value: '${calc.capRate!.toStringAsFixed(2)}%',
                     hint: s.annualNOIDivPropertyValue,
                     color: calc.capRate! >= 6
@@ -1089,7 +1083,7 @@ class _ResultsSection extends StatelessWidget {
                 ],
                 if (calc.cocRoi != null) ...[
                   _InvestorMetricRow(
-                    label: 'Cash-on-Cash ROI',
+                    label: s.cocRoiLabel,
                     value: '${calc.cocRoi!.toStringAsFixed(2)}%',
                     hint: s.annualCashFlowDivCashInvested,
                     color: calc.cocRoi! >= 8

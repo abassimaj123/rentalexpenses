@@ -87,6 +87,9 @@ class AppStringsEs extends AppStrings {
   @override String get annualCashFlowDivCashInvested => 'Flujo anual ÷ capital invertido';
   @override String get annualNOIDivPropertyValue => 'NOI anual ÷ valor de propiedad';
   @override String get capRateGoodCoCROIExcellent => 'Cap Rate > 6% = bueno  •  CoC ROI > 8% = excelente';
+  @override String get capRateLabel => 'Cap Rate';
+  @override String get cocRoiLabel => 'Retorno sobre Efectivo (CoC ROI)';
+  @override String get perMonthSuffix => '/mes';
   @override String get positiveCashFlow => 'Flujo de caja positivo — propiedad rentable';
   @override String get negativeCashFlow => 'Flujo de caja negativo — revisar gastos';
   @override String get noExpensesEntered => 'Sin gastos ingresados';

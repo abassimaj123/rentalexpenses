@@ -266,6 +266,7 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
                 await PropertyDatabaseService.instance.insertMileageTrip(trip);
                 await AnalyticsService.instance.logMileageTripAdded();
                 if (d.mounted) Navigator.pop(d);
+                if (!mounted) return;
                 _load();
               },
               style: ElevatedButton.styleFrom(minimumSize: const Size(80, 40)),

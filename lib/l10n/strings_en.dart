@@ -89,6 +89,9 @@ abstract class AppStrings {
   String get annualCashFlowDivCashInvested;
   String get annualNOIDivPropertyValue;
   String get capRateGoodCoCROIExcellent;
+  String get capRateLabel;
+  String get cocRoiLabel;
+  String get perMonthSuffix;
   String get positiveCashFlow;
   String get negativeCashFlow;
   String get noExpensesEntered;
@@ -519,6 +522,9 @@ class AppStringsEn extends AppStrings {
   @override String get annualCashFlowDivCashInvested => 'Annual cash flow ÷ cash invested';
   @override String get annualNOIDivPropertyValue => 'Annual NOI ÷ property value';
   @override String get capRateGoodCoCROIExcellent => 'Cap Rate > 6% = good  •  CoC ROI > 8% = excellent';
+  @override String get capRateLabel => 'Cap Rate';
+  @override String get cocRoiLabel => 'Cash-on-Cash ROI';
+  @override String get perMonthSuffix => '/mo';
   @override String get positiveCashFlow => 'Positive cash flow — property is profitable';
   @override String get negativeCashFlow => 'Negative cash flow — review your expenses';
   @override String get noExpensesEntered => 'No expenses entered';

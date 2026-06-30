@@ -63,6 +63,8 @@ class _HistoryDetailPdfParams {
   final String lTotalExpenses;
   final String lInvestmentMetrics;
   final String lGrossYield;
+  final String lCapRate;
+  final String lCocRoi;
   final String lFooter;
 
   const _HistoryDetailPdfParams({
@@ -106,6 +108,8 @@ class _HistoryDetailPdfParams {
     required this.lTotalExpenses,
     required this.lInvestmentMetrics,
     required this.lGrossYield,
+    required this.lCapRate,
+    required this.lCocRoi,
     required this.lFooter,
   });
 }
@@ -268,7 +272,7 @@ Future<List<int>> _buildHistoryDetailPdf(_HistoryDetailPdfParams p) async {
           pw.Row(children: [
             if (p.capRate != null) ...[
               metric(
-                label: 'Cap Rate',
+                label: p.lCapRate,
                 value: '${p.capRate!.toStringAsFixed(2)}%',
                 color: p.capRate! >= 6 ? green : red,
               ),
@@ -284,7 +288,7 @@ Future<List<int>> _buildHistoryDetailPdf(_HistoryDetailPdfParams p) async {
             ],
             if (p.cocRoi != null)
               metric(
-                label: 'CoC ROI',
+                label: p.lCocRoi,
                 value: '${p.cocRoi!.toStringAsFixed(2)}%',
                 color: p.cocRoi! >= 8 ? green : red,
               ),
@@ -378,6 +382,8 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
         lTotalExpenses: s.totalExpenses,
         lInvestmentMetrics: s.investmentMetrics,
         lGrossYield: s.grossYield,
+        lCapRate: s.capRateLabel,
+        lCocRoi: s.cocRoiLabel,
         lFooter:
             'Rental Expenses Tracker — ${DateFormat('yyyy-MM-dd').format(DateTime.now())}',
       );
@@ -480,6 +486,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                       value:
                           '${c.monthlyCashFlow < 0 ? '-' : ''}${AmountFormatter.ui(c.monthlyCashFlow.abs(), 'USD')}',
                       color: cfColor,
+                      suffix: s.perMonthSuffix,
                     ),
                     const SizedBox(height: 16),
 
@@ -567,7 +574,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                         ),
                         _Row(
                           s.breakEvenRentLabel,
-                          '${AmountFormatter.ui(c.breakEvenRent, 'USD')}/mo',
+                          '${AmountFormatter.ui(c.breakEvenRent, 'USD')}${s.perMonthSuffix}',
                         ),
                         _Row(
                           s.annualNOI,
@@ -587,7 +594,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                         rows: [
                           if (c.capRate != null)
                             _Row(
-                              'Cap Rate',
+                              s.capRateLabel,
                               '${c.capRate!.toStringAsFixed(2)}%',
                               valueColor: c.capRate! >= 6
                                   ? AppTheme.success
@@ -605,7 +612,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                             ),
                           if (c.cocRoi != null)
                             _Row(
-                              'Cash-on-Cash ROI',
+                              s.cocRoiLabel,
                               '${c.cocRoi!.toStringAsFixed(2)}%',
                               valueColor: c.cocRoi! >= 8
                                   ? AppTheme.success
@@ -697,9 +704,13 @@ class _HeroCard extends StatelessWidget {
   final String label;
   final String value;
   final Color color;
+  final String suffix;
 
   const _HeroCard(
-      {required this.label, required this.value, required this.color});
+      {required this.label,
+      required this.value,
+      required this.color,
+      this.suffix = '/mo'});
 
   @override
   Widget build(BuildContext context) {
@@ -724,7 +735,7 @@ class _HeroCard extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                   color: color)),
           const SizedBox(height: 4),
-          Text('/mo',
+          Text(suffix,
               style: TextStyle(
                   fontSize: AppTextSize.md,
                   color: CalcwiseTheme.of(context).textSecondary)),

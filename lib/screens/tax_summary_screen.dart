@@ -303,6 +303,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                   await PropertyDatabaseService.instance
                       .deleteScheduleEEntry(existing.id);
                   if (d.mounted) Navigator.pop(d);
+                  if (!mounted) return;
                   _load();
                 },
                 style: TextButton.styleFrom(
@@ -343,6 +344,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                   AnalyticsService.instance.logRecurringExpenseCreated();
                 }
                 if (d.mounted) Navigator.pop(d);
+                if (!mounted) return;
                 _load();
               },
               child: Text(s.save),
