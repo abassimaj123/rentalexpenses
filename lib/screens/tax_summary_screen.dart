@@ -365,7 +365,8 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
     setState(() => _exporting = true);
     try {
       final doc = pw.Document();
-      final genDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      final genDate = DateFormat('yyyy-MM-dd', isSpanish ? 'es' : 'en')
+          .format(DateTime.now());
 
       doc.addPage(
         pw.MultiPage(
@@ -772,7 +773,20 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
                                             keyboardType: const TextInputType
                                                 .numberWithOptions(
                                                 decimal: true),
-                                            onChanged: (_) => setState(() {}),
+                                            onChanged: (_) {
+                                              setState(() {});
+                                              double grossIncome = 0;
+                                              double totalExpenses = 0;
+                                              for (final prop in _properties) {
+                                                grossIncome +=
+                                                    _totalIncome(prop);
+                                                totalExpenses +=
+                                                    _totalExpensesForProperty(
+                                                        prop.id);
+                                              }
+                                              _scheduleSmartHistorySave(
+                                                  grossIncome, totalExpenses);
+                                            },
                                             decoration: InputDecoration(
                                               labelText: s.annualRentalIncome,
                                               prefixText: '\$',
