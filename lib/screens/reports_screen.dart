@@ -28,7 +28,7 @@ const _chartColors = [
   AppTheme.primary,
   AppTheme.success,
   AppTheme.warning,
-  Colors.red,
+  AppTheme.dangerRed,
   AppTheme.chartPurple,
   AppTheme.chartTeal,
 ];
