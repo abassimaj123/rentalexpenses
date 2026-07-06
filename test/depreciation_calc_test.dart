@@ -123,12 +123,12 @@ void main() {
       expect(MileageRates.rateForYear(2024), closeTo(0.67, 1e-9));
     });
 
-    test('2026 = \$0.725/mile', () {
-      expect(MileageRates.rateForYear(2026), closeTo(0.725, 1e-9));
+    test('2026 = \$0.70/mile', () {
+      expect(MileageRates.rateForYear(2026), closeTo(0.70, 1e-9));
     });
 
     test('future year falls back to latest known rate', () {
-      expect(MileageRates.rateForYear(2030), closeTo(0.725, 1e-9));
+      expect(MileageRates.rateForYear(2030), closeTo(0.70, 1e-9));
     });
 
     test('deduction = miles × rate', () {
