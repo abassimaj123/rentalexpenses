@@ -801,12 +801,16 @@ class _RowWidget extends StatelessWidget {
                     color: CalcwiseTheme.of(context).textSecondary)),
           ),
           const SizedBox(width: 12),
-          Text(
-            row.value,
-            style: TextStyle(
-              fontSize: AppTextSize.body,
-              fontWeight: row.bold ? FontWeight.bold : FontWeight.w600,
-              color: row.valueColor,
+          Flexible(
+            child: Text(
+              row.value,
+              textAlign: TextAlign.right,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: AppTextSize.body,
+                fontWeight: row.bold ? FontWeight.bold : FontWeight.w600,
+                color: row.valueColor,
+              ),
             ),
           ),
         ],
