@@ -286,6 +286,32 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
     _load();
   }
 
+  Widget _buildTripCard(MileageTrip t, DateFormat dateFmt, bool isSpanish) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: ListTile(
+        leading:
+            const Icon(Icons.directions_car_rounded, color: AppTheme.primary),
+        title: Text(
+          '${t.miles.toStringAsFixed(1)} mi'
+          '${t.purpose.isNotEmpty ? ' · ${t.purpose}' : ''}',
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        subtitle: Text(dateFmt.format(t.date)),
+        trailing: IconButton(
+          icon: Icon(Icons.delete_outline_rounded,
+              color: CalcwiseSemanticColors.error(
+                  Theme.of(context).brightness)),
+          tooltip: isSpanish ? 'Eliminar viaje' : 'Delete trip',
+          onPressed: () {
+            HapticFeedback.mediumImpact();
+            _deleteTrip(t);
+          },
+        ),
+      ),
+    );
+  }
+
   Future<void> _addToScheduleE(bool isSpanish) async {
     if (!freemiumService.hasFullAccess) {
       await PaywallHard.show(context);
@@ -459,35 +485,25 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
                                     ),
                                   ),
                                 )
+                              else if (_trips.length > 20)
+                                // Trips accumulate one per drive over the
+                                // life of the property — can reach hundreds
+                                // for active users. Virtualize past a small
+                                // threshold to avoid building every row
+                                // eagerly (same fix as HELOCApp's Draw
+                                // Schedule jank).
+                                SizedBox(
+                                  height: 420,
+                                  child: ListView.builder(
+                                    padding: EdgeInsets.zero,
+                                    itemCount: _trips.length,
+                                    itemBuilder: (_, i) => _buildTripCard(
+                                        _trips[i], dateFmt, isSpanishNotifier.value),
+                                  ),
+                                )
                               else
-                                ..._trips.map((t) => Card(
-                                      margin: const EdgeInsets.only(
-                                          bottom: AppSpacing.sm),
-                                      child: ListTile(
-                                        leading: const Icon(
-                                            Icons.directions_car_rounded,
-                                            color: AppTheme.primary),
-                                        title: Text(
-                                          '${t.miles.toStringAsFixed(1)} mi'
-                                          '${t.purpose.isNotEmpty ? ' · ${t.purpose}' : ''}',
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.w600),
-                                        ),
-                                        subtitle: Text(dateFmt.format(t.date)),
-                                        trailing: IconButton(
-                                          icon: Icon(Icons.delete_outline_rounded,
-                                              color:
-                                                  CalcwiseSemanticColors.error(
-                                                      Theme.of(context)
-                                                          .brightness)),
-                                          tooltip: isSpanishNotifier.value ? 'Eliminar viaje' : 'Delete trip',
-                                          onPressed: () {
-                                            HapticFeedback.mediumImpact();
-                                            _deleteTrip(t);
-                                          },
-                                        ),
-                                      ),
-                                    )),
+                                ..._trips.map((t) => _buildTripCard(
+                                    t, dateFmt, isSpanishNotifier.value)),
 
                               const SizedBox(height: AppSpacing.lg),
                               Text(

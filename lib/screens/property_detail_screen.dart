@@ -175,6 +175,56 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
     }
   }
 
+  Widget _buildExpenseCard(
+      MonthlyExpense e, double rent, DateFormat dateFmt) {
+    final cf = rent - e.totalExpenses;
+    final ratio = rent > 0 ? (e.totalExpenses / rent * 100) : 0.0;
+    final cfColor = cf >= 0
+        ? AppTheme.success
+        : CalcwiseSemanticColors.error(Theme.of(context).brightness);
+    return Card(
+      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        onTap: () => _openEntry(e),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.mdPlus),
+          child: Row(
+            children: [
+              Icon(Icons.receipt_long_rounded,
+                  color: CalcwiseTheme.of(context).textSecondary, size: 22),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      dateFmt.format(e.date),
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    Text(
+                      '${AmountFormatter.ui(e.totalExpenses, 'USD')}  •  ${ratio.toStringAsFixed(1)}%',
+                      style: TextStyle(
+                          fontSize: AppTextSize.sm,
+                          color: CalcwiseTheme.of(context).textSecondary),
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                '${cf < 0 ? '-' : '+'}${AmountFormatter.ui(cf.abs(), 'USD')}',
+                style: TextStyle(fontWeight: FontWeight.bold, color: cfColor),
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              Icon(Icons.chevron_right_rounded,
+                  color: CalcwiseTheme.of(context).textSecondary, size: 18),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
@@ -434,73 +484,23 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                 ),
                               ),
                             )
+                          else if (visibleExpenses.length > 20)
+                            // Premium users see the full unbounded history —
+                            // years of monthly entries can exceed the eager-
+                            // render threshold. Virtualize past that point
+                            // (same fix as HELOCApp's Draw Schedule jank).
+                            SizedBox(
+                              height: 480,
+                              child: ListView.builder(
+                                padding: EdgeInsets.zero,
+                                itemCount: visibleExpenses.length,
+                                itemBuilder: (_, i) => _buildExpenseCard(
+                                    visibleExpenses[i], rent, dateFmt),
+                              ),
+                            )
                           else
-                            ...visibleExpenses.map((e) {
-                              final cf = rent - e.totalExpenses;
-                              final ratio = rent > 0
-                                  ? (e.totalExpenses / rent * 100)
-                                  : 0.0;
-                              final cfColor = cf >= 0
-                                  ? AppTheme.success
-                                  : CalcwiseSemanticColors.error(
-                                      Theme.of(context).brightness);
-                              return Card(
-                                margin: const EdgeInsets.only(
-                                    bottom: AppSpacing.sm),
-                                child: InkWell(
-                                  borderRadius:
-                                      BorderRadius.circular(AppRadius.xl),
-                                  onTap: () => _openEntry(e),
-                                  child: Padding(
-                                    padding:
-                                        const EdgeInsets.all(AppSpacing.mdPlus),
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.receipt_long_rounded,
-                                            color: CalcwiseTheme.of(context)
-                                                .textSecondary,
-                                            size: 22),
-                                        const SizedBox(width: AppSpacing.md),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                dateFmt.format(e.date),
-                                                style: const TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.w600),
-                                              ),
-                                              Text(
-                                                '${AmountFormatter.ui(e.totalExpenses, 'USD')}  •  ${ratio.toStringAsFixed(1)}%',
-                                                style: TextStyle(
-                                                    fontSize: AppTextSize.sm,
-                                                    color: CalcwiseTheme.of(
-                                                            context)
-                                                        .textSecondary),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Text(
-                                          '${cf < 0 ? '-' : '+'}${AmountFormatter.ui(cf.abs(), 'USD')}',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: cfColor,
-                                          ),
-                                        ),
-                                        const SizedBox(width: AppSpacing.xs),
-                                        Icon(Icons.chevron_right_rounded,
-                                            color: CalcwiseTheme.of(context)
-                                                .textSecondary,
-                                            size: 18),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }),
+                            ...visibleExpenses.map(
+                                (e) => _buildExpenseCard(e, rent, dateFmt)),
                         ],
                       ),
               ),
