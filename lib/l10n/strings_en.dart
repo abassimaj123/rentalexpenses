@@ -424,9 +424,6 @@ abstract class AppStrings {
 
   // ── PDF Unlock Sheet ────────────────────────────────────────────────────────
   String get exportPdfReport;
-  String get chooseUnlockPdf;
-  String get watchShortVideo;
-  String get exportOnceFree;
   String get premiumUnlimited;
   String get notNow;
   String get adNotAvailable;
@@ -857,9 +854,6 @@ class AppStringsEn extends AppStrings {
 
   // ── PDF Unlock Sheet ───────────────────────────────────────────────────────
   @override String get exportPdfReport => 'Export PDF Report';
-  @override String get chooseUnlockPdf => 'Choose how to unlock PDF export';
-  @override String get watchShortVideo => 'Watch a short video';
-  @override String get exportOnceFree => 'Export once — free';
   @override String get premiumUnlimited => 'Premium (unlimited)';
   @override String get notNow => 'Not now';
   @override String get adNotAvailable => 'Ad not available. Try again later.';

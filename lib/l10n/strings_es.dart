@@ -422,9 +422,6 @@ class AppStringsEs extends AppStrings {
 
   // ── PDF Unlock Sheet ───────────────────────────────────────────────────────
   @override String get exportPdfReport => 'Exportar Informe PDF';
-  @override String get chooseUnlockPdf => 'Elige cómo desbloquear la exportación';
-  @override String get watchShortVideo => 'Ver un video corto';
-  @override String get exportOnceFree => 'Exportar una vez — gratis';
   @override String get premiumUnlimited => 'Premium (ilimitado)';
   @override String get notNow => 'Ahora no';
   @override String get adNotAvailable => 'Anuncio no disponible. Inténtalo más tarde.';
