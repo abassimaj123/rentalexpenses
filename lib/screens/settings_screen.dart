@@ -49,7 +49,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: Text(s.settings),
             actions: [
               ValueListenableBuilder<bool>(
-                valueListenable: freemiumService.hasFullAccessNotifier,
+                valueListenable: freemiumService.isPremiumNotifier,
                 builder: (_, isPremium, __) {
                   if (isPremium) {
                     return const Padding(
@@ -62,7 +62,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     icon: const Icon(Icons.star_outline,
                         color: CalcwiseSemanticColors.warnIcon),
                     tooltip: s.goPremium,
-                    onPressed: () => PaywallHard.show(context),
+                    onPressed: () => PaywallHard.show(context, isSpanish: isSpanishNotifier.value),
                   );
                 },
               ),
@@ -79,7 +79,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     // ── Premium ───────────────────────────────────────
                     _SectionHeader(label: s.premiumSection),
                     ValueListenableBuilder<bool>(
-                      valueListenable: freemiumService.hasFullAccessNotifier,
+                      valueListenable: freemiumService.isPremiumNotifier,
                       builder: (_, isPremium, __) {
                         if (isPremium) {
                           return Card(
@@ -100,7 +100,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 title: Text(s.unlockPremium),
                                 subtitle: Text(s.premiumSubtitle),
                                 trailing: ElevatedButton(
-                                  onPressed: () => PaywallHard.show(context),
+                                  onPressed: () => PaywallHard.show(context, isSpanish: isSpanishNotifier.value),
                                   style: ElevatedButton.styleFrom(
                                     minimumSize: const Size(80, 36),
                                     padding: const EdgeInsets.symmetric(
