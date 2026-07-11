@@ -280,6 +280,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
       } else {
         await PropertyDatabaseService.instance.insertExpense(expense);
       }
+      historyRefreshNotifier.value++;
 
       final trigger = await paywallSession.recordAction();
       await AnalyticsService.instance.logExpenseTracked('monthly_expenses');
@@ -294,10 +295,10 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
           duration: const Duration(seconds: 2),
         ));
         if (trigger == PaywallTrigger.hard) {
-          await PaywallHard.show(context);
+          await PaywallHard.show(context, isSpanish: isSpanishNotifier.value);
           if (!mounted) return;
         } else if (trigger == PaywallTrigger.soft) {
-          PaywallSoft.show(context);
+          PaywallSoft.show(context, isSpanish: isSpanishNotifier.value);
         }
         Navigator.of(context).pop(true);
       }
@@ -590,7 +591,7 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
                           transitionDuration: AppDuration.base,
                         ));
                       },
-                      onPremiumTap: () => PaywallHard.show(context),
+                      onPremiumTap: () => PaywallHard.show(context, isSpanish: isSpanishNotifier.value),
                     ),
                     const SizedBox(height: AppSpacing.xl),
 

@@ -54,35 +54,11 @@ class _SaveScenarioButtonState extends State<SaveScenarioButton> {
     }
   }
 
-  Future<String?> _showNameDialog(AppStrings s) async {
-    final controller = TextEditingController();
-    final result = await showDialog<String>(
+  Future<String?> _showNameDialog(AppStrings s) {
+    return showDialog<String>(
       context: context,
-      builder: (_) => AlertDialog(
-        title: Text(s.saveScenarioTitle),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          textCapitalization: TextCapitalization.words,
-          decoration: InputDecoration(
-            hintText: s.scenarioNameHint,
-          ),
-          onSubmitted: (v) => Navigator.pop(context, v),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(s.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, controller.text),
-            child: Text(s.save),
-          ),
-        ],
-      ),
+      builder: (_) => _SaveScenarioNameDialog(s: s),
     );
-    controller.dispose();
-    return result;
   }
 
   @override
@@ -105,6 +81,58 @@ class _SaveScenarioButtonState extends State<SaveScenarioButton> {
           minimumSize: const Size.fromHeight(48),
         ),
       ),
+    );
+  }
+}
+
+class _SaveScenarioNameDialog extends StatefulWidget {
+  final AppStrings s;
+  const _SaveScenarioNameDialog({required this.s});
+
+  @override
+  State<_SaveScenarioNameDialog> createState() =>
+      _SaveScenarioNameDialogState();
+}
+
+class _SaveScenarioNameDialogState extends State<_SaveScenarioNameDialog> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = widget.s;
+    return AlertDialog(
+      title: Text(s.saveScenarioTitle),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        textCapitalization: TextCapitalization.words,
+        decoration: InputDecoration(
+          hintText: s.scenarioNameHint,
+        ),
+        onSubmitted: (v) => Navigator.pop(context, v),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(s.cancel),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, _controller.text),
+          child: Text(s.save),
+        ),
+      ],
     );
   }
 }

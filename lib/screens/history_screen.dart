@@ -330,7 +330,7 @@ class _UpgradeCTA extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () => PaywallHard.show(context),
+                onPressed: () => PaywallHard.show(context, isSpanish: isSpanishNotifier.value),
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 44),
                 ),

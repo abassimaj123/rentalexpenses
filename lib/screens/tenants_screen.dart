@@ -63,157 +63,17 @@ class _TenantsScreenState extends State<TenantsScreen> {
 
   Future<void> _showTenantDialog(BuildContext ctx, bool isSpanish,
       {Tenant? existing}) async {
-    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
-    final nameCtrl = TextEditingController(text: existing?.name ?? '');
-    final emailCtrl = TextEditingController(text: existing?.email ?? '');
-    final phoneCtrl = TextEditingController(text: existing?.phone ?? '');
-    final rentCtrl = TextEditingController(
-        text: existing != null && existing.monthlyRent > 0
-            ? existing.monthlyRent.toStringAsFixed(2)
-            : '');
-    final notesCtrl = TextEditingController(text: existing?.notes ?? '');
-
-    DateTime leaseStart = existing?.leaseStart ?? DateTime.now();
-    DateTime leaseEnd = existing?.leaseEnd ??
-        DateTime(
-            DateTime.now().year + 1, DateTime.now().month, DateTime.now().day);
-
     await showDialog<void>(
       context: ctx,
-      builder: (d) => StatefulBuilder(
-        builder: (d, setLocal) => AlertDialog(
-          title: Text(existing != null ? s.editTenant : s.addTenant),
-          scrollable: true,
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameCtrl,
-                decoration: InputDecoration(
-                  labelText: s.tenantNameRequired,
-                  prefixIcon: const Icon(Icons.person_rounded),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: emailCtrl,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  labelText: s.emailOptional,
-                  prefixIcon: const Icon(Icons.email_rounded),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: phoneCtrl,
-                keyboardType: TextInputType.phone,
-                decoration: InputDecoration(
-                  labelText: s.phoneOptional,
-                  prefixIcon: const Icon(Icons.phone_rounded),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: rentCtrl,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))
-                ],
-                decoration: InputDecoration(
-                  labelText: '${s.monthlyRentTenant} (\$)',
-                  prefixText: '\$',
-                ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              _DateRow(
-                label: s.leaseStartLabel,
-                date: leaseStart,
-                isSpanish: isSpanish,
-                onTap: () async {
-                  final picked = await showDatePicker(
-                    context: d,
-                    initialDate: leaseStart,
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2040),
-                  );
-                  if (picked != null) setLocal(() => leaseStart = picked);
-                },
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              _DateRow(
-                label: s.leaseEndLabel,
-                date: leaseEnd,
-                isSpanish: isSpanish,
-                onTap: () async {
-                  final picked = await showDatePicker(
-                    context: d,
-                    initialDate: leaseEnd,
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2040),
-                  );
-                  if (picked != null) setLocal(() => leaseEnd = picked);
-                },
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: notesCtrl,
-                maxLines: 2,
-                decoration: InputDecoration(
-                  labelText: s.notes,
-                  prefixIcon: const Icon(Icons.notes_rounded),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(d),
-              child: Text(s.cancel),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(minimumSize: const Size(80, 40)),
-              onPressed: () async {
-                HapticFeedback.mediumImpact();
-                final name = nameCtrl.text.trim();
-                if (name.isEmpty) return;
-                final id = existing?.id ??
-                    'tenant_${widget.property.id}_${DateTime.now().millisecondsSinceEpoch}';
-                final tenant = Tenant(
-                  id: id,
-                  propertyId: widget.property.id,
-                  name: name,
-                  email: emailCtrl.text.trim(),
-                  phone: phoneCtrl.text.trim(),
-                  monthlyRent:
-                      double.tryParse(rentCtrl.text.replaceAll(',', '.')) ??
-                          0.0,
-                  leaseStart: leaseStart,
-                  leaseEnd: leaseEnd,
-                  notes: notesCtrl.text.trim(),
-                  createdAt: existing?.createdAt ?? DateTime.now(),
-                );
-                if (existing != null) {
-                  await PropertyDatabaseService.instance.updateTenant(tenant);
-                } else {
-                  await PropertyDatabaseService.instance.insertTenant(tenant);
-                  await AnalyticsService.instance.logTenantAdded();
-                }
-                if (d.mounted) Navigator.pop(d);
-                if (!mounted) return;
-                _load();
-              },
-              child: Text(s.save),
-            ),
-          ],
-        ),
+      builder: (d) => TenantFormDialog(
+        isSpanish: isSpanish,
+        propertyId: widget.property.id,
+        existing: existing,
+        onSaved: () {
+          if (mounted) _load();
+        },
       ),
     );
-    nameCtrl.dispose();
-    emailCtrl.dispose();
-    phoneCtrl.dispose();
-    rentCtrl.dispose();
-    notesCtrl.dispose();
   }
 
   Future<void> _confirmDelete(
@@ -271,11 +131,9 @@ class _TenantsScreenState extends State<TenantsScreen> {
             icon: const Icon(Icons.person_add_rounded),
             label: Text(s.addTenant),
           ),
+          bottomNavigationBar: const CalcwiseAdFooter(),
           body: CalcwisePageEntrance(
-            child: Column(
-            children: [
-              Expanded(
-                child: _loading
+            child: _loading
                     ? const CalcwiseLoadingState(showHeroCard: false)
                     : _tenants.isEmpty
                         ? _EmptyTenantsState(isSpanish: isSpanish)
@@ -551,10 +409,6 @@ class _TenantsScreenState extends State<TenantsScreen> {
                               );
                             },
                           ),
-              ),
-              const CalcwiseAdFooter(),
-            ],
-          ),
           ),
         );
       },
@@ -563,6 +417,193 @@ class _TenantsScreenState extends State<TenantsScreen> {
 }
 
 // ── Small widgets ─────────────────────────────────────────────────────────────
+
+class TenantFormDialog extends StatefulWidget {
+  final bool isSpanish;
+  final String propertyId;
+  final Tenant? existing;
+  final VoidCallback onSaved;
+
+  const TenantFormDialog({
+    super.key,
+    required this.isSpanish,
+    required this.propertyId,
+    required this.existing,
+    required this.onSaved,
+  });
+
+  @override
+  State<TenantFormDialog> createState() => TenantFormDialogState();
+}
+
+class TenantFormDialogState extends State<TenantFormDialog> {
+  late final TextEditingController nameCtrl;
+  late final TextEditingController emailCtrl;
+  late final TextEditingController phoneCtrl;
+  late final TextEditingController rentCtrl;
+  late final TextEditingController notesCtrl;
+  late DateTime leaseStart;
+  late DateTime leaseEnd;
+
+  @override
+  void initState() {
+    super.initState();
+    final existing = widget.existing;
+    nameCtrl = TextEditingController(text: existing?.name ?? '');
+    emailCtrl = TextEditingController(text: existing?.email ?? '');
+    phoneCtrl = TextEditingController(text: existing?.phone ?? '');
+    rentCtrl = TextEditingController(
+        text: existing != null && existing.monthlyRent > 0
+            ? existing.monthlyRent.toStringAsFixed(2)
+            : '');
+    notesCtrl = TextEditingController(text: existing?.notes ?? '');
+    leaseStart = existing?.leaseStart ?? DateTime.now();
+    leaseEnd = existing?.leaseEnd ??
+        DateTime(
+            DateTime.now().year + 1, DateTime.now().month, DateTime.now().day);
+  }
+
+  @override
+  void dispose() {
+    nameCtrl.dispose();
+    emailCtrl.dispose();
+    phoneCtrl.dispose();
+    rentCtrl.dispose();
+    notesCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    FocusScope.of(context).unfocus();
+    HapticFeedback.mediumImpact();
+    final name = nameCtrl.text.trim();
+    if (name.isEmpty) return;
+    final existing = widget.existing;
+    final id = existing?.id ??
+        'tenant_${widget.propertyId}_${DateTime.now().millisecondsSinceEpoch}';
+    final tenant = Tenant(
+      id: id,
+      propertyId: widget.propertyId,
+      name: name,
+      email: emailCtrl.text.trim(),
+      phone: phoneCtrl.text.trim(),
+      monthlyRent: double.tryParse(rentCtrl.text.replaceAll(',', '.')) ?? 0.0,
+      leaseStart: leaseStart,
+      leaseEnd: leaseEnd,
+      notes: notesCtrl.text.trim(),
+      createdAt: existing?.createdAt ?? DateTime.now(),
+    );
+    if (existing != null) {
+      await PropertyDatabaseService.instance.updateTenant(tenant);
+    } else {
+      await PropertyDatabaseService.instance.insertTenant(tenant);
+      await AnalyticsService.instance.logTenantAdded();
+    }
+    if (mounted) Navigator.pop(context);
+    widget.onSaved();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = widget.isSpanish ? const AppStringsEs() : const AppStringsEn();
+    return AlertDialog(
+      title: Text(widget.existing != null ? s.editTenant : s.addTenant),
+      scrollable: true,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: nameCtrl,
+            decoration: InputDecoration(
+              labelText: s.tenantNameRequired,
+              prefixIcon: const Icon(Icons.person_rounded),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          TextField(
+            controller: emailCtrl,
+            keyboardType: TextInputType.emailAddress,
+            decoration: InputDecoration(
+              labelText: s.emailOptional,
+              prefixIcon: const Icon(Icons.email_rounded),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          TextField(
+            controller: phoneCtrl,
+            keyboardType: TextInputType.phone,
+            decoration: InputDecoration(
+              labelText: s.phoneOptional,
+              prefixIcon: const Icon(Icons.phone_rounded),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          TextField(
+            controller: rentCtrl,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))
+            ],
+            decoration: InputDecoration(
+              labelText: '${s.monthlyRentTenant} (\$)',
+              prefixText: '\$',
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          _DateRow(
+            label: s.leaseStartLabel,
+            date: leaseStart,
+            isSpanish: widget.isSpanish,
+            onTap: () async {
+              final picked = await showDatePicker(
+                context: context,
+                initialDate: leaseStart,
+                firstDate: DateTime(2000),
+                lastDate: DateTime(2040),
+              );
+              if (picked != null) setState(() => leaseStart = picked);
+            },
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          _DateRow(
+            label: s.leaseEndLabel,
+            date: leaseEnd,
+            isSpanish: widget.isSpanish,
+            onTap: () async {
+              final picked = await showDatePicker(
+                context: context,
+                initialDate: leaseEnd,
+                firstDate: DateTime(2000),
+                lastDate: DateTime(2040),
+              );
+              if (picked != null) setState(() => leaseEnd = picked);
+            },
+          ),
+          const SizedBox(height: AppSpacing.md),
+          TextField(
+            controller: notesCtrl,
+            maxLines: 2,
+            decoration: InputDecoration(
+              labelText: s.notes,
+              prefixIcon: const Icon(Icons.notes_rounded),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(s.cancel),
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(minimumSize: const Size(80, 40)),
+          onPressed: _save,
+          child: Text(s.save),
+        ),
+      ],
+    );
+  }
+}
 
 class _LeaseDateTile extends StatelessWidget {
   final IconData icon;

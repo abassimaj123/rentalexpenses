@@ -175,8 +175,8 @@ class _DepreciationScreenState extends State<DepreciationScreen> {
     adService.onSave();
     final trigger = await paywallSession.recordAction();
     if (!mounted) return;
-    if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
-    if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
+    if (trigger == PaywallTrigger.soft) PaywallSoft.show(context, isSpanish: isSpanishNotifier.value);
+    if (trigger == PaywallTrigger.hard) PaywallHard.show(context, isSpanish: isSpanishNotifier.value);
   }
 
   Future<void> _exportPdf(bool isSpanish) async {
@@ -207,7 +207,7 @@ class _DepreciationScreenState extends State<DepreciationScreen> {
 
   Future<void> _addToScheduleE(bool isSpanish) async {
     if (!freemiumService.hasFullAccess) {
-      await PaywallHard.show(context);
+      await PaywallHard.show(context, isSpanish: isSpanishNotifier.value);
       return;
     }
     final property = _selectedProperty;

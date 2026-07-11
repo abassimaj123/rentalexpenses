@@ -281,9 +281,9 @@ class _MainShellState extends State<MainShell> {
     if (trigger == PaywallTrigger.none || !mounted) return;
     if (!(ModalRoute.of(context)?.isCurrent ?? false)) return;
     if (trigger == PaywallTrigger.hard) {
-      PaywallHard.show(context);
+      PaywallHard.show(context, isSpanish: isSpanishNotifier.value);
     } else {
-      PaywallSoft.show(context);
+      PaywallSoft.show(context, isSpanish: isSpanishNotifier.value);
     }
   }
 
@@ -315,9 +315,12 @@ class _MainShellState extends State<MainShell> {
                 const Icon(Icons.home_work_rounded,
                     color: Colors.white, size: 22),
                 const SizedBox(width: 8),
-                Text(
-                  s.appTitle,
-                  style: const TextStyle(color: Colors.white),
+                Flexible(
+                  child: Text(
+                    s.appTitle,
+                    style: const TextStyle(color: Colors.white),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
@@ -336,7 +339,7 @@ class _MainShellState extends State<MainShell> {
                   ),
                 ),
                 onRewardAd: () => CalcwiseRewardAdSheet.show(context),
-                onPremium: () => PaywallHard.show(context),
+                onPremium: () => PaywallHard.show(context, isSpanish: isSpanishNotifier.value),
               ),
             ],
           ),

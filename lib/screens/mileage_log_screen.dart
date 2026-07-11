@@ -146,8 +146,8 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
     adService.onSave();
     final trigger = await paywallSession.recordAction();
     if (!mounted) return;
-    if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
-    if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
+    if (trigger == PaywallTrigger.soft) PaywallSoft.show(context, isSpanish: isSpanishNotifier.value);
+    if (trigger == PaywallTrigger.hard) PaywallHard.show(context, isSpanish: isSpanishNotifier.value);
   }
 
   Future<void> _exportPdf(bool isSpanish) async {
@@ -186,98 +186,21 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
   }
 
   Future<void> _addTripDialog(bool isSpanish) async {
-    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     final property = _selectedProperty;
     if (property == null) return;
 
-    final milesCtrl = TextEditingController();
-    final purposeCtrl = TextEditingController();
-    DateTime tripDate = DateTime(_selectedYear, _now.month, _now.day);
-    bool roundTrip = false;
-
     await showDialog<void>(
       context: context,
-      builder: (d) => StatefulBuilder(
-        builder: (d, setLocal) => AlertDialog(
-          title: Text(s.addTrip),
-          scrollable: true,
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: milesCtrl,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
-                ],
-                decoration: InputDecoration(labelText: s.milesOneWay),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(
-                  s.roundTripX2,
-                  style: const TextStyle(fontSize: AppTextSize.body),
-                ),
-                value: roundTrip,
-                activeThumbColor: AppTheme.primary,
-                onChanged: (v) => setLocal(() => roundTrip = v),
-              ),
-              TextField(
-                controller: purposeCtrl,
-                decoration: InputDecoration(labelText: s.purposeLabel),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.calendar_today_rounded),
-                title: Text(DateFormat('yyyy-MM-dd').format(tripDate)),
-                onTap: () async {
-                  final picked = await showDatePicker(
-                    context: d,
-                    initialDate: tripDate,
-                    firstDate: DateTime(_selectedYear, 1, 1),
-                    lastDate: DateTime(_selectedYear, 12, 31),
-                  );
-                  if (picked != null) setLocal(() => tripDate = picked);
-                },
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(d),
-              child: Text(s.cancel),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final raw =
-                    double.tryParse(milesCtrl.text.replaceAll(',', '.')) ?? 0;
-                if (raw <= 0) return;
-                final miles = roundTrip ? raw * 2 : raw;
-                final trip = MileageTrip(
-                  id: 'mile_${property.id}_${DateTime.now().millisecondsSinceEpoch}',
-                  propertyId: property.id,
-                  date: tripDate,
-                  miles: miles,
-                  purpose: purposeCtrl.text.trim(),
-                );
-                await PropertyDatabaseService.instance.insertMileageTrip(trip);
-                await AnalyticsService.instance.logMileageTripAdded();
-                if (d.mounted) Navigator.pop(d);
-                if (!mounted) return;
-                _load();
-              },
-              style: ElevatedButton.styleFrom(minimumSize: const Size(80, 40)),
-              child: Text(s.save),
-            ),
-          ],
-        ),
+      builder: (d) => _AddTripDialog(
+        isSpanish: isSpanish,
+        propertyId: property.id,
+        selectedYear: _selectedYear,
+        now: _now,
+        onSaved: () {
+          if (mounted) _load();
+        },
       ),
     );
-    milesCtrl.dispose();
-    purposeCtrl.dispose();
   }
 
   Future<void> _deleteTrip(MileageTrip trip) async {
@@ -314,7 +237,7 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
 
   Future<void> _addToScheduleE(bool isSpanish) async {
     if (!freemiumService.hasFullAccess) {
-      await PaywallHard.show(context);
+      await PaywallHard.show(context, isSpanish: isSpanishNotifier.value);
       return;
     }
     final property = _selectedProperty;
@@ -356,11 +279,9 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
                   icon: const Icon(Icons.add_road_rounded),
                   label: Text(s.addTrip),
                 ),
+          bottomNavigationBar: const CalcwiseAdFooter(),
           body: CalcwisePageEntrance(
-            child: Column(
-            children: [
-              Expanded(
-                child: _loading
+            child: _loading
                     ? const CalcwiseLoadingState()
                     : _properties.isEmpty
                         ? _EmptyState(isSpanish: isSpanish)
@@ -516,13 +437,132 @@ class _MileageLogScreenState extends State<MileageLogScreen> {
                               ),
                             ],
                           ),
-              ),
-              const CalcwiseAdFooter(),
-            ],
-          ),
           ),
         );
       },
+    );
+  }
+}
+
+class _AddTripDialog extends StatefulWidget {
+  final bool isSpanish;
+  final String propertyId;
+  final int selectedYear;
+  final DateTime now;
+  final VoidCallback onSaved;
+
+  const _AddTripDialog({
+    required this.isSpanish,
+    required this.propertyId,
+    required this.selectedYear,
+    required this.now,
+    required this.onSaved,
+  });
+
+  @override
+  State<_AddTripDialog> createState() => _AddTripDialogState();
+}
+
+class _AddTripDialogState extends State<_AddTripDialog> {
+  late final TextEditingController milesCtrl;
+  late final TextEditingController purposeCtrl;
+  late DateTime tripDate;
+  bool roundTrip = false;
+
+  @override
+  void initState() {
+    super.initState();
+    milesCtrl = TextEditingController();
+    purposeCtrl = TextEditingController();
+    tripDate = DateTime(widget.selectedYear, widget.now.month, widget.now.day);
+  }
+
+  @override
+  void dispose() {
+    milesCtrl.dispose();
+    purposeCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    FocusScope.of(context).unfocus();
+    final raw = double.tryParse(milesCtrl.text.replaceAll(',', '.')) ?? 0;
+    if (raw <= 0) return;
+    final miles = roundTrip ? raw * 2 : raw;
+    final trip = MileageTrip(
+      id: 'mile_${widget.propertyId}_${DateTime.now().millisecondsSinceEpoch}',
+      propertyId: widget.propertyId,
+      date: tripDate,
+      miles: miles,
+      purpose: purposeCtrl.text.trim(),
+    );
+    await PropertyDatabaseService.instance.insertMileageTrip(trip);
+    await AnalyticsService.instance.logMileageTripAdded();
+    if (mounted) Navigator.pop(context);
+    widget.onSaved();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s =
+        widget.isSpanish ? const AppStringsEs() : const AppStringsEn();
+    return AlertDialog(
+      title: Text(s.addTrip),
+      scrollable: true,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: milesCtrl,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+            ],
+            decoration: InputDecoration(labelText: s.milesOneWay),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(
+              s.roundTripX2,
+              style: const TextStyle(fontSize: AppTextSize.body),
+            ),
+            value: roundTrip,
+            activeThumbColor: AppTheme.primary,
+            onChanged: (v) => setState(() => roundTrip = v),
+          ),
+          TextField(
+            controller: purposeCtrl,
+            decoration: InputDecoration(labelText: s.purposeLabel),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.calendar_today_rounded),
+            title: Text(DateFormat('yyyy-MM-dd').format(tripDate)),
+            onTap: () async {
+              final picked = await showDatePicker(
+                context: context,
+                initialDate: tripDate,
+                firstDate: DateTime(widget.selectedYear, 1, 1),
+                lastDate: DateTime(widget.selectedYear, 12, 31),
+              );
+              if (picked != null) setState(() => tripDate = picked);
+            },
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(s.cancel),
+        ),
+        ElevatedButton(
+          onPressed: _save,
+          style: ElevatedButton.styleFrom(minimumSize: const Size(80, 40)),
+          child: Text(s.save),
+        ),
+      ],
     );
   }
 }

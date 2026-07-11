@@ -131,10 +131,12 @@ class _ReportsScreenState extends State<ReportsScreen> {
     AnalyticsService.instance.logScreenView('reports');
     AnalyticsService.instance.logReportViewed();
     _load();
+    historyRefreshNotifier.addListener(_load);
   }
 
   @override
   void dispose() {
+    historyRefreshNotifier.removeListener(_load);
     smartHistoryService.cancelPendingSave('rentalexpenses', 'income');
     super.dispose();
   }
@@ -283,8 +285,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
     adService.onSave();
     final trigger = await paywallSession.recordAction();
     if (!mounted) return;
-    if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
-    if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
+    if (trigger == PaywallTrigger.soft) PaywallSoft.show(context, isSpanish: isSpanishNotifier.value);
+    if (trigger == PaywallTrigger.hard) PaywallHard.show(context, isSpanish: isSpanishNotifier.value);
   }
 
   double _cf(Property p) {
@@ -430,7 +432,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
   Future<void> _exportPdf(BuildContext context) async {
     HapticFeedback.mediumImpact();
     if (!freemiumService.hasFullAccess) {
-      await PaywallHard.show(context);
+      await PaywallHard.show(context, isSpanish: isSpanishNotifier.value);
       return;
     }
 
@@ -796,7 +798,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                                   description: isSpanish
                                       ? 'Desbloquea el desglose de gastos de todas tus propiedades'
                                       : 'Unlock the expense breakdown for all your properties',  // chart-specific
-                                  onUnlock: () => PaywallHard.show(context),
+                                  onUnlock: () => PaywallHard.show(context, isSpanish: isSpanishNotifier.value),
                                   price: IAPService.instance.localizedPrice,
                                 ),
                               ],
@@ -2161,7 +2163,7 @@ class _TenYearProjectionSectionState
                       description: isSpanish
                           ? 'Desbloquea los años 4–10 y todos los escenarios de crecimiento'
                           : 'Unlock years 4–10 and all growth scenarios',
-                      onUnlock: () => PaywallHard.show(context),
+                      onUnlock: () => PaywallHard.show(context, isSpanish: isSpanishNotifier.value),
                       price: IAPService.instance.localizedPrice,
                     ),
                   ],

@@ -13,6 +13,7 @@ import '../models/property_model.dart';
 import '../services/property_database_service.dart';
 import 'expense_entry_screen.dart';
 import 'expense_history_screen.dart';
+import 'property_list_screen.dart' show PropertyFormDialog;
 import 'tenants_screen.dart';
 
 class PropertyDetailScreen extends StatefulWidget {
@@ -51,91 +52,21 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
   }
 
   Future<void> _editProperty(bool isSpanish) async {
-    await _showPropertyDialog(context, isSpanish, existing: _property);
-  }
-
-  Future<void> _showPropertyDialog(BuildContext ctx, bool isSpanish,
-      {Property? existing}) async {
-    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
-    final nameCtrl = TextEditingController(text: existing?.name ?? '');
-    final addrCtrl = TextEditingController(text: existing?.address ?? '');
-    final rentCtrl = TextEditingController(
-        text: existing != null && existing.monthlyRent > 0
-            ? existing.monthlyRent.toStringAsFixed(2)
-            : '');
-    final sqftCtrl = TextEditingController(
-        text: existing != null && existing.squareFootage > 0
-            ? existing.squareFootage.toStringAsFixed(0)
-            : '');
-
     await showDialog<void>(
-      context: ctx,
-      builder: (d) => AlertDialog(
-        title: Text(s.editProperty),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameCtrl,
-                decoration: InputDecoration(labelText: s.propertyName),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: addrCtrl,
-                decoration: InputDecoration(labelText: s.address),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: rentCtrl,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(
-                    labelText: s.monthlyRent,
-                    prefixText: '\$'),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: sqftCtrl,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(labelText: s.squareFootageOptional),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(d),
-            child: Text(s.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              HapticFeedback.mediumImpact();
-              final updated = _property.copyWith(
-                name: nameCtrl.text.trim().isEmpty
-                    ? _property.name
-                    : nameCtrl.text.trim(),
-                address: addrCtrl.text.trim(),
-                monthlyRent:
-                    double.tryParse(rentCtrl.text) ?? _property.monthlyRent,
-                squareFootage:
-                    double.tryParse(sqftCtrl.text) ?? _property.squareFootage,
-              );
-              await PropertyDatabaseService.instance.updateProperty(updated);
-              if (mounted) setState(() => _property = updated);
-              if (d.mounted) Navigator.pop(d);
-            },
-            style: ElevatedButton.styleFrom(minimumSize: const Size(80, 40)),
-            child: Text(s.save),
-          ),
-        ],
+      context: context,
+      builder: (d) => PropertyFormDialog(
+        isSpanish: isSpanish,
+        existing: _property,
+        onSaved: () async {
+          final refreshed = await PropertyDatabaseService.instance
+              .getProperty(_property.id);
+          historyRefreshNotifier.value++;
+          if (mounted && refreshed != null) {
+            setState(() => _property = refreshed);
+          }
+        },
       ),
     );
-    nameCtrl.dispose();
-    addrCtrl.dispose();
-    rentCtrl.dispose();
-    sqftCtrl.dispose();
   }
 
   Future<void> _addExpenses(bool isSpanish) async {
@@ -300,11 +231,9 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
           ),
           floatingActionButtonLocation:
               FloatingActionButtonLocation.centerFloat,
+          bottomNavigationBar: const CalcwiseAdFooter(),
           body: CalcwisePageEntrance(
-            child: Column(
-            children: [
-              Expanded(
-                child: _loading
+            child: _loading
                     ? const CalcwiseLoadingState()
                     : ListView(
                         padding: const EdgeInsets.fromLTRB(
@@ -503,10 +432,6 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                 (e) => _buildExpenseCard(e, rent, dateFmt)),
                         ],
                       ),
-              ),
-              const CalcwiseAdFooter(),
-            ],
-          ),
           ),
         );
       },

@@ -386,8 +386,8 @@ class _CalculatorScreenState extends State<CalculatorScreen>
     adService.onSave();
     final trigger = await paywallSession.recordAction();
     if (!mounted) return;
-    if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
-    if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
+    if (trigger == PaywallTrigger.soft) PaywallSoft.show(context, isSpanish: isSpanishNotifier.value);
+    if (trigger == PaywallTrigger.hard) PaywallHard.show(context, isSpanish: isSpanishNotifier.value);
   }
 
   Future<void> _calculate(bool isSpanish) async {

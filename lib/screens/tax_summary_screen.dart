@@ -181,8 +181,8 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
     adService.onSave();
     final trigger = await paywallSession.recordAction();
     if (!mounted) return;
-    if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
-    if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
+    if (trigger == PaywallTrigger.soft) PaywallSoft.show(context, isSpanish: isSpanishNotifier.value);
+    if (trigger == PaywallTrigger.hard) PaywallHard.show(context, isSpanish: isSpanishNotifier.value);
   }
 
   double _totalIncome(Property p) {
@@ -218,139 +218,16 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
   Future<void> _addOrEditEntry(
       BuildContext ctx, bool isSpanish, Property property,
       {ScheduleEEntry? existing}) async {
-    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
-    String selectedCategory = existing?.category ?? IrsCategories.all.first;
-    final amountCtrl = TextEditingController(
-        text: existing != null && existing.amount > 0
-            ? existing.amount.toStringAsFixed(2)
-            : '');
-    bool isRecurring = existing?.isRecurring ?? false;
-    String recurrenceType = existing?.recurrenceType ?? 'monthly';
-
     await showDialog<void>(
       context: ctx,
-      builder: (d) => StatefulBuilder(
-        builder: (d, setLocal) => AlertDialog(
-          title: Text(existing != null ? s.editExpense : s.addExpense),
-          scrollable: true,
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              DropdownButtonFormField<String>(
-                initialValue: selectedCategory,
-                isExpanded: true,
-                decoration: InputDecoration(
-                  labelText: s.irsCategory,
-                ),
-                items: IrsCategories.all.map((c) {
-                  return DropdownMenuItem(
-                    value: c,
-                    child: Text(
-                      IrsCategories.translate(c, isSpanish),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  );
-                }).toList(),
-                onChanged: (v) =>
-                    setLocal(() => selectedCategory = v ?? selectedCategory),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: amountCtrl,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(
-                  labelText: '${s.amount} (\$)',
-                  prefixText: '\$',
-                ),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(
-                  s.recurringExpense,
-                  style: const TextStyle(fontSize: AppTextSize.body),
-                ),
-                value: isRecurring,
-                activeThumbColor: AppTheme.primary,
-                onChanged: (v) => setLocal(() => isRecurring = v),
-              ),
-              if (isRecurring)
-                DropdownButtonFormField<String>(
-                  initialValue: recurrenceType,
-                  decoration: InputDecoration(
-                    labelText: s.frequency,
-                  ),
-                  items: [
-                    DropdownMenuItem(
-                      value: 'monthly',
-                      child: Text(s.monthly),
-                    ),
-                    DropdownMenuItem(
-                      value: 'annual',
-                      child: Text(s.annual),
-                    ),
-                  ],
-                  onChanged: (v) =>
-                      setLocal(() => recurrenceType = v ?? 'monthly'),
-                ),
-            ],
-          ),
-          actions: [
-            if (existing != null)
-              TextButton(
-                onPressed: () async {
-                  await PropertyDatabaseService.instance
-                      .deleteScheduleEEntry(existing.id);
-                  if (d.mounted) Navigator.pop(d);
-                  if (!mounted) return;
-                  _load();
-                },
-                style: TextButton.styleFrom(
-                    foregroundColor: CalcwiseSemanticColors.error(
-                        Theme.of(d).brightness)),
-                child: Text(s.delete),
-              ),
-            TextButton(
-              onPressed: () => Navigator.pop(d),
-              child: Text(s.cancel),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(minimumSize: const Size(80, 40)),
-              onPressed: () async {
-                final amount =
-                    double.tryParse(amountCtrl.text.replaceAll(',', '')) ??
-                        0.0;
-                if (amount <= 0) return;
-                final id = existing?.id ??
-                    'sche_${property.id}_${_selectedYear}_${DateTime.now().millisecondsSinceEpoch}';
-                final entry = ScheduleEEntry(
-                  id: id,
-                  propertyId: property.id,
-                  year: _selectedYear,
-                  category: selectedCategory,
-                  amount: amount,
-                  isRecurring: isRecurring,
-                  recurrenceType: isRecurring ? recurrenceType : null,
-                );
-                if (existing != null) {
-                  await PropertyDatabaseService.instance
-                      .updateScheduleEEntry(entry);
-                } else {
-                  await PropertyDatabaseService.instance
-                      .insertScheduleEEntry(entry);
-                }
-                if (isRecurring) {
-                  AnalyticsService.instance.logRecurringExpenseCreated();
-                }
-                if (d.mounted) Navigator.pop(d);
-                if (!mounted) return;
-                _load();
-              },
-              child: Text(s.save),
-            ),
-          ],
-        ),
+      builder: (d) => _ScheduleEEntryDialog(
+        isSpanish: isSpanish,
+        propertyId: property.id,
+        selectedYear: _selectedYear,
+        existing: existing,
+        onSaved: () {
+          if (mounted) _load();
+        },
       ),
     );
   }
@@ -1038,6 +915,180 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
 }
 
 // ── Small widgets ─────────────────────────────────────────────────────────────
+
+class _ScheduleEEntryDialog extends StatefulWidget {
+  final bool isSpanish;
+  final String propertyId;
+  final int selectedYear;
+  final ScheduleEEntry? existing;
+  final VoidCallback onSaved;
+
+  const _ScheduleEEntryDialog({
+    required this.isSpanish,
+    required this.propertyId,
+    required this.selectedYear,
+    required this.existing,
+    required this.onSaved,
+  });
+
+  @override
+  State<_ScheduleEEntryDialog> createState() => _ScheduleEEntryDialogState();
+}
+
+class _ScheduleEEntryDialogState extends State<_ScheduleEEntryDialog> {
+  late final TextEditingController amountCtrl;
+  late String selectedCategory;
+  late bool isRecurring;
+  late String recurrenceType;
+
+  @override
+  void initState() {
+    super.initState();
+    final existing = widget.existing;
+    selectedCategory = existing?.category ?? IrsCategories.all.first;
+    amountCtrl = TextEditingController(
+        text: existing != null && existing.amount > 0
+            ? existing.amount.toStringAsFixed(2)
+            : '');
+    isRecurring = existing?.isRecurring ?? false;
+    recurrenceType = existing?.recurrenceType ?? 'monthly';
+  }
+
+  @override
+  void dispose() {
+    amountCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _delete() async {
+    final existing = widget.existing;
+    if (existing == null) return;
+    FocusScope.of(context).unfocus();
+    await PropertyDatabaseService.instance.deleteScheduleEEntry(existing.id);
+    if (mounted) Navigator.pop(context);
+    widget.onSaved();
+  }
+
+  Future<void> _save() async {
+    FocusScope.of(context).unfocus();
+    final amount = double.tryParse(amountCtrl.text.replaceAll(',', '')) ?? 0.0;
+    if (amount <= 0) return;
+    final existing = widget.existing;
+    final id = existing?.id ??
+        'sche_${widget.propertyId}_${widget.selectedYear}_${DateTime.now().millisecondsSinceEpoch}';
+    final entry = ScheduleEEntry(
+      id: id,
+      propertyId: widget.propertyId,
+      year: widget.selectedYear,
+      category: selectedCategory,
+      amount: amount,
+      isRecurring: isRecurring,
+      recurrenceType: isRecurring ? recurrenceType : null,
+    );
+    if (existing != null) {
+      await PropertyDatabaseService.instance.updateScheduleEEntry(entry);
+    } else {
+      await PropertyDatabaseService.instance.insertScheduleEEntry(entry);
+    }
+    if (isRecurring) {
+      AnalyticsService.instance.logRecurringExpenseCreated();
+    }
+    if (mounted) Navigator.pop(context);
+    widget.onSaved();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s =
+        widget.isSpanish ? const AppStringsEs() : const AppStringsEn();
+    final existing = widget.existing;
+    return AlertDialog(
+      title: Text(existing != null ? s.editExpense : s.addExpense),
+      scrollable: true,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          DropdownButtonFormField<String>(
+            initialValue: selectedCategory,
+            isExpanded: true,
+            decoration: InputDecoration(
+              labelText: s.irsCategory,
+            ),
+            items: IrsCategories.all.map((c) {
+              return DropdownMenuItem(
+                value: c,
+                child: Text(
+                  IrsCategories.translate(c, widget.isSpanish),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              );
+            }).toList(),
+            onChanged: (v) =>
+                setState(() => selectedCategory = v ?? selectedCategory),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          TextField(
+            controller: amountCtrl,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: InputDecoration(
+              labelText: '${s.amount} (\$)',
+              prefixText: '\$',
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(
+              s.recurringExpense,
+              style: const TextStyle(fontSize: AppTextSize.body),
+            ),
+            value: isRecurring,
+            activeThumbColor: AppTheme.primary,
+            onChanged: (v) => setState(() => isRecurring = v),
+          ),
+          if (isRecurring)
+            DropdownButtonFormField<String>(
+              initialValue: recurrenceType,
+              decoration: InputDecoration(
+                labelText: s.frequency,
+              ),
+              items: [
+                DropdownMenuItem(
+                  value: 'monthly',
+                  child: Text(s.monthly),
+                ),
+                DropdownMenuItem(
+                  value: 'annual',
+                  child: Text(s.annual),
+                ),
+              ],
+              onChanged: (v) =>
+                  setState(() => recurrenceType = v ?? 'monthly'),
+            ),
+        ],
+      ),
+      actions: [
+        if (existing != null)
+          TextButton(
+            onPressed: _delete,
+            style: TextButton.styleFrom(
+                foregroundColor:
+                    CalcwiseSemanticColors.error(Theme.of(context).brightness)),
+            child: Text(s.delete),
+          ),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(s.cancel),
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(minimumSize: const Size(80, 40)),
+          onPressed: _save,
+          child: Text(s.save),
+        ),
+      ],
+    );
+  }
+}
 
 class _SectionLabel extends StatelessWidget {
   final String label;

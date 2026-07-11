@@ -88,8 +88,8 @@ class _InvestmentRulesScreenState extends State<InvestmentRulesScreen> {
     if (!freemiumService.hasFullAccess) {
       final trigger = await paywallSession.recordAction();
       if (!mounted) return;
-      if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
-      if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
+      if (trigger == PaywallTrigger.soft) PaywallSoft.show(context, isSpanish: isSpanishNotifier.value);
+      if (trigger == PaywallTrigger.hard) PaywallHard.show(context, isSpanish: isSpanishNotifier.value);
     }
   }
 

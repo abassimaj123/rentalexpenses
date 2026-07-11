@@ -307,8 +307,8 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
     adService.onSave();
     final trigger = await paywallSession.recordAction();
     if (!mounted) return;
-    if (trigger == PaywallTrigger.soft) PaywallSoft.show(context);
-    if (trigger == PaywallTrigger.hard) PaywallHard.show(context);
+    if (trigger == PaywallTrigger.soft) PaywallSoft.show(context, isSpanish: isSpanishNotifier.value);
+    if (trigger == PaywallTrigger.hard) PaywallHard.show(context, isSpanish: isSpanishNotifier.value);
   }
 
   Future<void> _exportPdf(bool isSpanish) async {
@@ -411,7 +411,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                           ),
                           const SizedBox(height: AppSpacing.xxlPlus),
                           ElevatedButton.icon(
-                            onPressed: () => PaywallHard.show(context),
+                            onPressed: () => PaywallHard.show(context, isSpanish: isSpanishNotifier.value),
                             icon: const Icon(Icons.star_rounded),
                             label: Text(s.getPremium),
                           ),

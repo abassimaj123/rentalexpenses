@@ -126,7 +126,7 @@ class _ExpenseHistoryScreenState extends State<ExpenseHistoryScreen> {
                               if (isLocked) {
                                 return _LockedRow(
                                   isSpanish: isSpanish,
-                                  onUnlock: () => PaywallHard.show(context),
+                                  onUnlock: () => PaywallHard.show(context, isSpanish: isSpanishNotifier.value),
                                 );
                               }
 

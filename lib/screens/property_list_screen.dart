@@ -95,7 +95,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
     HapticFeedback.mediumImpact();
     final isPremium = freemiumService.hasFullAccess;
     if (!isPremium && _properties.length >= _freePropertyLimit) {
-      await PaywallHard.show(context);
+      await PaywallHard.show(context, isSpanish: isSpanishNotifier.value);
       return;
     }
     await _showPropertyDialog(context, isSpanish);
@@ -103,107 +103,14 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
 
   Future<void> _showPropertyDialog(BuildContext ctx, bool isSpanish,
       {Property? existing}) async {
-    final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
-    final nameCtrl = TextEditingController(text: existing?.name ?? '');
-    final addrCtrl = TextEditingController(text: existing?.address ?? '');
-    final rentCtrl = TextEditingController(
-        text: existing != null && existing.monthlyRent > 0
-            ? existing.monthlyRent.toStringAsFixed(2)
-            : '');
-    final sqftCtrl = TextEditingController(
-        text: existing != null && existing.squareFootage > 0
-            ? existing.squareFootage.toStringAsFixed(0)
-            : '');
-
     await showDialog<void>(
       context: ctx,
-      builder: (d) => AlertDialog(
-        title: Text(existing != null ? s.editProperty : s.addProperty),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameCtrl,
-                textCapitalization: TextCapitalization.words,
-                decoration: InputDecoration(
-                    labelText: s.propertyName,
-                    hintText: s.propertyNameDialogHint),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: addrCtrl,
-                decoration: InputDecoration(
-                    labelText: s.addressOptional,
-                    hintText: '123 Main St'),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: rentCtrl,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(
-                    labelText: s.monthlyRent,
-                    prefixText: '\$',
-                    hintText: '0.00'),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: sqftCtrl,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: false),
-                decoration: InputDecoration(
-                    labelText: s.squareFootageOptional,
-                    hintText: '0'),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(d),
-            child: Text(s.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final name = nameCtrl.text.trim();
-              if (name.isEmpty) return;
-              final now = DateTime.now();
-              if (existing != null) {
-                final updated = existing.copyWith(
-                  name: name,
-                  address: addrCtrl.text.trim(),
-                  monthlyRent:
-                      double.tryParse(rentCtrl.text) ?? existing.monthlyRent,
-                  squareFootage:
-                      double.tryParse(sqftCtrl.text) ?? existing.squareFootage,
-                );
-                await PropertyDatabaseService.instance.updateProperty(updated);
-              } else {
-                final prop = Property(
-                  id: 'prop_${now.millisecondsSinceEpoch}',
-                  name: name,
-                  address: addrCtrl.text.trim(),
-                  monthlyRent: double.tryParse(rentCtrl.text) ?? 0,
-                  squareFootage: double.tryParse(sqftCtrl.text) ?? 0,
-                  createdDate: now,
-                );
-                await PropertyDatabaseService.instance.insertProperty(prop);
-                await AnalyticsService.instance.logPropertyAdded();
-              }
-              if (d.mounted) Navigator.pop(d);
-              _load();
-            },
-            style: ElevatedButton.styleFrom(minimumSize: const Size(80, 40)),
-            child: Text(s.save),
-          ),
-        ],
+      builder: (d) => PropertyFormDialog(
+        isSpanish: isSpanish,
+        existing: existing,
+        onSaved: _load,
       ),
     );
-    nameCtrl.dispose();
-    addrCtrl.dispose();
-    rentCtrl.dispose();
-    sqftCtrl.dispose();
   }
 
   Future<void> _deleteProperty(Property p, bool isSpanish) async {
@@ -229,6 +136,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
     if (confirmed == true) {
       HapticFeedback.mediumImpact();
       await PropertyDatabaseService.instance.deleteProperty(p.id);
+      historyRefreshNotifier.value++;
       _load();
     }
   }
@@ -258,7 +166,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                     icon: const Icon(Icons.star_outline,
                         color: CalcwiseSemanticColors.warnIcon),
                     tooltip: s.goPremium,
-                    onPressed: () => PaywallHard.show(context),
+                    onPressed: () => PaywallHard.show(context, isSpanish: isSpanishNotifier.value),
                   );
                 },
               ),
@@ -331,11 +239,9 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
             icon: const Icon(Icons.add_rounded),
             label: Text(s.addProperty),
           ),
+          bottomNavigationBar: const CalcwiseAdFooter(),
           body: CalcwisePageEntrance(
-            child: Column(
-            children: [
-              Expanded(
-                child: _loading
+            child: _loading
                     ? const CalcwiseLoadingState(showHeroCard: false)
                     : _properties.isEmpty
                         ? _EmptyState(isSpanish: isSpanish)
@@ -387,6 +293,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                   onDismissed: (_) async {
                                     await PropertyDatabaseService.instance
                                         .deleteProperty(p.id);
+                                    historyRefreshNotifier.value++;
                                     _load();
                                   },
                                   background: Container(
@@ -552,10 +459,6 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                               },
                             ),
                           ),
-              ),
-              const CalcwiseAdFooter(),
-            ],
-          ),
           ),
         );
       },
@@ -564,6 +467,147 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
 }
 
 // ── Small widgets ─────────────────────────────────────────────────────────────
+
+/// Owns its TextEditingControllers via the widget lifecycle so they're only
+/// disposed when this dialog's Element actually unmounts — disposing them
+/// manually right after `Navigator.pop()` races the dialog's exit transition
+/// (the TextFields are still animating out) and crashes with "TextEditingController
+/// used after being disposed" / '_dependents.isEmpty'.
+class PropertyFormDialog extends StatefulWidget {
+  final bool isSpanish;
+  final Property? existing;
+  final VoidCallback onSaved;
+
+  const PropertyFormDialog({
+    required this.isSpanish,
+    required this.existing,
+    required this.onSaved,
+  });
+
+  @override
+  State<PropertyFormDialog> createState() => PropertyFormDialogState();
+}
+
+class PropertyFormDialogState extends State<PropertyFormDialog> {
+  late final TextEditingController nameCtrl;
+  late final TextEditingController addrCtrl;
+  late final TextEditingController rentCtrl;
+  late final TextEditingController sqftCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    final existing = widget.existing;
+    nameCtrl = TextEditingController(text: existing?.name ?? '');
+    addrCtrl = TextEditingController(text: existing?.address ?? '');
+    rentCtrl = TextEditingController(
+        text: existing != null && existing.monthlyRent > 0
+            ? existing.monthlyRent.toStringAsFixed(2)
+            : '');
+    sqftCtrl = TextEditingController(
+        text: existing != null && existing.squareFootage > 0
+            ? existing.squareFootage.toStringAsFixed(0)
+            : '');
+  }
+
+  @override
+  void dispose() {
+    nameCtrl.dispose();
+    addrCtrl.dispose();
+    rentCtrl.dispose();
+    sqftCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    FocusScope.of(context).unfocus();
+    final name = nameCtrl.text.trim();
+    if (name.isEmpty) return;
+    final existing = widget.existing;
+    final now = DateTime.now();
+    if (existing != null) {
+      final updated = existing.copyWith(
+        name: name,
+        address: addrCtrl.text.trim(),
+        monthlyRent: double.tryParse(rentCtrl.text) ?? existing.monthlyRent,
+        squareFootage:
+            double.tryParse(sqftCtrl.text) ?? existing.squareFootage,
+      );
+      await PropertyDatabaseService.instance.updateProperty(updated);
+    } else {
+      final prop = Property(
+        id: 'prop_${now.millisecondsSinceEpoch}',
+        name: name,
+        address: addrCtrl.text.trim(),
+        monthlyRent: double.tryParse(rentCtrl.text) ?? 0,
+        squareFootage: double.tryParse(sqftCtrl.text) ?? 0,
+        createdDate: now,
+      );
+      await PropertyDatabaseService.instance.insertProperty(prop);
+      await AnalyticsService.instance.logPropertyAdded();
+    }
+    if (mounted) Navigator.pop(context);
+    historyRefreshNotifier.value++;
+    widget.onSaved();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = widget.isSpanish ? const AppStringsEs() : const AppStringsEn();
+    return AlertDialog(
+      title: Text(widget.existing != null ? s.editProperty : s.addProperty),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameCtrl,
+              textCapitalization: TextCapitalization.words,
+              decoration: InputDecoration(
+                  labelText: s.propertyName,
+                  hintText: s.propertyNameDialogHint),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              controller: addrCtrl,
+              decoration: InputDecoration(
+                  labelText: s.addressOptional, hintText: '123 Main St'),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              controller: rentCtrl,
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(
+                  labelText: s.monthlyRent,
+                  prefixText: '\$',
+                  hintText: '0.00'),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              controller: sqftCtrl,
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: false),
+              decoration: InputDecoration(
+                  labelText: s.squareFootageOptional, hintText: '0'),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(s.cancel),
+        ),
+        ElevatedButton(
+          onPressed: _save,
+          style: ElevatedButton.styleFrom(minimumSize: const Size(80, 40)),
+          child: Text(s.save),
+        ),
+      ],
+    );
+  }
+}
 
 class _EmptyState extends StatelessWidget {
   final bool isSpanish;

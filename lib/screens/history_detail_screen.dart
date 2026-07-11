@@ -332,7 +332,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
   Future<void> _exportPdf(bool isPremium, bool isSpanish) async {
     final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
     if (!isPremium) {
-      await PaywallSoft.show(context);
+      await PaywallSoft.show(context, isSpanish: isSpanishNotifier.value);
       return;
     }
     if (_exporting) return;
@@ -442,7 +442,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
                   return IconButton(
                     icon: const Icon(Icons.star_outline, color: Colors.amber),
                     tooltip: s.goPremium,
-                    onPressed: () => PaywallHard.show(context),
+                    onPressed: () => PaywallHard.show(context, isSpanish: isSpanishNotifier.value),
                   );
                 },
               ),

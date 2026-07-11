@@ -1145,6 +1145,6 @@ class PdfExportService {
       await onExport();
       return;
     }
-    await PaywallHard.show(context);
+    await PaywallHard.show(context, isSpanish: isSpanishNotifier.value);
   }
 }
