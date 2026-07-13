@@ -109,9 +109,7 @@ Future<void> main() async {
   AnalyticsService.instance.setUserPremium(freemiumService.hasFullAccess);
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   // Initial style — will be overridden per-frame in MainShell based on theme brightness.
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-  ));
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle());
 
   CalcwiseAdFooter.configure(
     adService: adService,
@@ -291,13 +289,8 @@ class _MainShellState extends State<MainShell> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      // Transparent — the app draws under the system nav bar
-      // (edge-to-edge) instead of painting it opaque, per Android 15's
-      // forced behavior.
-      systemNavigationBarColor: Colors.transparent,
       systemNavigationBarIconBrightness:
           isDark ? Brightness.light : Brightness.dark,
-      statusBarColor: Colors.transparent,
       statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
     ));
     return ValueListenableBuilder<bool>(
