@@ -94,19 +94,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         return Card(
                           child: Column(
                             children: [
-                              ListTile(
-                                leading: const Icon(Icons.star_outline_rounded,
-                                    color: AppTheme.primary),
-                                title: Text(s.unlockPremium),
-                                subtitle: Text(s.premiumSubtitle),
-                                trailing: ElevatedButton(
-                                  onPressed: () => PaywallHard.show(context, isSpanish: isSpanishNotifier.value),
-                                  style: ElevatedButton.styleFrom(
-                                    minimumSize: const Size(80, 36),
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 16),
-                                  ),
-                                  child: Text(s.getPremium),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: AppSpacing.lg,
+                                    vertical: AppSpacing.sm),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.star_outline_rounded,
+                                        color: AppTheme.primary),
+                                    const SizedBox(width: AppSpacing.lg),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(s.unlockPremium),
+                                          Text(s.premiumSubtitle,
+                                              style: TextStyle(
+                                                  fontSize: AppTextSize.sm,
+                                                  color: CalcwiseTheme.of(
+                                                          context)
+                                                      .textSecondary)),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(width: AppSpacing.sm),
+                                    ElevatedButton(
+                                      onPressed: () => PaywallHard.show(
+                                          context,
+                                          isSpanish: isSpanishNotifier.value),
+                                      style: ElevatedButton.styleFrom(
+                                        minimumSize: const Size(0, 36),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 16),
+                                      ),
+                                      child: Text(s.getPremium),
+                                    ),
+                                  ],
                                 ),
                               ),
                               Divider(

@@ -32,6 +32,7 @@ abstract class AppStrings {
   String get exportPdf;
   String get goPremium;
   String get unlockPremium;
+  String get oneTimeNoSubscription;
 
   // ── Common field labels ─────────────────────────────────────────────────────
   String get required;
@@ -137,6 +138,13 @@ abstract class AppStrings {
   String get loadInCalculator;
   String get monthlyCFLabel;
   String savedNOfNFreeProperties(int limit);
+  String get otherSavedScenarios;
+  String get depreciationEntryTitle;
+  String get mileageEntryTitle;
+  String get incomeEntryTitle;
+  String get taxSummaryEntryTitle;
+  String get compareEntryTitle;
+  String get scenarioDetails;
   String get unlockForUnlimitedHistory;
 
   // ── History detail screen ───────────────────────────────────────────────────
@@ -462,6 +470,7 @@ class AppStringsEn extends AppStrings {
   @override String get exportPdf => 'Export PDF';
   @override String get goPremium => 'Go Premium';
   @override String get unlockPremium => 'Unlock Premium';
+  @override String get oneTimeNoSubscription => 'One-time purchase · No subscription';
 
   // ── Common field labels ──────────────────────────────────────────────────────
   @override String get required => 'Required';
@@ -568,6 +577,13 @@ class AppStringsEn extends AppStrings {
   @override String get monthlyCFLabel => 'Monthly CF';
   @override String savedNOfNFreeProperties(int limit) => 'You\'ve saved $limit of $limit free properties';
   @override String get unlockForUnlimitedHistory => 'Unlock Premium for unlimited history';
+  @override String get otherSavedScenarios => 'Other saved scenarios';
+  @override String get depreciationEntryTitle => 'Depreciation analysis';
+  @override String get mileageEntryTitle => 'Mileage log';
+  @override String get incomeEntryTitle => 'Portfolio report';
+  @override String get taxSummaryEntryTitle => 'Schedule E summary';
+  @override String get compareEntryTitle => 'Property comparison';
+  @override String get scenarioDetails => 'Scenario details';
 
   // ── History detail screen ────────────────────────────────────────────────────
   @override String get calculationDetail => 'Calculation Detail';

@@ -235,7 +235,7 @@ class _TaxSummaryScreenState extends State<TaxSummaryScreen> {
   Future<void> _exportPdf(BuildContext ctx, bool isSpanish) async {
     HapticFeedback.mediumImpact();
     if (!freemiumService.hasFullAccess) {
-      await PaywallHard.show(ctx);
+      await PaywallHard.show(ctx, isSpanish: isSpanish);
       return;
     }
     final s = isSpanish ? const AppStringsEs() : const AppStringsEn();

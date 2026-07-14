@@ -30,6 +30,7 @@ class AppStringsEs extends AppStrings {
   @override String get exportPdf => 'Exportar PDF';
   @override String get goPremium => 'Obtener Premium';
   @override String get unlockPremium => 'Desbloquear Premium';
+  @override String get oneTimeNoSubscription => 'Compra única · Sin suscripción';
 
   // ── Common field labels ──────────────────────────────────────────────────────
   @override String get required => 'Requerido';
@@ -136,6 +137,13 @@ class AppStringsEs extends AppStrings {
   @override String get monthlyCFLabel => 'Flujo mensual';
   @override String savedNOfNFreeProperties(int limit) => 'Guardaste $limit de $limit propiedades gratis';
   @override String get unlockForUnlimitedHistory => 'Desbloquea Premium para historial ilimitado';
+  @override String get otherSavedScenarios => 'Otros escenarios guardados';
+  @override String get depreciationEntryTitle => 'Análisis de depreciación';
+  @override String get mileageEntryTitle => 'Registro de millaje';
+  @override String get incomeEntryTitle => 'Informe de cartera';
+  @override String get taxSummaryEntryTitle => 'Resumen Schedule E';
+  @override String get compareEntryTitle => 'Comparación de propiedades';
+  @override String get scenarioDetails => 'Detalles del escenario';
 
   // ── History detail screen ────────────────────────────────────────────────────
   @override String get calculationDetail => 'Detalle de cálculo';

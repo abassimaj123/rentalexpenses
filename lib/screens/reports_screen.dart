@@ -800,6 +800,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
                                       : 'Unlock the expense breakdown for all your properties',  // chart-specific
                                   onUnlock: () => PaywallHard.show(context, isSpanish: isSpanishNotifier.value),
                                   price: IAPService.instance.localizedPrice,
+                                  buttonLabel: s.unlockPremium,
+                                  subtitle: s.oneTimeNoSubscription,
                                 ),
                               ],
                               const SizedBox(height: 20),
@@ -1843,7 +1845,7 @@ class _CashFlowTrendChart extends StatelessWidget {
                       ),
                     ),
                     TextButton(
-                      onPressed: () => PaywallSoft.show(outerCtx),
+                      onPressed: () => PaywallSoft.show(outerCtx, isSpanish: isSpanishNotifier.value),
                       style: TextButton.styleFrom(
                         padding: EdgeInsets.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -2165,6 +2167,10 @@ class _TenYearProjectionSectionState
                           : 'Unlock years 4–10 and all growth scenarios',
                       onUnlock: () => PaywallHard.show(context, isSpanish: isSpanishNotifier.value),
                       price: IAPService.instance.localizedPrice,
+                      buttonLabel: isSpanish ? 'Desbloquear Premium' : 'Unlock Premium',
+                      subtitle: isSpanish
+                          ? 'Compra única · Sin suscripción'
+                          : 'One-time purchase · No subscription',
                     ),
                   ],
 
