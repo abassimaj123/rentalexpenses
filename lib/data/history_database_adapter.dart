@@ -10,7 +10,7 @@ import 'package:sqflite/sqflite.dart';
 /// [DatabaseAdapter].
 class HistoryDatabaseAdapter implements DatabaseAdapter {
   static const _dbName = 'rentalexpenses_history.db';
-  static const _dbVersion = 1;
+  static const _dbVersion = 2;
   static const _table = 'history';
 
   Database? _db;
@@ -41,11 +41,22 @@ class HistoryDatabaseAdapter implements DatabaseAdapter {
           )
         ''');
         await db.execute(
-          'CREATE UNIQUE INDEX idx_history_hash ON $_table(app_key, result_hash)',
+          'CREATE UNIQUE INDEX idx_history_hash ON $_table(app_key, screen_id, result_hash)',
         );
         await db.execute(
           'CREATE INDEX idx_history_recent ON $_table(app_key, is_pinned, saved_at DESC)',
         );
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          // Old unique index scoped dedup to (app_key, result_hash) only,
+          // letting two different screens with the same rounded-input hash
+          // silently collide/merge saves. Rebuild it scoped by screen_id too.
+          await db.execute('DROP INDEX IF EXISTS idx_history_hash');
+          await db.execute(
+            'CREATE UNIQUE INDEX idx_history_hash ON $_table(app_key, screen_id, result_hash)',
+          );
+        }
       },
     );
   }
@@ -106,13 +117,14 @@ class HistoryDatabaseAdapter implements DatabaseAdapter {
   @override
   Future<Map<String, dynamic>?> getRowByHash({
     required String appKey,
+    required String screenId,
     required String resultHash,
   }) async {
     final db = await _database;
     final rows = await db.query(
       _table,
-      where: 'app_key = ? AND result_hash = ?',
-      whereArgs: [appKey, resultHash],
+      where: 'app_key = ? AND screen_id = ? AND result_hash = ?',
+      whereArgs: [appKey, screenId, resultHash],
       limit: 1,
     );
     return rows.isEmpty ? null : rows.first;
