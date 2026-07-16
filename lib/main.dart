@@ -336,18 +336,23 @@ class _MainShellState extends State<MainShell> {
               ),
             ],
           ),
-          body: Stack(
-            fit: StackFit.expand,
-            children: List.generate(
-              _screens.length,
-              (i) => IgnorePointer(
-                ignoring: _index != i,
-                child: CalcwiseTabReveal(
-                    active: _index == i, child: _screens[i]),
+          body: SafeArea(
+            bottom: false,
+            child: Stack(
+              fit: StackFit.expand,
+              children: List.generate(
+                _screens.length,
+                (i) => IgnorePointer(
+                  ignoring: _index != i,
+                  child: CalcwiseTabReveal(
+                      active: _index == i, child: _screens[i]),
+                ),
               ),
             ),
           ),
-          bottomNavigationBar: NavigationBar(
+          bottomNavigationBar: SafeArea(
+            top: false,
+            child: NavigationBar(
             selectedIndex: _index,
             onDestinationSelected: _onTabChanged,
             destinations: [
@@ -377,6 +382,7 @@ class _MainShellState extends State<MainShell> {
                 label: s.navHistory,
               ),
             ],
+            ),
           ),
         );
       },
