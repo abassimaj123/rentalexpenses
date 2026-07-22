@@ -338,6 +338,7 @@ abstract class AppStrings {
 
   // ── Tools screen ───────────────────────────────────────────────────────────
   String get tools;
+  String get toolsIntro;
   String get taxSummaryTool;
   String get taxSummaryToolSubtitle;
   String get depreciationTool;
@@ -352,6 +353,13 @@ abstract class AppStrings {
   String get settingsToolSubtitle;
   String get investmentRulesTitle;
   String get investmentRulesToolSubtitle;
+  String get investmentRulesSeedLabel;
+
+  // ── Silent pre-fill / data-scope clarity (Calculator vs Add Expense) ────────
+  String get calculatorScratchpadNotice;
+  String get calculatorScratchpadSummary;
+  String get expenseEntryOfficialNotice;
+  String get expenseEntryOfficialSummary;
 
   // ── Settings screen ─────────────────────────────────────────────────────────
   String get settings;
@@ -449,7 +457,7 @@ class AppStringsEn extends AppStrings {
   @override String get navProperties => 'Properties';
   @override String get navCalculator => 'Calculator';
   @override String get navReports => 'Reports';
-  @override String get navTools => 'Tools';
+  @override String get navTools => 'More Calculators';
   @override String get navHistory => 'History';
 
   // ── Common actions ──────────────────────────────────────────────────────────
@@ -775,7 +783,8 @@ class AppStringsEn extends AppStrings {
   @override String get addPropertiesFirst => 'Add properties in the Properties tab.';
 
   // ── Tools screen ──────────────────────────────────────────────────────────
-  @override String get tools => 'Tools';
+  @override String get tools => 'More Calculators';
+  @override String get toolsIntro => '5 extra calculators for property analysis, taxes, and comparisons — beyond your main Calculator.';
   @override String get taxSummaryTool => 'Tax Summary';
   @override String get taxSummaryToolSubtitle => 'Tax breakdown & deductions';
   @override String get depreciationTool => 'Depreciation (27.5 yr)';
@@ -785,11 +794,18 @@ class AppStringsEn extends AppStrings {
   @override String get comparePropertiesTool => 'Compare Properties';
   @override String get comparePropertiesToolSubtitle => 'Compare property profitability side-by-side';
   @override String get expenseHistoryTool => 'Expense History';
-  @override String get expenseHistoryToolSubtitle => 'View full transaction history';
+  @override String get expenseHistoryToolSubtitle => 'View full transaction history — shortcut to the History tab';
   @override String get settingsTool => 'Settings';
-  @override String get settingsToolSubtitle => 'App preferences & settings';
+  @override String get settingsToolSubtitle => 'App preferences — shortcut to the ⚙ icon above';
   @override String get investmentRulesTitle => 'Investment Rules';
   @override String get investmentRulesToolSubtitle => '1% Rule · 50% Rule · CapEx estimate';
+  @override String get investmentRulesSeedLabel => 'From your calculator:';
+
+  // ── Silent pre-fill / data-scope clarity ────────────────────────────────────
+  @override String get calculatorScratchpadNotice => 'Quick what-if scratchpad —';
+  @override String get calculatorScratchpadSummary => 'not saved to any property. For your official monthly record, use Add Expense on a property.';
+  @override String get expenseEntryOfficialNotice => 'Official record —';
+  @override String get expenseEntryOfficialSummary => 'saved to this property and used in Reports, Tax Summary, and Schedule E.';
 
   // ── Settings screen ────────────────────────────────────────────────────────
   @override String get settings => 'Settings';

@@ -342,6 +342,10 @@ class _ExpenseEntryScreenState extends State<ExpenseEntryScreen>
           body: CalcwisePageEntrance(
             child: Column(
             children: [
+              CalcSourceBanner(
+                label: s.expenseEntryOfficialNotice,
+                summary: s.expenseEntryOfficialSummary,
+              ),
               Expanded(
                 child: ListView(
                   padding: const EdgeInsets.all(AppSpacing.lg),

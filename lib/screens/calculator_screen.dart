@@ -433,6 +433,8 @@ class _CalculatorScreenState extends State<CalculatorScreen>
       _saved = false;
     });
 
+    lastCalcSeedNotifier.value =
+        CalcSeed(rent: calc.rentIncome, propertyValue: calc.propertyValue);
     _scheduleAutoSave(calc);
     unawaited(AnalyticsService.instance.logCalculate());
     unawaited(AnalyticsService.instance.maybeLogFirstCalculate());
@@ -593,7 +595,7 @@ class _CalculatorScreenState extends State<CalculatorScreen>
         final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
         return Scaffold(
           appBar: AppBar(
-            title: Text(s.appTitle),
+            title: Text(s.navCalculator),
             actions: [
               IconButton(
                 icon: const Icon(Icons.refresh_rounded),
@@ -606,6 +608,10 @@ class _CalculatorScreenState extends State<CalculatorScreen>
             onTap: () => FocusScope.of(context).unfocus(),
             child: Column(
               children: [
+                CalcSourceBanner(
+                  label: s.calculatorScratchpadNotice,
+                  summary: s.calculatorScratchpadSummary,
+                ),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(AppSpacing.lg),

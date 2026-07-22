@@ -9,7 +9,7 @@ class AppStringsEs extends AppStrings {
   @override String get navProperties => 'Propiedades';
   @override String get navCalculator => 'Calculadora';
   @override String get navReports => 'Reportes';
-  @override String get navTools => 'Herramientas';
+  @override String get navTools => 'Más Calculadoras';
   @override String get navHistory => 'Historial';
 
   // ── Common actions ──────────────────────────────────────────────────────────
@@ -335,7 +335,8 @@ class AppStringsEs extends AppStrings {
   @override String get addPropertiesFirst => 'Agrega propiedades en la pestaña Propiedades.';
 
   // ── Tools screen ──────────────────────────────────────────────────────────
-  @override String get tools => 'Herramientas';
+  @override String get tools => 'Más Calculadoras';
+  @override String get toolsIntro => '5 calculadoras adicionales para análisis de propiedades, impuestos y comparaciones — más allá de tu Calculadora principal.';
   @override String get taxSummaryTool => 'Resumen Fiscal';
   @override String get taxSummaryToolSubtitle => 'Desglose de impuestos y deducciones';
   @override String get depreciationTool => 'Depreciación (27.5 años)';
@@ -345,11 +346,18 @@ class AppStringsEs extends AppStrings {
   @override String get comparePropertiesTool => 'Comparar Propiedades';
   @override String get comparePropertiesToolSubtitle => 'Comparar rentabilidad de propiedades';
   @override String get expenseHistoryTool => 'Historial de Gastos';
-  @override String get expenseHistoryToolSubtitle => 'Ver historial completo de transacciones';
+  @override String get expenseHistoryToolSubtitle => 'Ver historial completo — acceso directo a la pestaña Historial';
   @override String get settingsTool => 'Configuración';
-  @override String get settingsToolSubtitle => 'Preferencias y configuración de la app';
+  @override String get settingsToolSubtitle => 'Preferencias — acceso directo al ícono ⚙ de arriba';
   @override String get investmentRulesTitle => 'Reglas de Inversión';
   @override String get investmentRulesToolSubtitle => 'Regla del 1% · Regla del 50% · Estimación CapEx';
+  @override String get investmentRulesSeedLabel => 'Desde tu calculadora:';
+
+  // ── Silent pre-fill / data-scope clarity ───────────────────────────────────
+  @override String get calculatorScratchpadNotice => 'Simulador rápido —';
+  @override String get calculatorScratchpadSummary => 'no se guarda en ninguna propiedad. Para tu registro oficial mensual, usa Agregar Gasto en una propiedad.';
+  @override String get expenseEntryOfficialNotice => 'Registro oficial —';
+  @override String get expenseEntryOfficialSummary => 'se guarda en esta propiedad y se usa en Reportes, Resumen Fiscal y Schedule E.';
 
   // ── Settings screen ────────────────────────────────────────────────────────
   @override String get settings => 'Configuración';

@@ -42,6 +42,17 @@ final smartHistoryService = SmartHistoryService(
 /// Bumped to trigger a silent reload after a SmartHistory save.
 final historyRefreshNotifier = ValueNotifier<int>(0);
 
+/// Latest rent / property value typed into the Calculator tab — used to
+/// seed secondary Tools screens (e.g. Investment Rules) so their fields
+/// aren't silently blank when the user just entered these numbers.
+class CalcSeed {
+  final double rent;
+  final double propertyValue;
+  const CalcSeed({this.rent = 0, this.propertyValue = 0});
+}
+
+final lastCalcSeedNotifier = ValueNotifier<CalcSeed>(const CalcSeed());
+
 /// Centralized paywall session service
 final paywallSession = PaywallSessionService(
   appKey: 'rentalexpenses',
@@ -297,6 +308,13 @@ class _MainShellState extends State<MainShell> {
       valueListenable: isSpanishNotifier,
       builder: (_, isSpanish, __) {
         final s = isSpanish ? const AppStringsEs() : const AppStringsEn();
+        final tabTitles = [
+          s.navProperties,
+          s.navCalculator,
+          s.navReports,
+          s.navTools,
+          s.navHistory,
+        ];
         return Scaffold(
           appBar: AppBar(
             flexibleSpace: Container(
@@ -310,7 +328,7 @@ class _MainShellState extends State<MainShell> {
                 const SizedBox(width: 8),
                 Flexible(
                   child: Text(
-                    s.appTitle,
+                    tabTitles[_index],
                     style: const TextStyle(color: Colors.white),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -372,8 +390,8 @@ class _MainShellState extends State<MainShell> {
                 label: s.navReports,
               ),
               NavigationDestination(
-                icon: const Icon(Icons.build_rounded),
-                selectedIcon: const Icon(Icons.build),
+                icon: const Icon(Icons.grid_view_rounded),
+                selectedIcon: const Icon(Icons.grid_view_rounded),
                 label: s.navTools,
               ),
               NavigationDestination(

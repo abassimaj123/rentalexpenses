@@ -11,7 +11,13 @@ import 'mileage_log_screen.dart';
 import 'settings_screen.dart';
 import 'history_screen.dart';
 import 'package:calcwise_core/calcwise_core.dart'
-    show CalcwiseAdFooter, AppDuration, AppSpacing, AppRadius, AppTextSize;
+    show
+        CalcwiseAdFooter,
+        AppDuration,
+        AppSpacing,
+        AppRadius,
+        AppTextSize,
+        CalcwiseTheme;
 
 /// Tools hub screen — provides access to utility calculators and features
 class ToolsScreen extends StatefulWidget {
@@ -45,6 +51,16 @@ class _ToolsScreenState extends State<ToolsScreen> {
                 child: ListView(
                   padding: const EdgeInsets.all(AppSpacing.lg),
                   children: [
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                      child: Text(
+                        s.toolsIntro,
+                        style: TextStyle(
+                          fontSize: AppTextSize.sm,
+                          color: CalcwiseTheme.of(context).textSecondary,
+                        ),
+                      ),
+                    ),
                     _ToolCard(
                       icon: Icons.rule_rounded,
                       title: s.investmentRulesTitle,

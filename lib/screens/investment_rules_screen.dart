@@ -9,6 +9,7 @@ import 'package:calcwise_core/calcwise_core.dart'
         CalcwiseAdFooter,
         CalcwisePageEntrance,
         CalcwiseStaggerItem,
+        CalcSourceBanner,
         PaywallSoft,
         PaywallHard,
         PaywallTrigger;
@@ -17,7 +18,8 @@ import '../core/freemium/freemium_service.dart';
 import '../core/theme/app_theme.dart';
 import '../l10n/strings_en.dart';
 import '../l10n/strings_es.dart';
-import '../main.dart' show isSpanishNotifier, adService, paywallSession;
+import '../main.dart'
+    show isSpanishNotifier, adService, paywallSession, lastCalcSeedNotifier;
 
 class InvestmentRulesScreen extends StatefulWidget {
   const InvestmentRulesScreen({super.key});
@@ -37,10 +39,24 @@ class _InvestmentRulesScreenState extends State<InvestmentRulesScreen> {
   double? _capEx;
   double? _capRate;
 
+  bool _seededFromCalc = false;
+
   @override
   void initState() {
     super.initState();
     AnalyticsService.instance.logScreenView('investment_rules');
+    final seed = lastCalcSeedNotifier.value;
+    if (seed.rent > 0) {
+      _rentCtrl.text = seed.rent.toStringAsFixed(0);
+      _seededFromCalc = true;
+    }
+    if (seed.propertyValue > 0) {
+      _priceCtrl.text = seed.propertyValue.toStringAsFixed(0);
+      _seededFromCalc = true;
+    }
+    if (_seededFromCalc) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _calculate());
+    }
   }
 
   @override
@@ -114,6 +130,13 @@ class _InvestmentRulesScreenState extends State<InvestmentRulesScreen> {
           ),
           body: Column(
             children: [
+              if (_seededFromCalc)
+                CalcSourceBanner(
+                  label: s.investmentRulesSeedLabel,
+                  summary: isSpanish
+                      ? '\$${_rentCtrl.text}/mes de renta, \$${_priceCtrl.text} de valor'
+                      : '\$${_rentCtrl.text}/mo rent, \$${_priceCtrl.text} value',
+                ),
               Expanded(
                 child: ListView(
                   padding: const EdgeInsets.all(AppSpacing.lg),
