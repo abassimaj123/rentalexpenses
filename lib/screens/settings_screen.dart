@@ -378,7 +378,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 ? 'Más apps de CalqWise'
                                 : 'More apps by CalqWise',
                             onTap: () => _launchUrl(
-                                'https://play.google.com/store/apps/developer?id=CalqWise'),
+                                'https://play.google.com/store/apps/developer?id=Dailywave+Apps'),
                           ),
                         ],
                       ),
